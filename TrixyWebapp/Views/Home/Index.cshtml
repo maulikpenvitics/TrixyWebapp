@@ -25,7 +25,7 @@
 										<tr id="stock-RELIANCE">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo01.png" width="30"
+													<img src="~/assets/images/company-logo/logo01.png" width="30"
 														 alt="reliance" />&nbsp;
 													Reliance
 												</a>
@@ -52,7 +52,7 @@
 										<tr id="stock-ITC">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo02.png" width="30"
+													<img src="~/assets/images/company-logo/logo02.png" width="30"
 														 alt="reliance" />&nbsp;
 													ITC
 												</a>
@@ -79,7 +79,7 @@
 										<tr id="stock-TCS">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo03.png" width="30"
+													<img src="~/assets/images/company-logo/logo03.png" width="30"
 														 alt="reliance" />&nbsp;TCS
 												</a>
 											</td>
@@ -105,7 +105,7 @@
 										<tr id="stock-VEDL">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo04.png" width="30"
+													<img src="~/assets/images/company-logo/logo04.png" width="30"
 														 alt="vedanta" />&nbsp;Vedanta
 												</a>
 											</td>
@@ -131,7 +131,7 @@
 										<tr id="stock-IDFCFIRSTB">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo05.png" width="30"
+													<img src="~/assets/images/company-logo/logo05.png" width="30"
 														 alt="idfc bank" />&nbsp;IDFC First bank
 												</a>
 											</td>
@@ -157,7 +157,7 @@
 										<tr id="stock-ABFRL">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo06.png" width="30"
+													<img src="~/assets/images/company-logo/logo06.png" width="30"
 														 alt="Aditya Birla" />&nbsp;Aditya Birla
 												</a>
 											</td>
@@ -183,7 +183,7 @@
 										<tr id="stock-BAJFINANCE">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo07.png" width="30"
+													<img src="~/assets/images/company-logo/logo07.png" width="30"
 														 alt="bajaj finance" />&nbsp; Bajaj Finance
 												</a>
 											</td>
@@ -209,7 +209,7 @@
 										<tr id="stock-INFY">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo08.png" width="30"
+													<img src="~/assets/images/company-logo/logo08.png" width="30"
 														 alt="infosys" />&nbsp;Infosys
 												</a>
 											</td>
@@ -235,7 +235,7 @@
 										<tr id="stock-HINDUNILVR">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo09.png" width="30"
+													<img src="~/assets/images/company-logo/logo09.png" width="30"
 														 alt="hindustan uniliver" />&nbsp;Hindustan Unilever
 												</a>
 											</td>
@@ -261,7 +261,7 @@
 										<tr id="stock-ICICIBANK">
 											<td>
 												<a href="#realtime_stock_detail">
-													<img src="assets/images/company-logo/logo10.png" width="30"
+													<img src="~/assets/images/company-logo/logo10.png" width="30"
 														 alt="icici bank" />&nbsp;ICICI Bank
 												</a>
 											</td>
@@ -294,7 +294,7 @@
 						<div class="box-body bb-1 d-lg-block bbsr-0 bber-0">
 							<div class="d-flex justify-content-between stock_detail_header">
 								<h3 class="my-0">
-									<img src="assets/images/company-logo/logo01.png" width="45"
+									<img src="~/assets/images/company-logo/logo01.png" width="45"
 										 alt="reliance" />&nbsp;
 									<span class="text-primary">Reliance</span>
 								</h3>
@@ -376,9 +376,7 @@
 			type: 'GET',
 			dataType: 'json',
 			success: function (stockData) {
-				debugger
 				stockData.forEach(stock => {
-					debugger
 					let Symbol = stock.symbol.split(":")[1]?.split("-")[0]; // Extract symbol correctly
 					let price = stock.price;
 					let row = document.getElementById(`stock-${Symbol}`);
