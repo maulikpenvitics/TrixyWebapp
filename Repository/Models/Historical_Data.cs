@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Repository.Models
         public string? symbol { get; set; }
         public string? from_date { get; set; }
         public string? to_date { get; set; }
+        [BsonDateTimeOptions]
         public DateTime Timestamp { get; set; }
         public decimal Open { get; set; }
         public decimal High { get; set; }

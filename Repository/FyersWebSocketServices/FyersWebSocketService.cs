@@ -27,12 +27,12 @@ namespace Repository.FyersWebSocketServices
         //private const string BaseUrl = "https://api-t1.fyers.in/data/history";
         private const string ClientId = "NGX016JVE9-100";
         private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDAzNzcwODQsImV4cCI6MTc0MDQ0MzQ0NCwibmJmIjoxNzQwMzc3MDg0LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbnZBdjhDU1FsRy1RZnE3ZjRsTzdTLXJTR25hSzhsOFVLUzNGaGxVTWxMbEtyODRseGxoNEdtcUpnS1JWREt2UkZrajBXQU1xSlp4ekpwR0ZvZndhdWoyWVJRWFZLcFFueW9qeHBRLU54MzdtbWFQST0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.gd5cBpE3bRCzak2WZlKCd8qgzwE3bp6QxKtj3x49y0U";
-        private readonly FyersStockMarketSettings _settings;
+       
         public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient)
         {
             _hubContext = hubContext;
             _httpClient = httpClient;
-            
+           
         }
         public List<StockData> GetStockData()
         {
@@ -99,7 +99,7 @@ namespace Repository.FyersWebSocketServices
 
                 foreach (var scrip in scripsArray)
                 {
-                    string symbol = scrip["symbol"]?.ToString();
+                    string? symbol = scrip["symbol"]?.ToString();
                     decimal price = scrip["ltp"]?.ToObject<decimal>() ?? 0;
 
                     if (!string.IsNullOrEmpty(symbol))

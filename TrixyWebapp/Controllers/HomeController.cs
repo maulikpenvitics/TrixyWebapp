@@ -10,17 +10,19 @@ namespace TrixyWebapp.Controllers
     public class HomeController : Controller
     {
         private readonly FyersWebSocketService _fyersWebSocket;
-        private readonly IRepository<Historical_Data> _userRepository;
+        private readonly IRepository<Historical_Data> _HistoricalStockdata;
+        
         public HomeController(FyersWebSocketService fyersWebSocket, IRepository<Historical_Data> userRepository)
         {
             _fyersWebSocket = fyersWebSocket;
-            _userRepository = userRepository;
+            _HistoricalStockdata = userRepository;
         }
 
         public async Task<IActionResult> Index()
         {
             var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
-            await _userRepository.InsertManyAsync(data);
+            await _HistoricalStockdata.InsertManyAsync(data);
+            var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
             return View();
         }
         [HttpGet]
