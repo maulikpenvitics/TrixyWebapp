@@ -14,6 +14,7 @@ namespace Repository.IRepositories
         Task CreateAsync(T entity);
         Task UpdateAsync(string id, T entity);
         Task DeleteAsync(string id);
+        Task InsertManyAsync(List<T> entities);
 
     }
 }

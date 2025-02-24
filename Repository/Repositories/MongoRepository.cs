@@ -43,5 +43,12 @@ namespace Repository.Repositories
         public async Task DeleteAsync(string id) =>
             await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id));
 
+        public async  Task InsertManyAsync(List<T> entities)
+        {
+            if (entities != null)
+            {
+                await _collection.InsertManyAsync(entities);
+            }
+        }
     }
 }
