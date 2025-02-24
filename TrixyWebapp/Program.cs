@@ -22,6 +22,15 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
+// Configure Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set your session timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -33,6 +42,8 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddSingleton<FyersWebSocketService>();
+builder.Services.AddSession();
+
 
 
 builder.Services.Configure<FyersStockMarketSettings>(builder.Configuration.GetSection("FyersStockMarketData"));
@@ -64,9 +75,10 @@ app.MapControllers();
 app.MapStaticAssets();
 //app.MapRazorPages()
 //   .WithStaticAssets();
+app.UseSession();
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.MapHub<StockHub>("/stockHub");
 

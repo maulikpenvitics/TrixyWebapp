@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.IRepositories;
+using Repository.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,14 @@ namespace Repository.Repositories
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _collection = database.GetCollection<T>(typeof(T).Name);
         }
+
+        public async Task<T> AuthenticateUserAsync(string email, string password) =>
+        await _collection.Find(Builders<T>.Filter.And(
+            Builders<T>.Filter.Eq("email", email),
+            Builders<T>.Filter.Eq("password", password)
+        )).FirstOrDefaultAsync();
+
+
         public async Task<IEnumerable<T>> GetAllAsync() =>
         await _collection.Find(_ => true).ToListAsync();
 

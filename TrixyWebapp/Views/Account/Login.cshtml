@@ -1,31 +1,22 @@
-﻿<!DOCTYPE html>
+﻿@model Repository.ViewModels.LoginViewModel
+
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="~/assets/images/logo.png">
-
     <title>Trixy</title>
 
-    <!-- Vendors Style-->
+    <link rel="icon" href="~/assets/images/logo.png">
     <link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
-
-    <!-- Style-->
     <link rel="stylesheet" href="~/assets/css/style.css">
     <link rel="stylesheet" href="~/assets/css/skin_color.css">
-
 </head>
-
 <body class="hold-transition theme-primary bg-img" style="background-image: url(https://specie-admin-template.multipurposethemes.com/images/auth-bg/bg-6.jpg)">
 
     <div class="container h-p100">
         <div class="row align-items-center justify-content-md-center h-p100">
-
             <div class="col-12">
                 <div class="row justify-content-center g-0">
                     <div class="col-lg-5 col-md-5 col-12">
@@ -36,45 +27,65 @@
                                 <p class="mb-0">Sign in to continue to Trixy.</p>
                             </div>
                             <div class="p-40">
-                                <form action="index.html" method="post">
-                                    <div class="form-group has-feedback">
-                                        <input type="email" class="form-control" placeholder="Email">
-                                        <span class="ion ion-email form-control-feedback"></span>
+                                <form asp-action="Login" asp-controller="Account" method="post">
+                                    <!-- Display Error Message -->
+                                    @if (ViewData["LoginError"] != null)
+                                    {
+                                        <div class="alert alert-danger text-center">
+                                            @ViewData["LoginError"]
+                                        </div>
+                                    }
+
+                                    <div class="form-group">
+                                        <input type="email" asp-for="Email" name="Email" class="form-control" placeholder="Email">
+                                        <span asp-validation-for="Email" class="text-danger"></span>
                                     </div>
-                                    <div class="form-group has-feedback">
-                                        <input type="password" class="form-control" placeholder="Password">
-                                        <span class="ion ion-locked form-control-feedback"></span>
+
+                                    <div class="form-group">
+                                        <input type="password" asp-for="Password" name="Password" class="form-control" placeholder="Password">
+                                        <span asp-validation-for="Password" class="text-danger"></span>
                                     </div>
+
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="checkbox">
-                                                <input type="checkbox" id="basic_checkbox_1">
+                                                <input type="checkbox" asp-for="RememberMe" id="basic_checkbox_1">
                                                 <label for="basic_checkbox_1">Remember Me</label>
                                             </div>
                                         </div>
-                                        <!-- /.col -->
-                                        <div class="col-6">
-                                            <div class="fog-pwd text-end">
-                                                <a href="javascript:void(0)" class="hover-warning">
-                                                    <i class="ion ion-locked"></i> Forgot pwd?
-                                                </a><br>
-                                            </div>
+                                        <div class="col-6 text-end">
+                                            <a href="#" class="hover-warning">
+                                                <i class="ion ion-locked"></i> Forgot Password?
+                                            </a>
                                         </div>
-                                        <!-- /.col -->
                                         <div class="col-12 text-center">
                                             <button type="submit" class="btn btn-danger mt-10">SIGN IN</button>
                                         </div>
-                                        <!-- /.col -->
                                     </div>
                                 </form>
                             </div>
-                        </div>
+                        </div>                    
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
 
+</body>
 </html>
+
+<script>
+    $(document).ready(function () {
+        $(document).on("click", function () {
+            $(".alert-danger").fadeOut("slow");
+        });
+
+        $(".alert-danger").on("click", function (event) {
+            event.stopPropagation();
+        });
+    });
+</script>
