@@ -1,0 +1,92 @@
+$mobile_width: "only screen and (min-width: 280px) and (max-width:480px)";
+$tablet_width: "only screen and (min-width: 767px) and (max-width:980px)";
+$laptop_width: "only screen and (min-width: 981px) and (max-width:1200px)";
+$desktop_width: "only screen and (min-width: 1201px) and (max-width:1366px)";
+$medium_desktop_width: "only screen and (min-width: 1367px) and (max-width:1599px)";
+$large_desktop_width: "only screen and (min-width: 1600px) and (max-width:2500px)";
+
+.customize-responsive-table {
+
+    @media #{$mobile_width, $tablet_width} {
+
+        thead{
+            display: none;
+        }
+
+        tbody{
+
+            tr{
+                display: flex;                
+                flex-direction: column;
+
+                td {
+                    position: relative;                    
+                    padding-left: 45% !important;
+
+                    &:before {
+                        left: 5px;
+                        font-weight: bold;
+                        position: absolute;                        
+                        padding-right: 10px;
+                        white-space: nowrap;            
+                    }
+            
+                    &:nth-of-type(1):before {
+                        content: "Company";
+                    }
+
+                    &:nth-of-type(2):before {
+                        content: "Current Price";
+                    }
+
+                    &:nth-of-type(3):before {
+                        content: "Change";
+                    }
+
+                    &:nth-of-type(4):before {
+                        content: "Rec.";
+                    }
+
+                    &:last-child{
+                        border-color: #212529;
+                    }
+                } 
+            }
+
+        }          
+
+    }     
+
+}
+
+
+#realtime_stock_detail{
+
+    @media #{$mobile_width}{
+
+        .stock_detail_header{
+            gap: 1rem;
+            flex-direction: column;
+
+            h5{
+                display: flex;
+                padding-bottom: 10px;
+                justify-content: space-between;
+                border-bottom: 1px solid #DEE2E6;    
+                
+                &:last-child{
+                    padding-bottom: 0;
+                    border-bottom: none;                    
+                }
+            }
+
+            .close-btn{
+                top: 12px;
+                right: 15px;
+                position: absolute;
+            }
+        }
+
+    }    
+
+}

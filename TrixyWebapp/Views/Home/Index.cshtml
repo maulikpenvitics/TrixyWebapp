@@ -1,0 +1,403 @@
+﻿@{
+    Layout = "_Layout";
+}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+	<div class="container-full">
+		<!-- Main content -->
+		<section class="content">
+			<div class="row">
+				<div class="col-xl-12 col-12">
+					<div class="box">
+						<div class="box-body">
+							<div class="table-responsive customize-responsive-table">
+								<table id="tickets" class="table mt-0 table-hover no-wrap" data-page-size="10">
+									<thead>
+										<tr>
+											<th>Company</th>
+											<th>Current Price</th>
+											<th>Change</th>
+											<th>Recommendation</th>
+											<th>Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr id="stock-RELIANCE">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo01.png" width="30"
+														 alt="reliance" />&nbsp;
+													Reliance
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">1,278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>10.34%</b></lable>
+											</td>
+											<td><span class="label label-success">Buy</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-ITC">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo02.png" width="30"
+														 alt="reliance" />&nbsp;
+													ITC
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-danger text-black">278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-danger">
+													<i class="ti-stats-down" aria-hidden="true"></i>
+												</span>
+												<lable class="text-danger"><b>5.34%</b></lable>
+											</td>
+											<td><span class="label label-danger">Sell</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-TCS">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo03.png" width="30"
+														 alt="reliance" />&nbsp;TCS
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>2.34%</b></lable>
+											</td>
+											<td><span class="label label-success">Buy</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-VEDL">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo04.png" width="30"
+														 alt="vedanta" />&nbsp;Vedanta
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>2.34%</b></lable>
+											</td>
+											<td><span class="label label-success">Buy</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-IDFCFIRSTB">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo05.png" width="30"
+														 alt="idfc bank" />&nbsp;IDFC First bank
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-danger text-black">278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-danger">
+													<i class="ti-stats-down" aria-hidden="true"></i>
+												</span>
+												<lable class="text-danger"><b>2.34%</b></lable>
+											</td>
+											<td><span class="label label-danger">Sell</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-ABFRL">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo06.png" width="30"
+														 alt="Aditya Birla" />&nbsp;Aditya Birla
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-danger text-black">278.50</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-danger">
+													<i class="ti-stats-down" aria-hidden="true"></i>
+												</span>
+												<lable class="text-danger"><b>2.34%</b></lable>
+											</td>
+											<td><span class="label label-danger">Sell</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-BAJFINANCE">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo07.png" width="30"
+														 alt="bajaj finance" />&nbsp; Bajaj Finance
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">8,519.65</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>10.34%</b></lable>
+											</td>
+											<td><span class="label label-success">Buy</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-INFY">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo08.png" width="30"
+														 alt="infosys" />&nbsp;Infosys
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">1,908.15</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>0.34%</b></lable>
+											</td>
+											<td><span class="label label-warning">Hold</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-HINDUNILVR">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo09.png" width="30"
+														 alt="hindustan uniliver" />&nbsp;Hindustan Unilever
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-danger text-black">2,372.05</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-danger">
+													<i class="ti-stats-down" aria-hidden="true"></i>
+												</span>
+												<lable class="text-danger"><b>0.34%</b></lable>
+											</td>
+											<td><span class="label label-warning">Hold</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+										<tr id="stock-ICICIBANK">
+											<td>
+												<a href="#realtime_stock_detail">
+													<img src="assets/images/company-logo/logo10.png" width="30"
+														 alt="icici bank" />&nbsp;ICICI Bank
+												</a>
+											</td>
+											<td class="stock-price">
+												<lable class="label label-success text-black">1,268.40</lable>
+											</td>
+											<td>
+												<span class="badge badge-pill badge-success">
+													<i class="ti-stats-up" aria-hidden="true"></i>
+												</span>
+												<lable class="text-success"><b>0.15%</b></lable>
+											</td>
+											<td><span class="label label-success">Buy</span></td>
+											<td>
+												<a href="javascript:void(0)"
+												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+												   data-bs-toggle="tooltip"
+												   data-bs-original-title="Enable Notification">
+													<i class="ti-bell" aria-hidden="true"></i>
+												</a>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<div class="box" id="realtime_stock_detail">
+						<div class="box-body bb-1 d-lg-block bbsr-0 bber-0">
+							<div class="d-flex justify-content-between stock_detail_header">
+								<h3 class="my-0">
+									<img src="assets/images/company-logo/logo01.png" width="45"
+										 alt="reliance" />&nbsp;
+									<span class="text-primary">Reliance</span>
+								</h3>
+								<h5 class="mb-0">
+									<span>Current Price</span><br class="d-lg-block d-none">
+									<span class="text-success">1,278.50</span>
+								</h5>
+								<h5 class="mb-0">
+									<span>High/Low</span><br class="d-lg-block d-none">
+									<span>
+										<span class="text-success">1,288.00</span>/<span class="text-danger">1,270.35</span>
+									</span>
+								</h5>
+								<h5 class="mb-0">
+									<span>Volume</span><br class="d-lg-block d-none">
+									<span class="text-info">9,956,001</span>
+								</h5>
+								<div class="close-btn">
+									<button type="button"
+											class="waves-effect waves-circle btn btn-circle btn-light btn-xs">
+										<i class="ti-close"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="box-body">
+							<div id="bitcoin-stock" class="mb-15"></div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</section>
+		<!-- /.content -->
+	</div>
+</div>
+
+<!-- /.content-wrapper -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+	let selectedStockSymbol = null;
+
+	$(document).ready(function () {
+		// Click event for stock row
+		$("tr[id^='stock-']").click(function () {
+			selectedStockSymbol = $(this).attr("id").replace("stock-", "");
+			let stockName = $(this).find("td a").text().trim();
+			let stockLogo = $(this).find("td a img").attr("src");
+			let stockPrice = $(this).find(".stock-price label").text().trim();
+
+			// Update the stock detail section dynamically
+			$("#realtime_stock_detail h3 img").attr("src", stockLogo);
+			$("#realtime_stock_detail h3 span.text-primary").text(stockName)
+			$("#realtime_stock_detail h5:nth-child(2) span.text-success").text(stockPrice);
+
+			// Show the stock detail div
+			$("#realtime_stock_detail").fadeIn();
+		});
+
+		// Close button functionality
+		$(".close-btn button").click(function () {
+			$("#realtime_stock_detail").fadeOut();
+			selectedStockSymbol = null;
+		});
+	});
+	updateStockPrices();
+
+	function updateStockPrices() {
+		$.ajax({
+			url: '/Home/RealTimeData',
+			type: 'GET',
+			dataType: 'json',
+			success: function (stockData) {
+				debugger
+				stockData.forEach(stock => {
+					debugger
+					let Symbol = stock.symbol.split(":")[1]?.split("-")[0]; // Extract symbol correctly
+					let price = stock.price;
+					let row = document.getElementById(`stock-${Symbol}`);
+					if (row) {
+						row.querySelector(".stock-price").innerHTML =
+							`<label class="label label-success text-black">${price}</label>`;
+					}
+					// If this stock is currently selected, update the stock detail price in real-time
+					if (selectedStockSymbol === Symbol) {
+						$("#realtime_stock_detail h5:nth-child(2) span.text-success").text(price);
+					}
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("Error fetching stock data:", error);
+			}
+		});
+	}
+
+	setInterval(updateStockPrices, 1000);
+
+</script>

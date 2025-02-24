@@ -1,0 +1,57 @@
+@media only screen and (min-width: 280px) and (max-width:480px), only screen and (min-width: 767px) and (max-width:980px) {
+  .customize-responsive-table thead {
+    display: none;
+  }
+  .customize-responsive-table tbody tr {
+    display: flex;
+    flex-direction: column;
+  }
+  .customize-responsive-table tbody tr td {
+    position: relative;
+    padding-left: 45% !important;
+  }
+  .customize-responsive-table tbody tr td:before {
+    left: 5px;
+    font-weight: bold;
+    position: absolute;
+    padding-right: 10px;
+    white-space: nowrap;
+  }
+  .customize-responsive-table tbody tr td:nth-of-type(1):before {
+    content: "Company";
+  }
+  .customize-responsive-table tbody tr td:nth-of-type(2):before {
+    content: "Current Price";
+  }
+  .customize-responsive-table tbody tr td:nth-of-type(3):before {
+    content: "Change";
+  }
+  .customize-responsive-table tbody tr td:nth-of-type(4):before {
+    content: "Rec.";
+  }
+  .customize-responsive-table tbody tr td:last-child {
+    border-color: #212529;
+  }
+}
+
+@media only screen and (min-width: 280px) and (max-width:480px) {
+  #realtime_stock_detail .stock_detail_header {
+    gap: 1rem;
+    flex-direction: column;
+  }
+  #realtime_stock_detail .stock_detail_header h5 {
+    display: flex;
+    padding-bottom: 10px;
+    justify-content: space-between;
+    border-bottom: 1px solid #DEE2E6;
+  }
+  #realtime_stock_detail .stock_detail_header h5:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  #realtime_stock_detail .stock_detail_header .close-btn {
+    top: 12px;
+    right: 15px;
+    position: absolute;
+  }
+}/*# sourceMappingURL=custom.css.map */
