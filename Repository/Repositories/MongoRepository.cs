@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.IRepositories;
@@ -13,12 +14,13 @@ namespace Repository.Repositories
 {
     public class MongoRepository<T> : IRepository<T> where T : class
     {
+        private readonly IMongoDatabase _database;
         private readonly IMongoCollection<T> _collection;
 
         public MongoRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings)
         {
-            var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-            _collection = database.GetCollection<T>(typeof(T).Name);
+            _database = mongoClient.GetDatabase(settings.Value.DatabaseName);
+            _collection = _database.GetCollection<T>(typeof(T).Name);
         }
 
         public async Task<T> AuthenticateUserAsync(string email, string password) =>
@@ -34,11 +36,23 @@ namespace Repository.Repositories
         public async Task<T> GetByIdAsync(string id) =>
             await _collection.Find(Builders<T>.Filter.Eq("_id", id)).FirstOrDefaultAsync();
 
+        public async Task<T> GetByIdAsyncForMaster(string userId) =>
+            await _collection.Find(Builders<T>.Filter.Eq("userId", userId)).FirstOrDefaultAsync();
+
         public async Task CreateAsync(T entity) =>
             await _collection.InsertOneAsync(entity);
 
         public async Task UpdateAsync(string id, T entity) =>
             await _collection.ReplaceOneAsync(Builders<T>.Filter.Eq("_id", id), entity);
+
+        public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
+        {
+            var filter = Builders<T>.Filter.Eq("userId", userId); // Filter only by userId
+
+            var update = Builders<T>.Update.Set(strategyName, isChecked); // Dynamically update the field
+
+            await _collection.UpdateOneAsync(filter, update);
+        }
 
         public async Task DeleteAsync(string id) =>
             await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id));

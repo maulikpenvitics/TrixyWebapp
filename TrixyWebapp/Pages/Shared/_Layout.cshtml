@@ -1,28 +1,39 @@
-﻿<!DOCTYPE html>
+﻿@using Repository.Models
+@model Strategy
+
+@{
+	// var strategies = ViewData["Strategies"] as List<Strategy>;
+	var masterDataObj = ViewData["MasterData"];
+	var masterData = masterDataObj as Dictionary<string, string>;
+	var userId = ViewData["UserId"] as string;
+	var userRole = ViewData["UserRole"] as string;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
 	<link rel="icon" href="~/assets/images/logo.png">
 
-    <title>Trixy</title>
+	<title>Trixy</title>
 
-    <!-- Vendors Style-->
-    <link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
+	<!-- Vendors Style-->
+	<link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
 
-    <!-- Style-->
-    <link rel="stylesheet" href="~/assets/css/style.css">
+	<!-- Style-->
+	<link rel="stylesheet" href="~/assets/css/style.css">
 	<link rel="stylesheet" href="~/assets/css/skin_color.css">
 
-    <!-- custom style -->
+	<!-- custom style -->
 	<link rel="stylesheet" href="~/assets/css/custom.css">
 
 </head>
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
-    <header class="main-header">
+	<header class="main-header">
 		<div class="d-flex align-items-center logo-box justify-content-start">
 			<!-- Logo -->
 			<a href="@Url.Action("Index","Home")" class="logo">
@@ -44,7 +55,7 @@
 				<ul class="header-megamenu nav">
 					<li class="btn-group nav-item d-sm-inline-flex d-none">
 						<a href="#" class="waves-effect waves-light nav-link push-btn btn-primary-light"
-						   data-toggle="push-menu" role="button">
+						data-toggle="push-menu" role="button">
 							<i data-feather="align-left"></i>
 						</a>
 					</li>
@@ -54,7 +65,7 @@
 								<form>
 									<div class="input-group">
 										<input type="search" class="form-control" placeholder="Search"
-											   aria-label="Search">
+										aria-label="Search">
 										<div class="input-group-append">
 											<button class="btn" type="submit" id="button-addon3">
 												<i data-feather="search"></i>
@@ -73,7 +84,7 @@
 
 					<li class="btn-group nav-item d-block d-sm-none">
 						<a href="#" class="waves-effect full-screen waves-light btn-primary-light"
-						   data-toggle="push-menu" role="button">
+						data-toggle="push-menu" role="button">
 							<i data-feather="align-left"></i>
 						</a>
 					</li>
@@ -87,7 +98,7 @@
 					<!-- Control Sidebar Toggle Button -->
 					<li class="btn-group nav-item">
 						<a href="#" data-toggle="control-sidebar" title="Setting"
-						   class="waves-effect full-screen waves-light btn-danger-light">
+						class="waves-effect full-screen waves-light btn-danger-light">
 							<i data-feather="settings"></i>
 						</a>
 					</li>
@@ -95,15 +106,15 @@
 					<!-- User Account-->
 					<li class="dropdown user user-menu">
 						<a href="#"
-						   class="waves-effect waves-light dropdown-toggle w-auto l-h-12 bg-transparent py-0 no-shadow"
-						   data-bs-toggle="dropdown" title="User">
+						class="waves-effect waves-light dropdown-toggle w-auto l-h-12 bg-transparent py-0 no-shadow"
+						data-bs-toggle="dropdown" title="User">
 							<div class="d-flex align-items-center">
 								<div class="text-end me-10 d-sm-inline d-none">
 									<p class="pt-5 fs-14 mb-0 fw-700 text-primary">Johen Doe</p>
-									<small class="fs-10 mb-0 text-uppercase text-mute">Admin</small>
+									<small class="fs-10 mb-0 text-uppercase text-mute">@userRole</small>
 								</div>
 								<img src="~/assets/images/avatar-1.png"
-									 class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
+								class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
 							</div>
 						</a>
 						<ul class="dropdown-menu animated flipInX">
@@ -133,7 +144,7 @@
 
 		</nav>
 
-    </header>
+	</header>
 	<aside class="main-sidebar">
 		<!-- sidebar-->
 		<section class="sidebar position-relative">
@@ -156,23 +167,23 @@
 			</div>
 		</section>
 	</aside>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+	<div class="container">
+		<main role="main" class="pb-3">
+			@RenderBody()
+		</main>
+	</div>
 
-    <!-- /.content-wrapper -->
-    <footer class="main-footer">
-        &copy;
-        <script>document.write(new Date().getFullYear())</script> Trixy. All Rights Reserved.
-    </footer>
+	<!-- /.content-wrapper -->
+	<footer class="main-footer">
+		&copy;
+		<script>document.write(new Date().getFullYear())</script> Trixy. All Rights Reserved.
+	</footer>
 	<!-- Control Sidebar -->
 	<aside class="control-sidebar">
 
 		<div class="rpanel-title">
 			<span class="pull-right btn btn-circle btn-danger"
-				  data-toggle="control-sidebar"><i class="ti-close text-white"></i></span>
+			data-toggle="control-sidebar"><i class="ti-close text-white"></i></span>
 		</div>
 		<!-- Create the tabs -->
 		<ul class="nav nav-tabs control-sidebar-tabs">
@@ -186,7 +197,7 @@
 				<div class="media-list media-list-hover mt-20">
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-success" href="#">
-							<img src="assets/images/1.jpg" alt="...">
+							<img src="~/assets/images/1.jpg" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -198,7 +209,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="assets/images/avatar-1.png" alt="...">
+							<img src="~/assets/images/avatar-1.png" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -210,7 +221,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-success" href="#">
-							<img src="assets/images/1.jpg" alt="...">
+							<img src="~/assets/images/1.jpg" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -222,7 +233,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="assets/images/avatar-1.png" alt="...">
+							<img src="~/assets/images/avatar-1.png" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -238,49 +249,30 @@
 			<!-- Settings tab content -->
 			<div class="tab-pane" id="control-sidebar-settings-tab">
 				<ul class="todo-list mt-20">
-					<li class="py-15 px-5 by-1">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_1" class="filled-in">
-						<label for="basic_checkbox_1" class="mb-0 h-15"></label>
-						<span>Nulla vitae purus</span>
-					</li>
-					<li class="py-15 px-5">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_2" class="filled-in">
-						<label for="basic_checkbox_2" class="mb-0 h-15"></label>
-						<span>Phasellus interdum</span>
-					</li>
-					<li class="py-15 px-5 by-1">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_3" class="filled-in">
-						<label for="basic_checkbox_3" class="mb-0 h-15"></label>
-						<span>Quisque sodales</span>
-					</li>
-					<li class="py-15 px-5">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_4" class="filled-in">
-						<label for="basic_checkbox_4" class="mb-0 h-15"></label>
-						<span>Proin nec mi porta</span>
-					</li>
-					<li class="py-15 px-5 by-1">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_5" class="filled-in">
-						<label for="basic_checkbox_5" class="mb-0 h-15"></label>
-						<span>Maecenas scelerisque</span>
-					</li>
-					<li class="py-15 px-5">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_6" class="filled-in">
-						<label for="basic_checkbox_6" class="mb-0 h-15"></label>
-						<span>Vivamus nec orci</span>
-					</li>
-					<li class="py-15 px-5 by-1">
-						<!-- checkbox -->
-						<input type="checkbox" id="basic_checkbox_7" class="filled-in">
-						<label for="basic_checkbox_7" class="mb-0 h-15"></label>
-						<span>Nulla vitae purus</span>
-					</li>
+					@if (masterData != null)
+					{
+						foreach (var item in masterData)
+						{
+							string strategyName = item.Key; // Strategy name
+							bool isChecked = item.Value == "True"; // Convert to boolean
+
+							<li class="py-15 px-5 by-1">
+								<input type="checkbox" id="basic_checkbox_@strategyName"
+									   class="filled-in strategy-checkbox"
+									   data-strategy="@strategyName"
+									   data-userid="@userId"
+								@(isChecked ? "checked" : "")>
+								<label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
+								<span>@strategyName</span>
+							</li>
+						}
+					}
+					else
+					{
+						<li class="py-15 px-5">No strategies available.</li>
+					}
 				</ul>
+
 			</div>
 			<!-- /.tab-pane -->
 
@@ -303,6 +295,32 @@
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/template.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/data-table.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/dashboard.js"></script>
+
+	<script>
+		var userId = "@userId";
+		$(document).ready(function () {
+			$(".strategy-checkbox").change(function () {
+				var strategyName = $(this).data("strategy");
+				var isChecked = $(this).is(":checked") ? "True" : "False";
+
+				$.ajax({
+					url: "/Home/UpdateStrategyStatus",
+					type: "POST",
+					data: {
+						userId: userId,
+						strategyName: strategyName,
+						status: isChecked
+					},
+					success: function (response) {
+						console.log(response);
+					},
+					error: function (error) {
+						console.log("Error:", error);
+					}
+				});
+			});
+		});
+	</script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
