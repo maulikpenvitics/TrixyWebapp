@@ -2,6 +2,7 @@
 @{
 	Layout = "~/Pages/Shared/_Layout.cshtml";
 }
+
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
 	<div class="container-full">
@@ -368,7 +369,60 @@
 			$("#realtime_stock_detail").fadeOut();
 			selectedStockSymbol = null;
 		});
+
+		$.ajax({
+		url: '/Home/FetchData',
+		type: 'GET',
+		dataType: 'json',
+		success: function (data) {
+			let seriesData = [];
+
+			data.forEach(item => {
+				seriesData.push({
+					x: new Date(item.x).toLocaleString('en-GB', {
+						weekday: 'short', day: '2-digit', month: 'short',
+						hour: '2-digit', minute: '2-digit'
+					}), // Format time to display only trading hours
+					y: item.y  // OHLC array [Open, High, Low, Close]
+				});
+			});
+
+			var options = {
+				chart: {
+					type: 'candlestick',
+					height: 350
+				},
+				series: [{
+					name: 'Stock Price',
+					data: seriesData
+				}],
+				xaxis: {
+					type: 'category',  // Prevents gaps by treating time as discrete values
+					labels: {
+						show: true,
+						rotate: 0,  // Keeps labels readable
+						formatter: function (val) {
+							return val; // Directly use formatted date
+						}
+					}
+				},
+				yaxis: {
+					tooltip: {
+						enabled: true
+					}
+				}
+			};
+
+			var chart = new ApexCharts(document.querySelector("#bitcoin-stock"), options);
+			chart.render();
+		},
+		error: function (error) {
+			console.log('Error:', error);
+		}
 	});
+
+	});
+
 	updateStockPrices();
 
 	function updateStockPrices() {
