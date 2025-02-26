@@ -8,7 +8,7 @@ using Repository.Models;
 
 namespace TrixyWebapp.Controllers
 {
-   
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly FyersWebSocketService _fyersWebSocket;
