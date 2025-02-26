@@ -4,7 +4,6 @@
 @{
 	// var strategies = ViewData["Strategies"] as List<Strategy>;
 	var masterDataObj = ViewData["MasterData"];
-	var masterData = masterDataObj as Dictionary<string, string>;
 	var userId = ViewData["UserId"] as string;
 	var userRole = ViewData["UserRole"] as string;
 }
@@ -157,11 +156,14 @@
 								<i data-feather="grid"></i><span>Dashboard</span>
 							</a>
 						</li>
-						<li class="treeview">
-							<a>
-								<i data-feather="user"></i><span>Users</span>
-							</a>
-						</li>
+						@if (userRole == "Admin")
+						{
+							<li class="treeview">
+								<a>
+									<i data-feather="user"></i><span>Users</span>
+								</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</div>
@@ -249,19 +251,26 @@
 			<!-- Settings tab content -->
 			<div class="tab-pane" id="control-sidebar-settings-tab">
 				<ul class="todo-list mt-20">
-					@if (masterData != null)
+					@if (masterDataObj != null)
 					{
-						foreach (var item in masterData)
+						var properties = masterDataObj.GetType().GetProperties(); // Get all properties of the Master object
+
+						foreach (var prop in properties)
 						{
-							string strategyName = item.Key; // Strategy name
-							bool isChecked = item.Value == "True"; // Convert to boolean
+							string strategyName = prop.Name;
+
+							if (strategyName == "Id" || strategyName == "userId")
+							{
+								continue;
+							}
+
+							bool isChecked = prop.GetValue(masterDataObj)?.ToString().Equals("True", StringComparison.OrdinalIgnoreCase) ?? false;
 
 							<li class="py-15 px-5 by-1">
 								<input type="checkbox" id="basic_checkbox_@strategyName"
 									   class="filled-in strategy-checkbox"
 									   data-strategy="@strategyName"
-									   data-userid="@userId"
-								@(isChecked ? "checked" : "")>
+								@(isChecked ? "checked=\"checked\"" : "")>
 								<label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
 								<span>@strategyName</span>
 							</li>

@@ -13,9 +13,9 @@ namespace TrixyWebapp.Controllers
         private readonly FyersWebSocketService _fyersWebSocket;
         private readonly IRepository<Historical_Data> _HistoricalStockdata;
         private readonly IRepository<Strategy> _strategyRepository;
-        private readonly IRepository<Master> _masterRepository;
+        private readonly IRepository<Master_Strategy_User> _masterRepository;
 
-        public HomeController(FyersWebSocketService fyersWebSocket, IRepository<Historical_Data> userRepository, IRepository<Strategy> strategyRepository, IRepository<Master> masterRepository)
+        public HomeController(FyersWebSocketService fyersWebSocket, IRepository<Historical_Data> userRepository, IRepository<Strategy> strategyRepository, IRepository<Master_Strategy_User> masterRepository)
         {
             _fyersWebSocket = fyersWebSocket;
             _HistoricalStockdata = userRepository;
@@ -38,7 +38,7 @@ namespace TrixyWebapp.Controllers
             var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
 
             var masterData = await _masterRepository.GetByIdAsyncForMaster(userId);
-            ViewBag.MasterData = masterData;
+            ViewData["MasterData"] = masterData;
 
             return View();
         }
@@ -60,8 +60,8 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> FetchData()
         {
-            var marketStart = new TimeSpan(9, 15, 0); // 9:15 AM
-            var marketEnd = new TimeSpan(15, 30, 0);  // 3:30 PM
+            var marketStart = new TimeSpan(9, 15, 0);
+            var marketEnd = new TimeSpan(15, 30, 0);
 
             var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
 
@@ -97,7 +97,16 @@ namespace TrixyWebapp.Controllers
             }
 
             strategyName = strategyName.Replace(" ", "_");
-            bool isChecked = status == "Yes";
+            bool isChecked;
+
+            if(status == "True")
+            {
+                isChecked = true;
+            }
+            else
+            {
+                isChecked = false;
+            }
 
             await _masterRepository.UpdateAsyncStrategy(userId, strategyName, isChecked);
 
