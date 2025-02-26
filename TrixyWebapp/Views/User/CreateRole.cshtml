@@ -1,0 +1,40 @@
+﻿@model Repository.Models.UserRole
+
+@{
+    ViewData["Title"] = "CreateRole";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div class="content-wrapper">
+    <div class="container-full">
+        <section class="content">
+            <h1>CreateRole</h1>
+
+            <h4>UserRole</h4>
+            <hr />
+            <div class="row">
+                <div class="col-md-4">
+                    <form asp-action="CreateRole" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label  class="control-label">Role Name</label>
+                            <input  name="Role" class="form-control" required/>
+                            <span asp-validation-for="RoleName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                <a href="/User/Index">Back to List</a>
+            </div>
+
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

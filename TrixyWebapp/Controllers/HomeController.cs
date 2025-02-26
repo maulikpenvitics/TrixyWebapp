@@ -1,4 +1,5 @@
 ﻿using FyersCSharpSDK;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
@@ -7,6 +8,7 @@ using Repository.Models;
 
 namespace TrixyWebapp.Controllers
 {
+   
     public class HomeController : Controller
     {
         private readonly FyersWebSocketService _fyersWebSocket;
@@ -17,11 +19,11 @@ namespace TrixyWebapp.Controllers
             _fyersWebSocket = fyersWebSocket;
             _HistoricalStockdata = userRepository;
         }
-
+        
         public async Task<IActionResult> Index()
         {
-            var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
-            await _HistoricalStockdata.InsertManyAsync(data);
+           // var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
+            //await _HistoricalStockdata.InsertManyAsync(data);
             var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
             return View();
         }

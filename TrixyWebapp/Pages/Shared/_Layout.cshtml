@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -20,6 +21,8 @@
     <!-- custom style -->
 	<link rel="stylesheet" href="~/assets/css/custom.css">
 
+	<!--toastr message-->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 </head>
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
     <header class="main-header">
@@ -123,7 +126,7 @@
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="#" style="display:none"><i class="ti-power-off me-2"></i> Logout</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="@Url.Action("Login","Account")"><i class="ti-power-off me-2"></i> Logout</a>
+								<a class="dropdown-item" href="@Url.Action("Logout","Account")"><i class="ti-power-off me-2"></i> Logout</a>
 							</li>
 						</ul>
 					</li>
@@ -138,19 +141,26 @@
 		<!-- sidebar-->
 		<section class="sidebar position-relative">
 			<div class="multinav">
-				<div class="multinav-scroll" style="height: 100%;">
+				<div class="multinav-scroll ps" style="height: 100%;">
 					<!-- sidebar menu-->
 					<ul class="sidebar-menu" data-widget="tree">
-						<li class="treeview active">
-							<a href="#">
+						<li class="treeview active" onclick="location.href=this.querySelector('a').href;">
+							<a href="/Home/Index">
 								<i data-feather="grid"></i><span>Dashboard</span>
 							</a>
 						</li>
-						<li class="treeview">
-							<a>
-								<i data-feather="user"></i><span>Users</span>
-							</a>
-						</li>
+						@if (User.Identity.IsAuthenticated)
+						{
+							@if (User.IsInRole("Admin"))
+							{
+								<li class="treeview" onclick="window.open(this.querySelector('a').href, '_blank');">
+									<a href="/User/Index" target="">
+										<i data-feather="user"></i><span>Users</span>
+									</a>
+								</li>
+							}
+						}
+						
 					</ul>
 				</div>
 			</div>
@@ -186,7 +196,7 @@
 				<div class="media-list media-list-hover mt-20">
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-success" href="#">
-							<img src="assets/images/1.jpg" alt="...">
+							<img src="~/assets/images/1.jpg" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -198,7 +208,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="assets/images/avatar-1.png" alt="...">
+							<img src="~/assets/images/avatar-1.png" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -210,7 +220,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-success" href="#">
-							<img src="assets/images/1.jpg" alt="...">
+							<img src="~/assets/images/1.jpg" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -222,7 +232,7 @@
 					</div>
 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="assets/images/avatar-1.png" alt="...">
+							<img src="~/assets/images/avatar-1.png" alt="...">
 						</a>
 						<div class="media-body">
 							<p class="fs-16">
@@ -304,10 +314,17 @@
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/data-table.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/dashboard.js"></script>
 
+	<!--toaster messages-->
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+	
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

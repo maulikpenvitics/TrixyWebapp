@@ -1,6 +1,8 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,12 +11,34 @@ namespace Repository.Models
 {
     public class User
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public ObjectId Id { get; set; }
-        public string? firstname { get; set; }
-        public string? lastname { get; set; }
-        public string? email { get; set; }
-        public string? password { get; set; }
-        public string? role { get; set; }
-        public string? username { get; set; }
+        [Required]
+        public string? Firstname { get; set; }
+        [Required]
+        public string? Lastname { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string? Email { get; set; }
+        [Required(ErrorMessage = "Password is required")]
+        public string? Password { get; set; }
+        [Required]
+        public string? Role { get; set; }
+        public bool? Status { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime? CreatedDate { get; set; }
+        public string? CreatedBy { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
+        public string StatusText => (bool)Status ? "Active" : "Inactive";
+        public User()
+        {
+            CreatedDate = DateTime.UtcNow;  
+            UpdatedDate = DateTime.UtcNow;
+            Status=true;
+        }
     }
 }

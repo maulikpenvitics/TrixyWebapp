@@ -1,0 +1,102 @@
+﻿@model IEnumerable<Repository.Models.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+<div class="content-wrapper">
+    <div class="container-full">
+        <section class="content">
+            <div class="col-xl-12 col-12">
+                <div class="box">
+                    <p>
+                        <a href="/User/Createuser" class="btn btn-primary mt-10" style="float:right;    margin-right: 10px;">Create New</a>
+                    </p>
+                    <div class="box-body">
+                        
+                        <div class="table-responsive customize-responsive-table">
+                            <table class="table mt-0 table-hover no-wrap" data-page-size="10">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            First Name
+                                        </th>
+                                        <th>
+                                            Last Name
+                                        </th>
+                                        <th>
+                                           Email
+                                        </th>
+                                        <th>
+                                            Password
+                                        </th>
+                                        <th>
+                                           Role
+                                        </th>
+                                        <th>
+                                           Status
+                                        </th>
+                                        <th>
+                                           Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Firstname)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Lastname)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Email)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Password)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Role)
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.StatusText)
+                                                </td>
+                                                <td>
+                                                    <a href="@Url.Action("CreateUser","User",new{id = item.Id.ToString()})"
+                                                       class="waves-effect btn btn-info  btn-xs"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-original-title="Update">
+                                                        <i data-feather="edit" aria-hidden="true"></i>
+                                                    </a>
+                                                 @*    @Html.ActionLink("Edit", "CreateUser", new { id = item.Id.ToString() }) | *@
+                                                    <a href="@Url.Action("DeleteUser","User",new{id = item.Id.ToString()})"
+                                                       class="waves-effect btn btn-info  btn-xs"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-original-title="Delete">
+                                                        <i data-feather="trash" aria-hidden="true"></i>
+                                                    </a>
+                                                @*     @Html.ActionLink("Delete", "DeleteUser", new { id = item.Id.ToString() }) *@
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+          
+        </section>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

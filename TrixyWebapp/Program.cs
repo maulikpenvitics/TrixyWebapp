@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.FyersWebSocketServices;
@@ -42,9 +43,23 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddSingleton<FyersWebSocketService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddSession();
 
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(option =>
+    {
+        option.LoginPath = "/Account/Login";
+        option.LogoutPath = "/Account/Logout";
+        option.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        option.SlidingExpiration = true;
+        option.Cookie.HttpOnly = true;
+        option.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.Configure<FyersStockMarketSettings>(builder.Configuration.GetSection("FyersStockMarketData"));
 

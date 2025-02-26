@@ -14,22 +14,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.firstname)
+                @Html.DisplayNameFor(model => model.Firstname)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.lastname)
+                @Html.DisplayNameFor(model => model.Lastname)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.email)
+                @Html.DisplayNameFor(model => model.Email)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.password)
+                @Html.DisplayNameFor(model => model.Password)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.role)
+                @Html.DisplayNameFor(model => model.Role)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.username)
+                @Html.DisplayNameFor(model => model.Status)
             </th>
             <th></th>
         </tr>
@@ -38,22 +38,22 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.firstname)
+                @Html.DisplayFor(modelItem => item.Firstname)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.lastname)
+                @Html.DisplayFor(modelItem => item.Lastname)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.email)
+                @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.password)
+                @Html.DisplayFor(modelItem => item.Password)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.role)
+                    @Html.DisplayFor(modelItem => item.Role)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.username)
+                @Html.DisplayFor(modelItem => (item.Status==true?"Active":"Deactive"))
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |

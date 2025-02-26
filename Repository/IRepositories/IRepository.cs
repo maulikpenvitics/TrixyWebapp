@@ -15,6 +15,7 @@ namespace Repository.IRepositories
         Task UpdateAsync(string id, T entity);
         Task DeleteAsync(string id);
         Task InsertManyAsync(List<T> entities);
-
+        Task <int> InsertAsync(T entity);
+        Task<T> getUserByEmail(string email);
     }
 }
