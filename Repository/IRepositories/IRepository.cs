@@ -19,6 +19,6 @@ namespace Repository.IRepositories
         Task DeleteAsync(string id);
         Task InsertManyAsync(List<T> entities);
         Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked);
-
+        Task<int> InsertAsync(T entity);
     }
 }

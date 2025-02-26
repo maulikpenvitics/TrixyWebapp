@@ -11,9 +11,11 @@ namespace TrixyWebapp.Controllers
     public class UserController : Controller
     {
         private readonly IRepository<User> _userRepository;
-        public UserController(IRepository<User> userRepository)
+        private readonly IUserRepository _user;
+        public UserController(IRepository<User> userRepository , IUserRepository user)
         {
             _userRepository = userRepository;
+            _user = user;
         }
         public async Task<IActionResult> Index()
         {
@@ -46,7 +48,7 @@ namespace TrixyWebapp.Controllers
                 }
                 else
                 {
-                    var existuser= await _userRepository.getUserByEmail(user?.Email??"");
+                    var existuser= await _user.GetByEmail(user?.Email??"");
                     if (existuser ==null)
                     {
                         var result = await _userRepository.InsertAsync(user);

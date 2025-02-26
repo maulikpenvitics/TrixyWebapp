@@ -1,0 +1,57 @@
+[{
+  "_id": {
+    "$oid": "67bdb003365d5ff03d958322"
+  },
+  "Firstname": "Manav",
+  "Lastname": "Ch",
+  "Email": "manavc.envitics@gmail.com",
+  "Password": "/Envitics@123/",
+  "Role": "Admin",
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-02-26T07:41:00.005Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-02-26T07:41:00.005Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67bdb4b887254cbd4d15b0a6"
+  },
+  "Firstname": "Dbabhi",
+  "Lastname": "varsha",
+  "Email": "varshad.envitics@gmail.com",
+  "Password": "Envitics@123",
+  "Role": "Admin",
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-02-25T12:16:54.037Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-02-25T12:16:54.037Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67beb5a428617325567baf8e"
+  },
+  "Firstname": "test",
+  "Lastname": "test",
+  "Email": "test.envitics@gmail.com",
+  "Password": "Envitics@123",
+  "Role": "User",
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-02-26T06:29:44.133Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-02-26T06:29:44.133Z"
+  },
+  "UpdatedBy": null
+}]

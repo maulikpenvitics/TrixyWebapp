@@ -17,7 +17,7 @@ namespace Repository.Repositories
         public UserRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings) : base(mongoClient, settings)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-            _users = database.GetCollection<User>("user");
+            _users = database.GetCollection<User>("User");
         }
 
         public async Task<User> GetByEmail(string Email)
