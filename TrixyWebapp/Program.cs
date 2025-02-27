@@ -46,7 +46,7 @@ builder.Services.AddSingleton<FyersWebSocketService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddSession();
-
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(option =>
@@ -91,6 +91,7 @@ app.MapStaticAssets();
 //app.MapRazorPages()
 //   .WithStaticAssets();
 app.UseSession();
+app.UseStaticFiles();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");

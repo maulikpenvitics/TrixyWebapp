@@ -1,8 +1,9 @@
 ﻿@model Repository.Models.User
 @{
-    ViewData["Title"] = "CreateUser";
+    ViewData["Title"] = "User Profile";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <div class="content-wrapper">
     <div class="container-full">
@@ -12,19 +13,29 @@
                     <div class="box">
                         <div class="box-body">
                             <div>
-                                @if (Model != null && Model.Id.ToString() != null)
-                                {
-                                    <h1>Create User</h1>
-                                }
-                                else
-                                {
-                                    <h1>Update User</h1>
-                                }
-
+                              <h2>User Profile</h2>
                                 <hr />
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <form asp-action="CreateUser" method="post" id="createuserform">
+                                        <form asp-action="CreateUser" method="post"  enctype="multipart/form-data" id="createuserform">
+
+                                            <div class="form-group">
+                                                <div>
+                                                    @if(!string.IsNullOrEmpty(Model.ProfileImageUrl)){
+                                                        <img id="previewImage" src="@Model.ProfileImageUrl" width="100" alt="User Image">
+                                                    }
+                                                    else{
+                                                        <img id="previewImage" src="/assets/images/avatar-1.png" width="100" alt="User Image">
+                                                    }
+                                                    
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label">Upload Image</label>
+                                                    <input type="file" name="ProfileImage" id="ProfileImage" class="form-control" accept="image/*" onchange="previewUserImage(event)" />
+                                                    <br />
+                                                  
+                                                </div>
+                                            </div>
                                             <div class="form-group">
                                                 <label class="control-label">Frist Name</label>
                                                 <input name="firstname" value="@Model?.Firstname" class="form-control" required />
@@ -38,67 +49,62 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Email</label>
-                                                <input name="Email" type="email" class="form-control" value="@Model?.Email" required />
+                                                <input name="Email" type="email" class="form-control" value="@Model?.Email"  readonly/>
 
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Password</label>
-                                                <input name="Password" id="Password" type="password" value="@Model?.Password" class="form-control" required />
+                                                <input name="Password" id="Password" type="password" value="@Model?.Password" class="form-control" readonly />
 
                                             </div>
-                                            <div class="form-group">
-                                                <label class="control-label">Confirm Password</label>
-                                                <input name="confirmpassowrd" id="confirmpassowrd" type="password" value="@Model?.Password" class="form-control" required />
-                                                <span id="valiconfirmpassowrd" class="text-danger"></span>
-
-                                            </div>
-                                            <div class="form-group">
+                                        @*     <div class="form-group">
                                                 <label class="control-label">Role</label>
                                                 <select name="Role" class="form-control">
                                                     <option value="">Select Role</option>
                                                     <option value="Admin" @(Model?.Role == "Admin" ? "selected" : "")>Admin</option>
                                                     <option value="User" @(Model?.Role == "User" ? "selected" : "")>User</option>
                                                 </select>
-                                            </div>
+                                            </div> *@
                                             <div class="form-group">
                                                 <input type="submit" value="Create" class="btn btn-primary mt-10" />
-                                                <a href="/User/Index" class="btn btn-danger mt-10">Back to List</a>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-                           
-                           
+
+
                         </div>
                     </div>
                 </div>
             </div>
 
-          
+
         </section>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript">
-    $("#confirmpassowrd").on( "input",function(){
-          var password = $("#Password").val();
-          var confirmPassword = $(this).val();
+      function previewUserImage(event) {
+          debugger
+       var input = event.target;
 
-        if (password !== confirmPassword) {
-            $("#valiconfirmpassowrd").text("Passwords do not match!").show();
-        } else {
-            $("#valiconfirmpassowrd").hide();
+    if (!input.files || input.files.length === 0) {
+        console.error("No file selected.");
+        return;
+    }
+
+    var file = input.files[0];
+    console.log("Selected File:", file);
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var imagePreview = document.getElementById("previewImage");
+            imagePreview.src = reader.result; // Set the image source
+           
+        };
+
+        if (input.files && input.files[0]) {
+            reader.readAsDataURL(input.files[0]); // Read file as Data URL
         }
-    });
-
-       $("#createuserform").submit(function (event) {
-           debugger
-        var password = $("#Password").val();
-        var confirmPassword = $("#confirmpassowrd").val();
-
-        if (password !== confirmPassword) {
-            event.preventDefault(); // Prevent form submission
-            return false;
-        }
+    }
 </script>

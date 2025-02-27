@@ -35,6 +35,8 @@ namespace TrixyWebapp.Controllers
             string userRole = Encoding.UTF8.GetString(UserRole);
             ViewData["UserRole"] = userRole;
 
+           
+
             var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
             //await _HistoricalStockdata.InsertManyAsync(data);
             var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();

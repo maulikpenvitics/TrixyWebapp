@@ -1,8 +1,11 @@
 ﻿@{
 	// var strategies = ViewData["Strategies"] as List<Strategy>;
 	var masterDataObj = ViewData["MasterData"];
-	var userId = ViewData["UserId"] as string;
-	var userRole = ViewData["UserRole"] as string;
+	//var userId = ViewData["UserId"] as string;
+	//var userRole = ViewData["UserRole"] as string;
+	var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+	var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
+	var Username = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
 }
 
 <!DOCTYPE html>
@@ -108,7 +111,7 @@
 						data-bs-toggle="dropdown" title="User">
 							<div class="d-flex align-items-center">
 								<div class="text-end me-10 d-sm-inline d-none">
-									<p class="pt-5 fs-14 mb-0 fw-700 text-primary">Johen Doe</p>
+									<p class="pt-5 fs-14 mb-0 fw-700 text-primary">@Username</p>
 									<small class="fs-10 mb-0 text-uppercase text-mute">@userRole</small>
 								</div>
 								<img src="~/assets/images/avatar-1.png"
@@ -117,7 +120,7 @@
 						</a>
 						<ul class="dropdown-menu animated flipInX">
 							<li class="user-body">
-								<a class="dropdown-item" href="#">
+								<a class="dropdown-item" href="@Url.Action("UserProfile", "Account", new { Id = userId })">
 									<i class="ti-user text-muted me-2"></i>
 									Profile
 								</a>
@@ -125,7 +128,7 @@
 									<i class="ti-settings text-muted me-2"></i>
 									Settings
 								</a>
-								<a class="dropdown-item" href="#">
+								<a class="dropdown-item" href="@Url.Action("ChangePassword","Account",new{Id=userId})" target="_blank">
 									<i class="ti-lock text-muted me-2"></i> Change
 									Password
 								</a>
@@ -290,6 +293,7 @@
 
 		</div>
 	</aside>
+	
 	<!-- /.control-sidebar -->
 	<!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
 	<div class="control-sidebar-bg"></div>
@@ -332,8 +336,11 @@
 				});
 			});
 		});
-	</script>
 
+
+
+	</script>
+	
 	<!--toaster messages-->
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

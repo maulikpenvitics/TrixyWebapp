@@ -27,6 +27,7 @@ namespace Repository.Models
         [Required]
         public string? Role { get; set; }
         public bool? Status { get; set; }
+        public string? ProfileImageUrl { get; set; }
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime? CreatedDate { get; set; }
         public string? CreatedBy { get; set; }
