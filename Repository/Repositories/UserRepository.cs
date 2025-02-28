@@ -28,8 +28,7 @@ namespace Repository.Repositories
                 Builders<User>.Filter.Eq("Status", true)
             )).FirstOrDefaultAsync();
         }
-
-        public async Task<int> ChangePassword(string Id,string oldpass,string newpass)
+       public async Task<int> ChangePassword(string Id,string oldpass,string newpass)
         {
             var user= await GetByIdAsync(Id);
             if (user !=null && user.Password==oldpass)
@@ -61,7 +60,6 @@ namespace Repository.Repositories
             .Set(u => u.Firstname, model.Firstname)
             .Set(u => u.Lastname, model.Lastname)
             .Set(u => u.Email, model.Email)
-            .Set(u => u.Password, model.Password) 
             .Set(u => u.ProfileImageUrl, model.ProfileImageUrl)
             .Set(u => u.UpdatedDate, DateTime.UtcNow); 
 
