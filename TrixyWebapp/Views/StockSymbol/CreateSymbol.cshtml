@@ -1,0 +1,75 @@
+﻿@model Repository.Models.StockSymbol
+@{
+    ViewData["Title"] = "CreateUser";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <section class="content">
+            <div class="row">
+                <div class="col-xl-12 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div>
+                                @if (Model != null && Model.Id.ToString() != null)
+                                {
+                                    <h1>Create Symbol</h1>
+                                }
+                                else
+                                {
+                                    <h1>Update Symbol</h1>
+                                }
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <form asp-action="CreateSymbol" method="post" id="CreateSymbolform" enctype="multipart/form-data">
+                                            <input name="Id" type="hidden" value="@Model?.Id" />
+
+                                            <div class="form-group">
+                                                <label class="control-label">Symbol</label>
+                                                <input name="Symbol" value="@Model?.Symbol" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="control-label">Company Name</label>
+                                                <input name="CompanyName" class="form-control" value="@Model?.CompanyName" required />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="control-label">Upload Icon</label>
+                                                <input name="IconFile" id="IconFile" type="file" class="form-control" @(Model?.Id != null ? "" : "required") />
+
+                                                <!-- Show the existing image if available (Edit mode) -->
+                                                @if (!string.IsNullOrEmpty(Model?.CompanyIconUrl))
+                                                {
+                                                    <div class="mt-2">
+                                                        <label>Current Icon:</label>
+                                                        <br />
+                                                        <img src="@Model.CompanyIconUrl" alt="Current Icon" width="100" height="100" />
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="submit" value="@(Model?.Id == null ? "Create" : "Update")" class="btn btn-primary mt-10" />
+                                                <a href="/StockSymbol/Index" class="btn btn-danger mt-10">Back to List</a>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
