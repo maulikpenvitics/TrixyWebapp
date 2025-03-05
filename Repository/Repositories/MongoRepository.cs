@@ -104,6 +104,9 @@ namespace Repository.Repositories
             }
         }
 
-       
+        public async Task<List<T>> FindAsync(FilterDefinition<T> filter)
+        {
+            return await _collection.Find(filter).ToListAsync();
+        }
     }
 }

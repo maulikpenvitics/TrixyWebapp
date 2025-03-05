@@ -44,6 +44,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddSingleton<FyersWebSocketService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWebStockRepository, WebStockRepository>();
+
 
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();

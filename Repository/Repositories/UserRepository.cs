@@ -15,10 +15,12 @@ namespace Repository.Repositories
     public class UserRepository : MongoRepository<User>, IUserRepository
     {
         private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<AdminSettings> _userSettingsCollection;
         public UserRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings) : base(mongoClient, settings)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _users = database.GetCollection<User>("User");
+            _userSettingsCollection = database.GetCollection<AdminSettings>("AdminSettings");
         }
 
         public async Task<User> GetByEmail(string Email)
@@ -67,6 +69,23 @@ namespace Repository.Repositories
 
         return result.ModifiedCount > 0; 
      }
+
+        public async Task InsertUserseting(AdminSettings model)
+        {
+            await _userSettingsCollection.InsertOneAsync(model);
+        }
+        public async Task<AdminSettings> GetUserSettings(string userId)
+        {
+            return await _userSettingsCollection.Find(s => s.UserId == userId).FirstOrDefaultAsync();
+        }
+        public async Task UpdateUserSettings(string userId, AdminSettings settings)
+        {
+            await _userSettingsCollection.ReplaceOneAsync(s => s.UserId == userId, settings);
+        }
+        public async Task DeleteUserSettings(string userId)
+        {
+            await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
+        }
 
     }
 }

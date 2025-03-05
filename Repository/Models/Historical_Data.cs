@@ -10,17 +10,18 @@ namespace Repository.Models
 {
     public class Historical_Data
     {
-        public ObjectId _id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         public string? symbol { get; set; }
         public string? from_date { get; set; }
         public string? to_date { get; set; }
-        [BsonDateTimeOptions]
+        
         public DateTime Timestamp { get; set; }
         public decimal Open { get; set; }
         public decimal High { get; set; }
         public decimal Low { get; set; }
         public decimal Close { get; set; }
         public decimal Volume { get; set; }
-    
     }
 }

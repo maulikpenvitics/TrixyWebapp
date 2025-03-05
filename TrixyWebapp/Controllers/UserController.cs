@@ -92,6 +92,33 @@ namespace TrixyWebapp.Controllers
             }
           
         }
-      
+
+        [HttpGet]
+        public async Task<IActionResult> UserSetting(AdminSettings userSettings)
+        {
+            userSettings = new AdminSettings
+            {
+                UserId = "123456",
+                NotificationStatus = true,
+                Threshold = 50,
+                MovingAverage = new MovingAverageSettings { SMA_Periods = 10, LMA_Periods = 50 },
+                RSIThresholds = new RSIThresholds { Overbought = 70, Oversold = 30 },
+                MACD_Settings = new MACDSettings { ShortEmaPeriod = 12, LongEmaPeriod = 26, SignalPeriod = 9 },
+                StrategyWeighted = new List<StrategyWeight>
+            {
+                new StrategyWeight { Strategy = "Moving_Average", Weight = 10.8, IsActive = true },
+                new StrategyWeight { Strategy = "RSI", Weight = 30, IsActive = true },
+                new StrategyWeight { Strategy = "Bollinger_Bands", Weight = 14.3, IsActive = true },
+                new StrategyWeight { Strategy = "Mean_Reversion", Weight = 14.3, IsActive = true },
+                new StrategyWeight { Strategy = "VWAP", Weight = 15.3, IsActive = true },
+                new StrategyWeight { Strategy = "MACD", Weight = 15.3, IsActive = true },
+                new StrategyWeight { Strategy = "Sentiment_Analysis", Weight = 0, IsActive = true },
+                new StrategyWeight { Strategy = "Combine_Strategy", Weight = 0, IsActive = true }
+            }
+            };
+            await _user.InsertUserseting(userSettings);
+            return View();
+        }
+        
     }
 }

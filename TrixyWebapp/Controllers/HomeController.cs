@@ -1,10 +1,13 @@
 ﻿using FyersCSharpSDK;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol.Core.Types;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
+using Repository.Repositories;
 using System.Text;
+using TrixyWebapp.Helpers;
 
 
 namespace TrixyWebapp.Controllers
@@ -16,17 +19,26 @@ namespace TrixyWebapp.Controllers
         private readonly IRepository<Historical_Data> _HistoricalStockdata;
         private readonly IRepository<Strategy> _strategyRepository;
         private readonly IRepository<Master_Strategy_User> _masterRepository;
-
-        public HomeController(FyersWebSocketService fyersWebSocket, IRepository<Historical_Data> userRepository, IRepository<Strategy> strategyRepository, IRepository<Master_Strategy_User> masterRepository)
+        private readonly IWebStockRepository _stockRepository;
+        private readonly IUserRepository _user;
+        public HomeController(FyersWebSocketService fyersWebSocket,
+            IRepository<Historical_Data> userRepository, 
+            IRepository<Strategy> strategyRepository,
+            IRepository<Master_Strategy_User> masterRepository,
+            IWebStockRepository stockRepository,
+            IUserRepository user)
         {
             _fyersWebSocket = fyersWebSocket;
             _HistoricalStockdata = userRepository;
             _strategyRepository = strategyRepository;
             _masterRepository = masterRepository;
+            _stockRepository = stockRepository;
+            _user = user;
         }
         
         public async Task<IActionResult> Index()
         {
+           
             var userIdBytes = HttpContext.Session.Get("UserId");
             string userId = Encoding.UTF8.GetString(userIdBytes);
             ViewData["UserId"] = userId;
@@ -34,16 +46,16 @@ namespace TrixyWebapp.Controllers
             var UserRole = HttpContext.Session.Get("UserRole");
             string userRole = Encoding.UTF8.GetString(UserRole);
             ViewData["UserRole"] = userRole;
-
-           
-
-            var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
-            //await _HistoricalStockdata.InsertManyAsync(data);
-            var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
-
             var masterData = await _masterRepository.GetByIdAsyncForMaster(userId);
             ViewData["MasterData"] = masterData;
+            //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
 
+            //await _HistoricalStockdata.InsertManyAsync(data);
+            var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
+            //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
+           // var weightedsignal = await _user.GetUserSettings(userId);
+
+            EnableDisableStratgey("NSE:OFSS-EQ");
             return View();
         }
 
@@ -115,6 +127,48 @@ namespace TrixyWebapp.Controllers
             await _masterRepository.UpdateAsyncStrategy(userId, strategyName, isChecked);
 
             return Ok(new { message = "Strategy updated successfully." });
+        }
+
+       
+        public async Task EnableDisableStratgey(string sym)
+        {
+            var userIdBytes = HttpContext.Session.Get("UserId");
+            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var weightedsignal = await _user.GetUserSettings(userId);
+
+
+            var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
+            if (gethistoricaldata!=null && gethistoricaldata.Count>0)
+            {
+                #region Moving Average Crossover Strategy
+               
+
+                var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: 10, longTerm: 50);
+
+                #endregion
+
+                #region Relative Strength Index (RSI)
+                var RSIresult = SignalGenerator.genratesignalsforRSI(gethistoricaldata);
+
+                #endregion
+                #region Bollinger Bands Strategy
+                var BBSresult = SignalGenerator.GenerateBuySellSignalsForBB(gethistoricaldata);
+                #endregion
+
+                #region Mean Reversion Strategy
+                var MRSresult = SignalGenerator.CalculateMeanReversion(gethistoricaldata, 30, 0.1);
+                #endregion
+
+                #region Volume-Weighted Average Price (VWAP) Strategy
+                var VWAP = SignalGenerator.CalculateVWAP(gethistoricaldata);
+                #endregion
+
+                #region MACD (Moving Average Convergence Divergence) Strategy
+                var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, 12, 26, 9);
+                #endregion
+                //combination signal
+                var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata);
+            }
         }
 
     }
