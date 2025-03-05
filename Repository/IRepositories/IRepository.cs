@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Repository.Models;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,6 @@ namespace Repository.IRepositories
         Task InsertManyAsync(List<T> entities);
         Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked);
         Task<int> InsertAsync(T entity);
+        Task<List<T>> FindAsync(FilterDefinition<T> filter);
     }
 }

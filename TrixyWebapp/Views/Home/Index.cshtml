@@ -42,7 +42,7 @@
 												<lable class="text-success"><b>10.34%</b></lable>
 											</td>
 											<td><span class="label label-success">Buy</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -121,7 +121,7 @@
 												<lable class="text-success"><b>2.34%</b></lable>
 											</td>
 											<td><span class="label label-success">Buy</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -147,7 +147,7 @@
 												<lable class="text-danger"><b>2.34%</b></lable>
 											</td>
 											<td><span class="label label-danger">Sell</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -173,7 +173,7 @@
 												<lable class="text-danger"><b>2.34%</b></lable>
 											</td>
 											<td><span class="label label-danger">Sell</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -199,7 +199,7 @@
 												<lable class="text-success"><b>10.34%</b></lable>
 											</td>
 											<td><span class="label label-success">Buy</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -225,7 +225,7 @@
 												<lable class="text-success"><b>0.34%</b></lable>
 											</td>
 											<td><span class="label label-warning">Hold</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -251,7 +251,7 @@
 												<lable class="text-danger"><b>0.34%</b></lable>
 											</td>
 											<td><span class="label label-warning">Hold</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -277,7 +277,7 @@
 												<lable class="text-success"><b>0.15%</b></lable>
 											</td>
 											<td><span class="label label-success">Buy</span></td>
-											<td>
+											<td class="stock_notification">
 												<a href="javascript:void(0)"
 												   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
 												   data-bs-toggle="tooltip"
@@ -432,12 +432,31 @@
 			dataType: 'json',
 			success: function (stockData) {
 				stockData.forEach(stock => {
+					debugger
 					let Symbol = stock.symbol.split(":")[1]?.split("-")[0]; // Extract symbol correctly
 					let price = stock.price;
 					let row = document.getElementById(`stock-${Symbol}`);
 					if (row) {
-						row.querySelector(".stock-price").innerHTML =
-							`<label class="label label-success text-black">${price}</label>`;
+							const stockPrice = row.querySelector(".stock-price");
+	const stockNotification = row.querySelector(".stock_notification");
+
+	if (stockPrice) {
+		stockPrice.innerHTML =
+			`<label class="label label-success text-black">${price}</label>`;
+	}
+	   if (stockNotification) {
+		stockNotification.innerHTML =
+			`<a href="EnableDisableStratgey/Home?sym=${encodeURIComponent(Symbol)}"
+			   class="waves-effect waves-circle btn btn-circle btn-info btn-xs"
+			   data-bs-toggle="tooltip"
+			   data-bs-title="Enable Notification">  <!-- Updated for Bootstrap 5 -->
+				<i class="ti-bell" aria-hidden="true"></i>
+			</a>`;
+	}
+						// row.querySelector(".stock-price").innerHTML =
+						// 	`<label class="label label-success text-black">${price}</label>`;
+							
+
 					}
 					// If this stock is currently selected, update the stock detail price in real-time
 					if (selectedStockSymbol === Symbol) {

@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using TrixyWebapp.ViewModels;
 using MongoDB.Bson;
+using TrixyWebapp.Helpers;
 
 
 namespace TrixyWebapp.Controllers
@@ -19,11 +20,13 @@ namespace TrixyWebapp.Controllers
     {
         private readonly IRepository<User> _userRepository;
         private readonly IUserRepository _user;
+        private readonly IWebHostEnvironment _env;
 
-        public AccountController(IRepository<User> userRepository, IUserRepository user)
+        public AccountController(IRepository<User> userRepository, IUserRepository user, IWebHostEnvironment env)
         {
             _userRepository = userRepository;
             _user = user;
+            _env = env;
         }
 
         public async Task<IActionResult> Index()
@@ -41,38 +44,48 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(model);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
 
-            var user = await _userRepository.AuthenticateUserAsync(model.Email, model.Password);
+                var user = await _userRepository.AuthenticateUserAsync(model.Email, model.Password);
 
-            if (user != null)
-            {
-                HttpContext.Session.Set("UserId", Encoding.UTF8.GetBytes(user.Id.ToString()));
-                HttpContext.Session.SetString("UserRole", user?.Role ?? "");
-                HttpContext.Session.SetString("UserName", user?.Firstname+ " "+ user?.Lastname);
+                if (user != null)
+                {
+                    HttpContext.Session.Set("UserId", Encoding.UTF8.GetBytes(user.Id.ToString()));
+                    HttpContext.Session.SetString("UserRole", user?.Role ?? "");
+                    HttpContext.Session.SetString("UserName", user?.Firstname + " " + user?.Lastname);
+                    HttpContext.Session.SetString("imageurl", user?.ProfileImageUrl ?? "");
 
 
-                var claims = new List<Claim>
+                    var claims = new List<Claim>
                       {
                             new Claim(ClaimTypes.Name, user.Email),
                              new Claim(ClaimTypes.Role, user.Role)
                        };
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties { IsPersistent = true };
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity), authProperties);
-                return RedirectToAction("Index", "Home");
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity), authProperties);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ViewData["LoginError"] = "Invalid email or password. Please try again.";
+                    return View(model);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ViewData["LoginError"] = "Invalid email or password. Please try again.";
+                Helper.LogFilegenerate(ex, "Login Action", _env);
                 return View(model);
             }
+          
         }
 
         public async Task<IActionResult> Logout()
@@ -135,13 +148,13 @@ namespace TrixyWebapp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserProfile(CreateUserViewModel model, IFormFile ProfileImage)
+        public async Task<IActionResult> UserProfile(CreateUserViewModel model)
         {
             var existuser = await _userRepository.GetByIdAsync(model?.Id ?? "");
             if (ModelState.IsValid)
             {
                 string? fileName = null;
-                if (ProfileImage != null)
+                if (model.ProfileImage != null)
                 {
                     string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Uploads");
                     if (!Directory.Exists(uploadDir))
@@ -149,12 +162,12 @@ namespace TrixyWebapp.Controllers
                         Directory.CreateDirectory(uploadDir);
                     }
 
-                    fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProfileImage.FileName);
+                    fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfileImage.FileName);
                     string filePath = Path.Combine(uploadDir, fileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        await ProfileImage.CopyToAsync(fileStream);
+                        await model.ProfileImage.CopyToAsync(fileStream);
                     }
 
                     model.ProfileImageUrl = "/Uploads/" + fileName;
@@ -166,7 +179,6 @@ namespace TrixyWebapp.Controllers
                     Firstname = model?.Firstname,
                     Lastname = model?.Lastname,
                     Email = model?.Email,
-                    Password = model?.Password,
                     ProfileImageUrl = model?.ProfileImageUrl // Save path in DB
                 };
                 var result=  await _user.UpdateUserProfile(user);
