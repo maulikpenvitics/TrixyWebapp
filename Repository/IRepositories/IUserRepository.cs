@@ -8,6 +8,8 @@ namespace Repository.IRepositories
         Task<User> GetByEmail(string Email);
         Task<int> ChangePassword(string Id, string oldpass, string newpass);
         Task<bool> UpdateUserProfile(User model);
+        Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked);
+        Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked);
         #endregion
         #region User settings method
         Task InsertUserseting(AdminSettings model);

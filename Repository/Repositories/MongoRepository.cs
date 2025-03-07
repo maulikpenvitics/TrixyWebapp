@@ -69,14 +69,15 @@ namespace Repository.Repositories
         }
            
 
-        public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
-        {
-            var filter = Builders<T>.Filter.Eq("userId", userId); // Filter only by userId
+        //public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
+        //{
+        //    var filter = Builders<T>.Filter.And(
+        //                 Builders<T>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
+        //                 Builders<T>.Filter.ElemMatch<BsonDocument>("UserStrategy", Builders<BsonDocument>.Filter.Eq("StrategyName", strategyName)) );
+        //    var update = Builders<T>.Update.Set("UserStrategy.$.StrategyEnableDisable", isChecked); // Update the StrategyEnableDisable field
 
-            var update = Builders<T>.Update.Set(strategyName, isChecked); // Dynamically update the field
-
-            await _collection.UpdateOneAsync(filter, update);
-        }
+        //    await _collection.UpdateOneAsync(filter, update);
+        //}
 
         public async Task DeleteAsync(string id) =>
             await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id));
@@ -108,5 +109,6 @@ namespace Repository.Repositories
         {
             return await _collection.Find(filter).ToListAsync();
         }
+      
     }
 }

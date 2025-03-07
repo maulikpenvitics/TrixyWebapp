@@ -30,7 +30,7 @@ namespace Repository.Repositories
                 Builders<User>.Filter.Eq("Status", true)
             )).FirstOrDefaultAsync();
         }
-       public async Task<int> ChangePassword(string Id,string oldpass,string newpass)
+        public async Task<int> ChangePassword(string Id,string oldpass,string newpass)
         {
             var user= await GetByIdAsync(Id);
             if (user !=null && user.Password==oldpass)
@@ -52,7 +52,7 @@ namespace Repository.Repositories
            
         }
 
-      public async Task<bool> UpdateUserProfile(User model)
+        public async Task<bool> UpdateUserProfile(User model)
       {
         if (model == null)
             return false; 
@@ -70,6 +70,27 @@ namespace Repository.Repositories
         return result.ModifiedCount > 0; 
      }
 
+        public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
+        {
+            var filter = Builders<User>.Filter.And(
+                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
+                         Builders<User>.Filter.ElemMatch(u=>u.UserStrategy,s=>s.StretagyName==strategyName));
+            var update = Builders<User>.Update.Set("UserStrategy.$.StretagyEnableDisable", isChecked); // Update the StrategyEnableDisable field
+
+            await _users.UpdateOneAsync(filter, update);
+        }
+
+        public async Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked)
+        {
+            var filter = Builders<User>.Filter.And(
+                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
+                         Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+            var update = Builders<User>.Update.Set("Stocks.$.StockNotification", isChecked); // Update the StrategyEnableDisable field
+
+            await _users.UpdateOneAsync(filter, update);
+        }
+
+        #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
         {
             await _userSettingsCollection.InsertOneAsync(model);
@@ -86,6 +107,7 @@ namespace Repository.Repositories
         {
             await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
         }
+        #endregion
 
     }
 }

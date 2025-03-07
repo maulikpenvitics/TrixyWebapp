@@ -12,6 +12,8 @@ using System.Text;
 using TrixyWebapp.ViewModels;
 using MongoDB.Bson;
 using TrixyWebapp.Helpers;
+using System.Text.Json;
+using Repository.FyersWebSocketServices;
 
 
 namespace TrixyWebapp.Controllers
@@ -21,12 +23,14 @@ namespace TrixyWebapp.Controllers
         private readonly IRepository<User> _userRepository;
         private readonly IUserRepository _user;
         private readonly IWebHostEnvironment _env;
-
-        public AccountController(IRepository<User> userRepository, IUserRepository user, IWebHostEnvironment env)
+        private readonly FyersWebSocketService _fyersWebSocket;
+        public AccountController(IRepository<User> userRepository, IUserRepository user, IWebHostEnvironment env,
+            FyersWebSocketService fyersWebSocket)
         {
             _userRepository = userRepository;
             _user = user;
             _env = env;
+            _fyersWebSocket = fyersWebSocket;
         }
 
         public async Task<IActionResult> Index()
@@ -59,19 +63,23 @@ namespace TrixyWebapp.Controllers
                     HttpContext.Session.SetString("UserRole", user?.Role ?? "");
                     HttpContext.Session.SetString("UserName", user?.Firstname + " " + user?.Lastname);
                     HttpContext.Session.SetString("imageurl", user?.ProfileImageUrl ?? "");
-
+                    HttpContext.Session.SetString("User", JsonSerializer.Serialize(user));
 
                     var claims = new List<Claim>
-                      {
-                            new Claim(ClaimTypes.Name, user.Email),
-                             new Claim(ClaimTypes.Role, user.Role)
-                       };
+                    {
+                              new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // ✅ Add User ID
+                               new Claim(ClaimTypes.Name, user.Email),
+                              new Claim(ClaimTypes.Role, user.Role)
+                    };
+
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties { IsPersistent = true };
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
+                   
+                    _fyersWebSocket.Connect(user.Stocks.ToList());
                     return RedirectToAction("Index", "Home");
                 }
                 else
