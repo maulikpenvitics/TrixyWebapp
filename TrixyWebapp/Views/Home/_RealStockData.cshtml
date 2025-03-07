@@ -1,5 +1,7 @@
 ﻿@using Repository.Models
 @using Newtonsoft.Json
+@using TrixyWebapp.Helpers
+
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
  @model List<Repository.FyersWebSocketServices.StockData>
@@ -24,7 +26,7 @@
 				<a href="#realtime_stock_detail">
 					@if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
 					{
-						<img src="@userstock?.CompanyLogoUrl" width="30"
+						<img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl.Trim())" width="30"
 							 alt="reliance" />
 						
 					}

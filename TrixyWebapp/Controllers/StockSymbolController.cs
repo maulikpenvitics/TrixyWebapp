@@ -10,11 +10,14 @@ namespace TrixyWebapp.Controllers
     {
         private readonly IRepository<StockSymbol> _stockSymbolRepository;
         private readonly IStockSymbolRepository _stockSymbol;
-
-        public StockSymbolController(IRepository<StockSymbol> stockSymbolRepository, IStockSymbolRepository stockSymbol)
+        private readonly IUserRepository _userRepository;
+        public StockSymbolController(IRepository<StockSymbol> stockSymbolRepository, 
+            IStockSymbolRepository stockSymbol,
+            IUserRepository userRepository)
         {
             _stockSymbolRepository = stockSymbolRepository;
             _stockSymbol = stockSymbol;
+            _userRepository = userRepository;
         }
         public async Task<IActionResult> Index()
         {
@@ -52,7 +55,7 @@ namespace TrixyWebapp.Controllers
                 // Handle file upload
                 if (stockSymbol.IconFile != null && stockSymbol.IconFile.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "/wwwroot/uploads");
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
                     if (!Directory.Exists(uploadsFolder))
                     {
                         Directory.CreateDirectory(uploadsFolder);
@@ -67,12 +70,13 @@ namespace TrixyWebapp.Controllers
                     }
 
                     // Store only the relative path in the database
-                    stockSymbol.CompanyIconUrl = "/uploads/" + fileName;
+                    stockSymbol.CompanyIconUrl = "/Uploads/" + fileName;
                 }
 
                 // **EDIT MODE: If ID exists, update the existing record**
                 if (stockSymbol.Id.ToString() != null && stockSymbol.Id != ObjectId.Empty && stockSymbol.Id.ToString() != "000000000000000000000000")
                 {
+                   // await _userRepository.UpdateAsyncUserStocksLogo(stockSymbol.Symbol, stockSymbol.CompanyIconUrl);
                     var existingStock = await _stockSymbolRepository.GetByIdAsync(stockSymbol.Id.ToString());
 
                     if (existingStock != null)

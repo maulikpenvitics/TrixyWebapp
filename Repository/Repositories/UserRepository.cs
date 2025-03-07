@@ -89,7 +89,6 @@ namespace Repository.Repositories
 
             await _users.UpdateOneAsync(filter, update);
         }
-
         #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
         {

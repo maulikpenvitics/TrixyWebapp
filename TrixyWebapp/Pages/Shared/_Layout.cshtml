@@ -124,10 +124,10 @@
 									<p class="pt-5 fs-14 mb-0 fw-700 text-primary">@Username</p>
 									<small class="fs-10 mb-0 text-uppercase text-mute">@userRole</small>
 								</div>
-								@if (!string.IsNullOrEmpty(imageurl))
+								@if (!string.IsNullOrEmpty(user?.ProfileImageUrl))
 								{
 
-									<img src="@Context.GetFullUrl(imageurl)" width="100"  class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
+									<img src="@Context.GetFullUrl(user?.ProfileImageUrl)" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
 								}
 								else
 								{
@@ -181,7 +181,7 @@
 						{
 							@if (User.IsInRole("Admin"))
 							{
-								<li class="treeview" onclick="window.open(this.querySelector('a').href, '_blank');">
+								<li class="treeview active" onclick="window.open(this.querySelector('a').href, '_blank');">
 									<a href="/User/Index" target="">
 										<i data-feather="user"></i><span>Users</span>
 									</a>
