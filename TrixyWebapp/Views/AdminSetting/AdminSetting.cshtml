@@ -1,0 +1,62 @@
+﻿@model Repository.Models.AdminSettings
+@using Newtonsoft.Json
+
+@{
+    ViewData["Title"] = Model?.Id == null ? "Create Admin Settings" : "Edit Admin Settings";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <section class="content">
+            <div class="row">
+                <div class="col-xl-12 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <h1>@(Model?.Id == null ? "Create Admin Settings" : "Edit Admin Settings")</h1>
+                            <hr />
+                            @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+                            {
+                                <label class="control-label" style="color:green">
+                                    @ViewBag.SuccessMessage
+                                </label>
+                            }
+                            @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                            {
+                                <label class="control-label" style="color:red">
+                                    @ViewBag.ErrorMessage
+                                </label>
+                            }
+                            <form asp-action="AdminSetting" method="post" id="AdminSettingsForm">
+                                <div class="form-group">
+                                    <label class="control-label">Edit Full Model as JSON</label>
+                                    <textarea id="fullModelJson" name="FullModelJson" class="form-control" rows="15">@JsonConvert.SerializeObject(Model, Formatting.Indented)</textarea>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <input type="submit" value="Update" class="btn btn-primary" />
+                                  @*   <a href="/AdminSettings/Index" class="btn btn-danger">Back to List</a> *@
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#AdminSettingsForm").submit(function () {
+            try {
+                JSON.parse($("#fullModelJson").val()); // Validate JSON before submission
+            } catch (e) {
+                alert("Invalid JSON format. Please correct it before submitting.");
+                return false;
+            }
+        });
+    });
+</script>

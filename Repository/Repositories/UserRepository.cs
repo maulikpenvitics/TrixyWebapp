@@ -87,5 +87,7 @@ namespace Repository.Repositories
             await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
         }
 
+    
+
     }
 }

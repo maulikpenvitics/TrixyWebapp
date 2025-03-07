@@ -46,6 +46,7 @@ builder.Services.AddSingleton<FyersWebSocketService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWebStockRepository, WebStockRepository>();
 builder.Services.AddScoped<IStockSymbolRepository, StockSymbolRepository>();
+builder.Services.AddScoped<IAdminSettingRepository, AdminSettingRepository>();
 
 
 

@@ -1,0 +1,121 @@
+﻿@model Repository.Models.AdminSettings
+@{
+    ViewData["Title"] = Model?.Id == null ? "Create Admin Settings" : "Edit Admin Settings";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <section class="content">
+            <div class="row">
+                <div class="col-xl-12 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <h1>@(Model?.Id == null ? "Create Admin Settings" : "Edit Admin Settings")</h1>
+                            <hr />
+
+                            <form asp-action="SaveAdminSettings" method="post" id="AdminSettingsForm">
+                                <input type="hidden" name="Id" value="@Model?.Id" />
+
+                                <div class="form-group">
+                                    <label class="control-label">User ID</label>
+                                    <input name="UserId" class="form-control" value="@Model?.UserId" required />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Notification Status</label>
+                                    <input type="checkbox" name="NotificationStatus" @(Model?.NotificationStatus == true ? "checked" : "") />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Threshold</label>
+                                    <input type="number" step="0.01" name="Threshold" class="form-control" value="@Model?.Threshold" required />
+                                </div>
+
+                                <h4>Moving Average Settings</h4>
+                                <div class="form-group">
+                                    <label class="control-label">SMA Periods</label>
+                                    <input type="number" name="MovingAverage.SMA_Periods" class="form-control" value="@Model?.MovingAverage?.SMA_Periods" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">LMA Periods</label>
+                                    <input type="number" name="MovingAverage.LMA_Periods" class="form-control" value="@Model?.MovingAverage?.LMA_Periods" />
+                                </div>
+
+                                <h4>RSI Thresholds</h4>
+                                <div class="form-group">
+                                    <label class="control-label">Overbought</label>
+                                    <input type="number" name="RSIThresholds.Overbought" class="form-control" value="@Model?.RSIThresholds?.Overbought" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Oversold</label>
+                                    <input type="number" name="RSIThresholds.Oversold" class="form-control" value="@Model?.RSIThresholds?.Oversold" />
+                                </div>
+
+                                <h4>MACD Settings</h4>
+                                <div class="form-group">
+                                    <label class="control-label">Short EMA Period</label>
+                                    <input type="number" name="MACD_Settings.ShortEmaPeriod" class="form-control" value="@Model?.MACD_Settings?.ShortEmaPeriod" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Long EMA Period</label>
+                                    <input type="number" name="MACD_Settings.LongEmaPeriod" class="form-control" value="@Model?.MACD_Settings?.LongEmaPeriod" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label">Signal Period</label>
+                                    <input type="number" name="MACD_Settings.SignalPeriod" class="form-control" value="@Model?.MACD_Settings?.SignalPeriod" />
+                                </div>
+
+                                <h4>Strategy Weights</h4>
+                                <div id="strategyContainer">
+                                    @if (Model?.StrategyWeighted != null)
+                                    {
+                                        @for (int i = 0; i < Model.StrategyWeighted.Count; i++)
+                                        {
+                                            <div class="strategy-group">
+                                                <input type="text" name="StrategyWeighted[@i].Strategy" value="@Model.StrategyWeighted[i].Strategy" placeholder="Strategy Name" class="form-control mb-2" />
+                                                <input type="number" step="0.01" name="StrategyWeighted[@i].Weight" value="@Model.StrategyWeighted[i].Weight" placeholder="Weight" class="form-control mb-2" />
+                                                <label>
+                                                    <input type="checkbox" name="StrategyWeighted[@i].IsActive" @(Model.StrategyWeighted[i].IsActive ? "checked" : "") /> Active
+                                                </label>
+                                            </div>
+                                        }
+                                    }
+                                    <button type="button" id="addStrategy" class="btn btn-secondary mt-2">Add Strategy</button>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <input type="submit" value="@(Model?.Id == null ? "Create" : "Update")" class="btn btn-primary" />
+                                    <a href="/AdminSettings/Index" class="btn btn-danger">Back to List</a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#addStrategy").click(function () {
+            let index = $(".strategy-group").length;
+            let newStrategy = `
+                <div class="strategy-group">
+                    <input type="text" name="StrategyWeighted[${index}].Strategy" placeholder="Strategy Name" class="form-control mb-2" />
+                    <input type="number" step="0.01" name="StrategyWeighted[${index}].Weight" placeholder="Weight" class="form-control mb-2" />
+                    <label>
+                        <input type="checkbox" name="StrategyWeighted[${index}].IsActive" /> Active
+                    </label>
+                </div>`;
+            $("#strategyContainer").append(newStrategy);
+        });
+    });
+</script>

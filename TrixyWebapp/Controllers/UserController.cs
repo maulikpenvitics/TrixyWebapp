@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Repository.IRepositories;
 using Repository.Models;
+using System.Text;
 
 
 namespace TrixyWebapp.Controllers
@@ -119,6 +120,17 @@ namespace TrixyWebapp.Controllers
             await _user.InsertUserseting(userSettings);
             return View();
         }
-        
+
+
+        [HttpGet]
+        public async Task<IActionResult> AdminSettings()
+        {
+            var userIdBytes = HttpContext.Session.Get("UserId");
+            string userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
+            var adminseting= _user.GetUserSettings("67bef9c5bc1d49323084998f");
+            
+            return View(adminseting);
+        }
+
     }
 }

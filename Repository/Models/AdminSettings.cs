@@ -17,6 +17,8 @@ namespace Repository.Models
         public string? UserId { get; set; }
         public bool NotificationStatus { get; set; }
         public double Threshold { get; set; }
+        public double Frequency { get; set; }
+        
         public MovingAverageSettings? MovingAverage { get; set; }
         public RSIThresholds? RSIThresholds { get; set; }
         public MACDSettings? MACD_Settings { get; set; }
