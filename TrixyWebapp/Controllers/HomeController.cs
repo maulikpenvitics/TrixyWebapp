@@ -42,24 +42,31 @@ namespace TrixyWebapp.Controllers
         
         public async Task<IActionResult> Index()
         {
-           
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = Encoding.UTF8.GetString(userIdBytes);
-            ViewData["UserId"] = userId;
+            try
+            {
+                var userIdBytes = HttpContext.Session.Get("UserId");
+                string userId = Encoding.UTF8.GetString(userIdBytes);
+                ViewData["UserId"] = userId;
 
-            var UserRole = HttpContext.Session.Get("UserRole");
-            string userRole = Encoding.UTF8.GetString(UserRole);
-            ViewData["UserRole"] = userRole;
-            var masterData = await _masterRepository.GetByIdAsyncForMaster(userId);
-            ViewData["MasterData"] = masterData;
-            //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
+                var UserRole = HttpContext.Session.Get("UserRole");
+                string userRole = Encoding.UTF8.GetString(UserRole);
+                ViewData["UserRole"] = userRole;
+                var masterData = await _masterRepository.GetByIdAsyncForMaster(userId);
+                ViewData["MasterData"] = masterData;
+                var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
 
-            await _HistoricalStockdata.InsertManyAsync(data);
-            var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
-            //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
-           // var weightedsignal = await _user.GetUserSettings(userId);
+                await _HistoricalStockdata.InsertManyAsync(data);
+                var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
+                //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
+                // var weightedsignal = await _user.GetUserSettings(userId);
 
-            //EnableDisableStratgey("NSE:OFSS-EQ");
+                //EnableDisableStratgey("NSE:OFSS-EQ");
+            }
+            catch (Exception ex)
+            {
+                Helper.LogFilegenerate(ex, "Login Action", _env);
+            }
+       
             return View();
         }
 
