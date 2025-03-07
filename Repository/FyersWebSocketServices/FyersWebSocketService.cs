@@ -38,6 +38,36 @@ namespace Repository.FyersWebSocketServices
             _hubContext = hubContext;
             _httpClient = httpClient;
         }
+        public void LogFilegenerate(Exception ex, string path)
+        {
+            string errorMessage = $"DateTime: {DateTime.Now:dd/MM/yyyy hh:mm:ss tt}";
+            errorMessage += Environment.NewLine;
+            errorMessage += "------------------------Exception-----------------------------------";
+            errorMessage += Environment.NewLine;
+            errorMessage += $"Path: {path}";
+            errorMessage += Environment.NewLine;
+            errorMessage += $"Message: {ex.Message}";
+            errorMessage += Environment.NewLine;
+            errorMessage += $"Details: {ex}";
+            errorMessage += Environment.NewLine;
+            errorMessage += "-----------------------------------------------------------";
+            errorMessage += Environment.NewLine;
+
+            // Get the path to the "ErrorLog" directory in wwwroot
+            string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ErrorLog");
+
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
+            string logFilePath = Path.Combine(logDirectory, "WebSoketErrorLog.txt");
+
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            {
+                writer.WriteLine(errorMessage);
+            }
+        }
         public List<StockData> GetStockData()
         {
             lock (_lock)
@@ -132,12 +162,20 @@ namespace Repository.FyersWebSocketServices
 
         public async void Connect(List<Stocks> stocks)
         {
-            FyersClass fyersModel = FyersClass.Instance;
-            fyersModel.ClientId = ClientId;
-            fyersModel.AccessToken = AccessToken;
-            _stocklist= stocks.Select(x=>x.Symbol).ToList();
-            Methods t = new Methods(this); // Pass the HubContext
-            await t.DataWebSocket();
+            try
+            {
+                FyersClass fyersModel = FyersClass.Instance;
+                fyersModel.ClientId = ClientId;
+                fyersModel.AccessToken = AccessToken;
+                _stocklist = stocks.Select(x => x.Symbol).ToList();
+                Methods t = new Methods(this); // Pass the HubContext
+                await t.DataWebSocket();
+            }
+            catch (Exception ex)
+            {
+                LogFilegenerate(ex, "FyersWebSocketService");
+            }
+            
         }
     }
     public class Methods : FyersSocketDelegate
@@ -153,15 +191,24 @@ namespace Repository.FyersWebSocketServices
 
         public async Task DataWebSocket()
         {
-            client = new FyersSocket();
-            client.ReconnectAttemptsCount = 1;
-            client.webSocketDelegate = this;
+            try
+            {
+                client = new FyersSocket();
+                client.ReconnectAttemptsCount = 1;
+                client.webSocketDelegate = this;
 
-            await client.Connect();
-            client.ConnectHSM(ChannelModes.FULL);
+                await client.Connect();
+                client.ConnectHSM(ChannelModes.FULL);
 
-           var stocklist= _service.GetStockList();
-           client.SubscribeData(stocklist);
+                var stocklist = _service.GetStockList();
+                client.SubscribeData(stocklist);
+            }
+            catch (Exception ex)
+            {
+
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods");
+            }
+          
         }
 
         public void OnClose(string status)
@@ -176,7 +223,15 @@ namespace Repository.FyersWebSocketServices
 
         public void OnError(JObject error)
         {
-            Console.WriteLine("WebSocket Error: " + error);
+            try
+            {
+                Console.WriteLine("WebSocket Error: " + error);
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods"+ error);
+            }
+           
         }
 
         public void OnIndex(JObject index)
@@ -191,7 +246,16 @@ namespace Repository.FyersWebSocketServices
 
         public void OnOpen(string status)
         {
-            Console.WriteLine("WebSocket Connection Opened: " + status);
+            try
+            {
+                Console.WriteLine("WebSocket Connection Opened: " + status);
+
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods");
+            }
+           
         }
 
         public void OnOrder(JObject orders)
@@ -206,23 +270,32 @@ namespace Repository.FyersWebSocketServices
 
         public async void OnScrips(JObject scrips)
         {
-            Console.WriteLine("Received Scrip Data: " + scrips);
+            try
+            {
+                Console.WriteLine("Received Scrip Data: " + scrips);
 
-            var data = scrips["data"];
+                var data = scrips["data"];
 
-            if (data is JObject singleStock)
-            {
-                var scripsArray = new JArray { singleStock };
-                _service.UpdateStockData(scripsArray);
+                if (data is JObject singleStock)
+                {
+                    var scripsArray = new JArray { singleStock };
+                    _service.UpdateStockData(scripsArray);
+                }
+                else if (data is JArray scripsArray)
+                {
+                    _service.UpdateStockData(scripsArray);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid data format received.");
+                }
             }
-            else if (data is JArray scripsArray)
+            catch (Exception ex)
             {
-                _service.UpdateStockData(scripsArray);
+
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods");
             }
-            else
-            {
-                Console.WriteLine("Invalid data format received.");
-            }
+           
         }
 
 

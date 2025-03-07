@@ -22,12 +22,14 @@ namespace TrixyWebapp.Controllers
         private readonly IRepository<User> _masterRepository;
         private readonly IWebStockRepository _stockRepository;
         private readonly IUserRepository _user;
+        private readonly IWebHostEnvironment _env;
         public HomeController(FyersWebSocketService fyersWebSocket,
             IRepository<Historical_Data> userRepository, 
             IRepository<Strategy> strategyRepository,
             IRepository<User> masterRepository,
             IWebStockRepository stockRepository,
-            IUserRepository user)
+            IUserRepository user,
+            IWebHostEnvironment env )
         {
             _fyersWebSocket = fyersWebSocket;
             _HistoricalStockdata = userRepository;
@@ -35,6 +37,7 @@ namespace TrixyWebapp.Controllers
             _masterRepository = masterRepository;
             _stockRepository = stockRepository;
             _user = user;
+            _env=env;
         }
         
         public async Task<IActionResult> Index()
@@ -63,8 +66,17 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> RealTimeData()
         {
-            List<StockData> stockData = _fyersWebSocket.GetStockData();
-            return PartialView("_RealStockData", stockData);
+            try
+            {
+                List<StockData> stockData = _fyersWebSocket.GetStockData();
+                return PartialView("_RealStockData", stockData);
+            }
+            catch (Exception ex)
+            {
+
+                Helper.LogFilegenerate(ex, "Login Action", _env);
+            }
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
