@@ -54,7 +54,7 @@ namespace TrixyWebapp.Controllers
             ViewData["MasterData"] = masterData;
             //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
 
-            //await _HistoricalStockdata.InsertManyAsync(data);
+            await _HistoricalStockdata.InsertManyAsync(data);
             var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
             //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
            // var weightedsignal = await _user.GetUserSettings(userId);

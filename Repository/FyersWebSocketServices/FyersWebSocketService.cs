@@ -17,6 +17,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ZstdSharp.Unsafe;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Repository.FyersWebSocketServices
 {
@@ -38,7 +39,7 @@ namespace Repository.FyersWebSocketServices
             _hubContext = hubContext;
             _httpClient = httpClient;
         }
-        public void LogFilegenerate(Exception ex, string path)
+        public void LogFilegenerate(Exception? ex, string path)
         {
             string errorMessage = $"DateTime: {DateTime.Now:dd/MM/yyyy hh:mm:ss tt}";
             errorMessage += Environment.NewLine;
@@ -46,9 +47,13 @@ namespace Repository.FyersWebSocketServices
             errorMessage += Environment.NewLine;
             errorMessage += $"Path: {path}";
             errorMessage += Environment.NewLine;
-            errorMessage += $"Message: {ex.Message}";
-            errorMessage += Environment.NewLine;
-            errorMessage += $"Details: {ex}";
+            if (ex !=null)
+            {
+                errorMessage += $"Message: {ex.Message}";
+                errorMessage += Environment.NewLine;
+                errorMessage += $"Details: {ex}";
+            }
+        
             errorMessage += Environment.NewLine;
             errorMessage += "-----------------------------------------------------------";
             errorMessage += Environment.NewLine;
@@ -84,7 +89,7 @@ namespace Repository.FyersWebSocketServices
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
             string? symbol = "NSE:OFSS-EQ"; // Ensure the correct format
             string? rangefrom = "2025-01-01";
-            string? rangeto = "2025-03-04";
+            string? rangeto = "2025-03-07";
             string apiUrl = "https://api-t1.fyers.in/data/history?symbol=NSE:OFSS-EQ&resolution=240&date_format=1&range_from=2025-01-01&range_to=2025-03-04";
             //string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={symbol}&resolution=15&date_format=1&range_from={rangefrom}&range_to={rangeto}";
 
@@ -231,23 +236,42 @@ namespace Repository.FyersWebSocketServices
             {
                 _service.LogFilegenerate(ex, "FyersWebSocketService/Methods"+ error);
             }
-           
         }
 
         public void OnIndex(JObject index)
         {
-            Console.WriteLine("Index Data: " + index);
+            try
+            {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + index);
+                Console.WriteLine("Index Data: " + index);
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods" + index);
+                Console.WriteLine("Index Data: " + index);
+            }
+          
         }
 
         public void OnMessage(JObject response)
         {
-            Console.WriteLine("OnMessage: " + response);
+            try
+            {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + response);
+                Console.WriteLine("OnMessage: " + response);
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods" + response);
+            }
+            
         }
 
         public void OnOpen(string status)
         {
             try
             {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + status);
                 Console.WriteLine("WebSocket Connection Opened: " + status);
 
             }
@@ -260,12 +284,32 @@ namespace Repository.FyersWebSocketServices
 
         public void OnOrder(JObject orders)
         {
-            Console.WriteLine("Order Data: " + orders);
+            try
+            {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + orders);
+                Console.WriteLine("Order Data: " + orders);
+
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods" + orders);
+            }
+            
         }
 
         public void OnPosition(JObject positions)
         {
-            Console.WriteLine("Position Data: " + positions);
+            try
+            {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + positions);
+                Console.WriteLine("Position Data: " + positions);
+            }
+            catch (Exception ex)
+            {
+
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods" + positions);
+            }
+           
         }
 
         public async void OnScrips(JObject scrips)
@@ -297,11 +341,18 @@ namespace Repository.FyersWebSocketServices
             }
            
         }
-
-
         public void OnTrade(JObject trades)
         {
-            Console.WriteLine("Trade Data: " + trades);
+            try
+            {
+                _service.LogFilegenerate(null, "FyersWebSocketService/Methods" + trades);
+                Console.WriteLine("Trade Data: " + trades);
+            }
+            catch (Exception ex)
+            {
+                _service.LogFilegenerate(ex, "FyersWebSocketService/Methods" + trades);
+            }
+            
         }
     }
 }
