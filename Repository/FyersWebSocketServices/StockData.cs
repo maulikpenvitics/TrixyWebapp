@@ -10,7 +10,16 @@ namespace Repository.FyersWebSocketServices
     {
         public string? Symbol { get; set; }
         public decimal Price { get; set; }
-        public decimal Change { get; set; }
+        public decimal prev_close_price { get; set; }
+        public decimal Change
+        {
+            get
+            {
+                return prev_close_price != 0
+                ? Math.Round(((Price - prev_close_price) / prev_close_price) * 100, 2)
+                : 0;
+            }
+        }
         public Dictionary<string, decimal> Stocks { get; set; } = new Dictionary<string, decimal>();
     }
 }

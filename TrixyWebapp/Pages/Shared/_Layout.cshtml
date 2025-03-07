@@ -1,4 +1,6 @@
-﻿@using TrixyWebapp.Helpers
+﻿@using Repository.Models
+@using Newtonsoft.Json
+@using TrixyWebapp.Helpers
 @{
 	// var strategies = ViewData["Strategies"] as List<Strategy>;
 	var masterDataObj = ViewData["MasterData"];
@@ -8,6 +10,12 @@
 	var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
 	var Username = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
 	var imageurl = HttpContextAccessor.HttpContext?.Session.GetString("imageurl");
+	var userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
+	User user = new User();
+	if (!string.IsNullOrEmpty(userJson))
+	{
+		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
+	}
 }
 
 <!DOCTYPE html>
@@ -124,9 +132,9 @@
 								else
 								{
 									<img src="~/assets/images/avatar-1.png"
-										 class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
+									class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
 								}
-							
+
 							</div>
 						</a>
 						<ul class="dropdown-menu animated flipInX">
@@ -277,20 +285,14 @@
 			<!-- Settings tab content -->
 			<div class="tab-pane" id="control-sidebar-settings-tab">
 				<ul class="todo-list mt-20">
-					@if (masterDataObj != null)
+					@if (user?.UserStrategy != null && user.UserStrategy.Any())
 					{
-						var properties = masterDataObj.GetType().GetProperties(); // Get all properties of the Master object
+						var properties = user?.UserStrategy.ToList(); // Get all properties of the Master object
 
-						foreach (var prop in properties)
+						foreach (var prop in user?.UserStrategy.ToList())
 						{
-							string strategyName = prop.Name;
-
-							if (strategyName == "Id" || strategyName == "userId")
-							{
-								continue;
-							}
-
-							bool isChecked = prop.GetValue(masterDataObj)?.ToString().Equals("True", StringComparison.OrdinalIgnoreCase) ?? false;
+							var strategyName = prop.StretagyName;
+							var isChecked = prop.StretagyEnableDisable;
 
 							<li class="py-15 px-5 by-1">
 								<input type="checkbox" id="basic_checkbox_@strategyName"

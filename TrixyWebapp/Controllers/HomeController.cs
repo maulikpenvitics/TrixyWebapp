@@ -8,6 +8,7 @@ using Repository.Models;
 using Repository.Repositories;
 using System.Text;
 using TrixyWebapp.Helpers;
+using TrixyWebapp.ViewModels;
 
 
 namespace TrixyWebapp.Controllers
@@ -18,13 +19,13 @@ namespace TrixyWebapp.Controllers
         private readonly FyersWebSocketService _fyersWebSocket;
         private readonly IRepository<Historical_Data> _HistoricalStockdata;
         private readonly IRepository<Strategy> _strategyRepository;
-        private readonly IRepository<Master_Strategy_User> _masterRepository;
+        private readonly IRepository<User> _masterRepository;
         private readonly IWebStockRepository _stockRepository;
         private readonly IUserRepository _user;
         public HomeController(FyersWebSocketService fyersWebSocket,
             IRepository<Historical_Data> userRepository, 
             IRepository<Strategy> strategyRepository,
-            IRepository<Master_Strategy_User> masterRepository,
+            IRepository<User> masterRepository,
             IWebStockRepository stockRepository,
             IUserRepository user)
         {
@@ -55,22 +56,15 @@ namespace TrixyWebapp.Controllers
             //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
            // var weightedsignal = await _user.GetUserSettings(userId);
 
-            EnableDisableStratgey("NSE:OFSS-EQ");
+            //EnableDisableStratgey("NSE:OFSS-EQ");
             return View();
         }
 
         [HttpGet]
-        public IActionResult RealTimeData()
+        public async Task<IActionResult> RealTimeData()
         {
             List<StockData> stockData = _fyersWebSocket.GetStockData();
-
-            var formattedData = stockData.Select(s => new {
-                symbol = s.Symbol,
-                price = s.Price,
-                change = s.Change
-            });
-
-            return Json(formattedData);
+            return PartialView("_RealStockData", stockData);
         }
 
         [HttpGet]
@@ -124,19 +118,19 @@ namespace TrixyWebapp.Controllers
                 isChecked = false;
             }
 
-            await _masterRepository.UpdateAsyncStrategy(userId, strategyName, isChecked);
+            await _user.UpdateAsyncStrategy(userId, strategyName, isChecked);
 
             return Ok(new { message = "Strategy updated successfully." });
         }
 
        
-        public async Task EnableDisableStratgey(string sym)
+        public async Task<IActionResult> EnableDisableStratgey(string sym,bool isEnable)
         {
+            string finalsignal=string.Empty;
             var userIdBytes = HttpContext.Session.Get("UserId");
             string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings(userId);
-
-
+            await _user.UpdateAsyncUserStocks(userId,sym, isEnable);
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
             if (gethistoricaldata!=null && gethistoricaldata.Count>0)
             {
@@ -167,8 +161,10 @@ namespace TrixyWebapp.Controllers
                 var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, 12, 26, 9);
                 #endregion
                 //combination signal
-                var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata);
+                finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata);
             }
+
+            return Json(new {finalsignal= finalsignal } );
         }
 
     }

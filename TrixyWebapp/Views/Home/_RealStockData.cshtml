@@ -1,0 +1,85 @@
+﻿@using Repository.Models
+@using Newtonsoft.Json
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+ @model List<Repository.FyersWebSocketServices.StockData>
+
+@{
+	var userJson = HttpContextAccessor.HttpContext?.Session.GetString("User");
+	User? user = new User();
+	if (!string.IsNullOrEmpty(userJson))
+	{
+		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
+	}
+}
+@if (Model != null && Model.Count>0)
+{
+	@foreach (var item in Model)
+	{
+		<tr id="stock-@item.Symbol">
+			<td>
+				@{
+					var userstock = user?.Stocks?.Where(testc => testc.Symbol == item.Symbol).FirstOrDefault();
+				}
+				<a href="#realtime_stock_detail">
+					@if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
+					{
+						<img src="@userstock?.CompanyLogoUrl" width="30"
+							 alt="reliance" />
+						
+					}
+					else{
+						<img src="~/assets/images/company-logo/logo01.png" width="30"
+							 alt="reliance" />
+					}
+					&nbsp;
+
+					@userstock?.CompanyName
+				</a>
+			</td>
+			<td class="stock-price">
+				<lable class="label label-success text-black">@item.Price</lable>
+			</td>
+			<td>
+				
+				@if (item.Change>0)
+				{
+					<span class="badge badge-pill badge-success">
+						<i class="ti-stats-up" aria-hidden="true"></i>
+					</span>
+					<lable class="text-success"><b>@item.Change%</b></lable>
+				}
+				else{
+					<span class="badge badge-pill  badge-danger">
+						<i class="ti-stats-down" aria-hidden="true"></i>
+					</span>
+					<lable class="text-danger"><b>@item.Change%</b></lable>
+				}
+			</td>
+			<td id="recomendation_@item.Symbol"> 
+				@if (userstock?.StockNotification != null && (bool)userstock.StockNotification)
+				{
+					<span class="label label-success">Buy</span>
+				}
+			</td>
+			<td class="stock_notification">
+				<a href="javascript:void(0);"
+				   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
+				   data-symbol="@item.Symbol"
+				   data-enable="@((userstock?.StockNotification != null && (bool)userstock.StockNotification) ? "false" : "true")"
+				   data-toggle="tooltip"
+				   data-original-title="@(userstock?.StockNotification != null && (bool)userstock.StockNotification ? "Disable Notification" : "Enable Notification")">
+					<i class="ti-bell" aria-hidden="true"></i>
+				</a>
+			</td>
+		</tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="5">No dataa found</td>
+    </tr>
+}
+
+
