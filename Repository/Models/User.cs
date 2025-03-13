@@ -58,5 +58,6 @@ namespace Repository.Models
         public string? CompanyName { get; set; }
         public string? CompanyLogoUrl { get; set; }
         public bool IsActive { get; set; }
+        public string? BuySellSignal { get; set; }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using FyersCSharpSDK;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Model;
+using Microsoft.VisualBasic;
 using NuGet.Protocol.Core.Types;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
 using System.Text;
+using System.Text.Json;
 using TrixyWebapp.Helpers;
 using TrixyWebapp.ViewModels;
 
@@ -23,13 +26,15 @@ namespace TrixyWebapp.Controllers
         private readonly IWebStockRepository _stockRepository;
         private readonly IUserRepository _user;
         private readonly IWebHostEnvironment _env;
+        private readonly IStockSymbolRepository _stockSymbol;
         public HomeController(FyersWebSocketService fyersWebSocket,
             IRepository<Historical_Data> userRepository, 
             IRepository<Strategy> strategyRepository,
             IRepository<User> masterRepository,
             IWebStockRepository stockRepository,
             IUserRepository user,
-            IWebHostEnvironment env )
+            IWebHostEnvironment env,
+            IStockSymbolRepository stockSymbolRepository)
         {
             _fyersWebSocket = fyersWebSocket;
             _HistoricalStockdata = userRepository;
@@ -38,6 +43,7 @@ namespace TrixyWebapp.Controllers
             _stockRepository = stockRepository;
             _user = user;
             _env=env;
+            _stockSymbol = stockSymbolRepository;
         }
         
         public async Task<IActionResult> Index()
@@ -51,31 +57,42 @@ namespace TrixyWebapp.Controllers
                 var UserRole = HttpContext.Session.Get("UserRole");
                 string userRole = Encoding.UTF8.GetString(UserRole);
                 ViewData["UserRole"] = userRole;
-                var masterData = await _masterRepository.GetByIdAsyncForMaster(userId);
-                ViewData["MasterData"] = masterData;
-                var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
 
-                await _HistoricalStockdata.InsertManyAsync(data);
+                var user = await _masterRepository.GetByIdAsync(userId);
+                HttpContext.Session.SetString("User", JsonSerializer.Serialize(user));
+
+                //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
+
+                //await _HistoricalStockdata.InsertManyAsync(data);
                 var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
+
                 //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
                 // var weightedsignal = await _user.GetUserSettings(userId);
 
                 //EnableDisableStratgey("NSE:OFSS-EQ");
+                return View();
             }
             catch (Exception ex)
             {
                 Helper.LogFilegenerate(ex, "Login Action", _env);
+                return View();
             }
        
-            return View();
+           
         }
 
         [HttpGet]
-        public async Task<IActionResult> RealTimeData()
+        public IActionResult RealTimeData()
         {
             try
             {
-                List<StockData> stockData = _fyersWebSocket.GetStockData();
+                List<StockData> stockData =  _fyersWebSocket.GetStockData();
+                var formateddata = stockData.Select(x => new
+                {
+                    symbol= x.Symbol,
+                    change =  x.Change,
+                }).ToList();
+                //return Json(formateddata);
                 return PartialView("_RealStockData", stockData);
             }
             catch (Exception ex)
@@ -87,15 +104,17 @@ namespace TrixyWebapp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> FetchData()
+        public async Task<IActionResult> FetchData(string sym)
         {
             var marketStart = new TimeSpan(9, 15, 0);
             var marketEnd = new TimeSpan(15, 30, 0);
 
-            var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
+            var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
 
             var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+            var oneWeekAgoUtc = DateTime.UtcNow.AddDays(-7);
+            var oneWeekAgoIST = TimeZoneInfo.ConvertTimeFromUtc(oneWeekAgoUtc, istTimeZone);
             var formattedData = gethistoricaldata
                 .Select(item => new
                 {
@@ -105,7 +124,7 @@ namespace TrixyWebapp.Controllers
                     item.Low,
                     item.Close
                 })
-                .Where(item => item.TimestampIST.TimeOfDay >= marketStart && item.TimestampIST.TimeOfDay <= marketEnd)
+                .Where(item => item.TimestampIST >= oneWeekAgoIST && item.TimestampIST.TimeOfDay >= marketStart && item.TimestampIST.TimeOfDay <= marketEnd)
                 .OrderBy(item => item.TimestampIST)
                 .Select(item => new
                 {
@@ -115,6 +134,25 @@ namespace TrixyWebapp.Controllers
 
             return Json(formattedData);
 
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetChartDetails(string sym)
+        {
+            var stocks = await _stockSymbol.GetStockBySymbol(sym);
+            var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
+            var historicaldata = gethistoricaldata.OrderByDescending(x=>x.Timestamp).FirstOrDefault();
+            StockCandleChartVM returndata = new StockCandleChartVM()
+            {
+                Symbol=stocks.Symbol,
+                Companylogo=stocks.CompanyIconUrl,
+                CompanyName=stocks.CompanyName,
+                Currentprice= historicaldata?.Open,
+                High=historicaldata?.High,
+                low=historicaldata?.Low,
+                close=historicaldata?.Close,
+                volume=historicaldata?.Volume
+            };
+            return Json(returndata);
         }
 
         [HttpPost]
@@ -149,7 +187,7 @@ namespace TrixyWebapp.Controllers
             var userIdBytes = HttpContext.Session.Get("UserId");
             string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings(userId);
-            await _user.UpdateAsyncUserStocks(userId,sym, isEnable);
+           
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
             if (gethistoricaldata!=null && gethistoricaldata.Count>0)
             {
@@ -181,10 +219,11 @@ namespace TrixyWebapp.Controllers
                 #endregion
                 //combination signal
                 finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata);
+                await _user.UpdateAsyncUserStocks(userId, sym, isEnable, finalsignal);
             }
 
-            return Json(new {finalsignal= finalsignal } );
+            return RedirectToAction("Index");
         }
-
+        
     }
 }

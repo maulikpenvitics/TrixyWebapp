@@ -34009,3 +34009,16 @@ img.away, img.busy, img.offline, img.online {
   z-index: -1; }
 
 /*# sourceMappingURL=style.css.map */
+.ui-autocomplete {
+    position: absolute;
+    top: 80px !important;
+    width: 220px!important;
+}
+.ui-autocomplete {
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 300px; /* Limit height */
+    overflow-x: auto; /* Enable scrolling if needed */
+    font-size: 14px;
+    z-index: 1050; /* Ensure it appears above other elements */
+}

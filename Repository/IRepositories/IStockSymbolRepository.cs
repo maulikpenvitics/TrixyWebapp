@@ -10,5 +10,6 @@ namespace Repository.IRepositories
     public interface IStockSymbolRepository
     {
         Task<StockSymbol> GetStockBySymbol(string Symbol);
+        Task<List<StockSymbol>> GetStocklistBySymbol(string Symbol);
     }
 }

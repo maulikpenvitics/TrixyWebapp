@@ -9,7 +9,8 @@ namespace Repository.IRepositories
         Task<int> ChangePassword(string Id, string oldpass, string newpass);
         Task<bool> UpdateUserProfile(User model);
         Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked);
-        Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked);
+        Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked,string BuySellSignal);
+        Task<bool> AddUserStocks(User user);
         #endregion
         #region User settings method
         Task InsertUserseting(AdminSettings model);

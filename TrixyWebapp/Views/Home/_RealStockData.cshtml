@@ -13,12 +13,13 @@
 	{
 		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
 	}
+	
 }
 @if (Model != null && Model.Count>0)
 {
 	@foreach (var item in Model)
 	{
-		<tr id="stock-@item.Symbol">
+		<tr id="stock-@item.Symbol" data-symbol="@item.Symbol" data-price="@item.Price" class="stock-row">
 			<td>
 				@{
 					var userstock = user?.Stocks?.Where(testc => testc.Symbol == item.Symbol).FirstOrDefault();
@@ -26,7 +27,7 @@
 				<a href="#realtime_stock_detail">
 					@if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
 					{
-						<img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl.Trim())" width="30"
+						<img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl??"")" width="30"
 							 alt="reliance" />
 						
 					}
@@ -58,21 +59,39 @@
 					<lable class="text-danger"><b>@item.Change%</b></lable>
 				}
 			</td>
-			<td id="recomendation_@item.Symbol"> 
-				@if (userstock?.StockNotification != null && (bool)userstock.StockNotification)
+			<td id="recomendation_@item.Symbol">
+				@if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification==true)
 				{
-					<span class="label label-success">Buy</span>
+					if (userstock.BuySellSignal=="SELL")
+					{
+						<span class="label label-danger">Sell</span>
+					}
+					else{
+						<span class="label label-success">Buy</span>
+					}
+					
 				}
 			</td>
 			<td class="stock_notification">
-				<a href="javascript:void(0);"
-				   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
-				   data-symbol="@item.Symbol"
-				   data-enable="@((userstock?.StockNotification != null && (bool)userstock.StockNotification) ? "false" : "true")"
-				   data-toggle="tooltip"
-				   data-original-title="@(userstock?.StockNotification != null && (bool)userstock.StockNotification ? "Disable Notification" : "Enable Notification")">
-					<i class="ti-bell" aria-hidden="true"></i>
-				</a>
+				@if (userstock?.StockNotification != null && userstock?.StockNotification==false){
+					<a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=true})"
+					   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
+					   data-symbol="@item.Symbol"
+					   data-toggle="tooltip"
+					   data-original-title="Enable Notification">
+						<i class="ti-bell" aria-hidden="true"></i>
+					</a>
+
+				}else{
+					<a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=false})"
+					   class="waves-effect waves-circle btn btn-circle btn-danger btn-xs notification-toggle"
+					   data-symbol="@item.Symbol"
+					   data-toggle="tooltip"
+					   data-original-title="Disable Notification">
+						<i class="ti-bell" aria-hidden="true"></i>
+					</a>
+				}
+		
 			</td>
 		</tr>
     }
@@ -83,5 +102,4 @@ else
         <td colspan="5">No dataa found</td>
     </tr>
 }
-
 

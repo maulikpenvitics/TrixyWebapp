@@ -93,15 +93,5 @@ namespace TrixyWebapp.ViewModels
         public double TradeSignal { get; set; }
         public string Signal { get; set; } = "HOLD";// BUY, SELL, or HOLD 
     }
-    public class finalStocksingl
-    {
-        public DateTime Date { get; set; }
-        public string? MovingAvgSignal { get; set; }
-        public string? RSISignal { get; set; }
-        public string? BollingerSignal { get; set; }
-        public string? VWAPSignal { get; set; }
-        public string? MACDSignal { get; set; }
-        public string? Mean_ReversionSignal { get; set; }
-        public string? FinalSignal { get; set; }
-    }
+   
 }

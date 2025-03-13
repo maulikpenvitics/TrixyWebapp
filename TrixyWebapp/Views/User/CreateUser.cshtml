@@ -81,24 +81,29 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript">
-    $("#confirmpassowrd").on( "input",function(){
-          var password = $("#Password").val();
-          var confirmPassword = $(this).val();
+    $(document).ready(function () {
+        // Confirm password validation
+        $("#confirmpassowrd").on("input", function () {
+            var password = $("#Password").val();
+            var confirmPassword = $(this).val();
 
-        if (password !== confirmPassword) {
-            $("#valiconfirmpassowrd").text("Passwords do not match!").show();
-        } else {
-            $("#valiconfirmpassowrd").hide();
-        }
+            if (password !== confirmPassword) {
+                $("#valiconfirmpassowrd").text("Passwords do not match!").show();
+            } else {
+                $("#valiconfirmpassowrd").hide();
+            }
+        });
+
+        // Prevent form submission if passwords don't match
+        $("#createuserform").submit(function (event) {
+            var password = $("#Password").val();
+            var confirmPassword = $("#confirmpassowrd").val();
+
+            if (password !== confirmPassword) {
+                event.preventDefault(); // Prevent form submission
+                $("#valiconfirmpassowrd").text("Passwords do not match!").show();
+                return false;
+            }
+        });
     });
-
-       $("#createuserform").submit(function (event) {
-           debugger
-        var password = $("#Password").val();
-        var confirmPassword = $("#confirmpassowrd").val();
-
-        if (password !== confirmPassword) {
-            event.preventDefault(); // Prevent form submission
-            return false;
-        }
 </script>

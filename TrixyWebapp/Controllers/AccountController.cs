@@ -78,8 +78,7 @@ namespace TrixyWebapp.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
-                   
-                    _fyersWebSocket.Connect(user.Stocks.ToList());
+                    _fyersWebSocket.Connect(user?.Stocks?.ToList());
                     return RedirectToAction("Index", "Home");
                 }
                 else

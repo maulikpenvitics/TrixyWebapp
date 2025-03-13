@@ -42,6 +42,10 @@
 
 	<!--toastr message-->
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+	<!--Autocomplete-->
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
 </head>
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
 	<header class="main-header">
@@ -73,12 +77,13 @@
 					<li class="btn-group d-lg-inline-flex">
 						<div class="app-menu">
 							<div class="search-bx mx-5">
-								<form>
+								<form asp-action="AddUserStock" asp-controller="StockSymbol" method="post">
 									<div class="input-group">
 										<input type="search" class="form-control" placeholder="Search"
-										aria-label="Search">
+											   aria-label="Search" id="searchStock" name="Symbol">
+										<input type="hidden" id="hiddenStockId" name="StockId">
 										<div class="input-group-append">
-											<button class="btn" type="submit" id="button-addon3">
+											<button class="btn" type="submit" id="button-addonStock">
 												<i data-feather="search"></i>
 											</button>
 										</div>
@@ -333,7 +338,15 @@
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/template.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/data-table.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/dashboard.js"></script>
+	<!--toaster messages-->
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+	<!--Autocomplete-->
+	
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script>
 		var userId = "@userId";
 		$(document).ready(function () {
@@ -358,17 +371,49 @@
 				});
 			});
 		});
+		$("#searchStock").autocomplete({
+			 autoFocus: true,
+			source: function (request, response) {
+				debugger
+				$.ajax({
+					url: "/StockSymbol/GetStockList", // Replace with your API URL
+					type: "GET",
+					dataType: "json",
+					data: { stocksym: request.term }, // Pass user input
+					success: function (data) {
+						debugger
 
-
-
+					if (!data.length) {
+						var result = [
+							{
+								label: 'No matches found',
+								value: response.term
+							}
+						];
+						response(result);
+					}
+					else {
+					response($.map(data, function (item) {
+							return {
+								label: item.symbol,
+								value: item.symbol,
+								 id: item.id,
+							};
+						}));
+					}
+						
+					}
+				});
+			},
+			minLength: 0,
+		    select: function (event, ui) {
+			$("#searchStock").val(ui.item.label); // Show selected text
+			$("#hiddenStockId").val(ui.item.id); // Store ID in a hidden field
+			return false; // Prevent default behavior
+		}
+		});
 	</script>
 	
-	<!--toaster messages-->
-	
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

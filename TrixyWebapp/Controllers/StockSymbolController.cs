@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
+using System.Text;
 
 namespace TrixyWebapp.Controllers
 {
@@ -11,13 +13,19 @@ namespace TrixyWebapp.Controllers
         private readonly IRepository<StockSymbol> _stockSymbolRepository;
         private readonly IStockSymbolRepository _stockSymbol;
         private readonly IUserRepository _userRepository;
+        private readonly IRepository<User> _masterRepository;
+        private readonly FyersWebSocketService _fyersWebSocket;
         public StockSymbolController(IRepository<StockSymbol> stockSymbolRepository, 
             IStockSymbolRepository stockSymbol,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IRepository<User> masterRepository,
+            FyersWebSocketService fyersWebSocketService)
         {
             _stockSymbolRepository = stockSymbolRepository;
             _stockSymbol = stockSymbol;
             _userRepository = userRepository;
+            _masterRepository = masterRepository;
+            _fyersWebSocket = fyersWebSocketService;
         }
         public async Task<IActionResult> Index()
         {
@@ -120,7 +128,80 @@ namespace TrixyWebapp.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetStockList(string stocksym)
+        {
+            if (!string.IsNullOrEmpty(stocksym))
+            {
+                var stocklist = await _stockSymbol.GetStocklistBySymbol(stocksym);
+                var stocklst = stocklist.Select(x => new
+                {
+                    symbol = x.Symbol,
+                    id = x.Id.ToString(),
+                });
+                return Json(stocklst);
+            }
+            else
+            {
+                return Json(new List<Stocks>());
+            }
+           
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> AddUserStock(string Symbol,string StockId)
+        {
+            var userIdBytes = HttpContext.Session.Get("UserId");
+            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var user = await _masterRepository.GetByIdAsync(userId);
+            if (!string.IsNullOrEmpty(StockId))
+            {
+                var stockSymbol = await _stockSymbolRepository.GetByIdAsync(StockId);
+                if (stockSymbol!=null)
+                {
+                    if (user != null)
+                    {
+                        if (user.Stocks == null)
+                        {
+                            user.Stocks.Add(new Stocks
+                            {
+                                CompanyLogoUrl = stockSymbol.CompanyIconUrl,
+                                CompanyName = stockSymbol.CompanyName,
+                                IsActive = true,
+                                StockNotification = false,
+                                BuySellSignal = null,
+                                Symbol = stockSymbol.Symbol,
+                            });
+                        }
+                        else
+                        {
+                            if (user.Stocks.Where(x=>x.Symbol==stockSymbol.Symbol).FirstOrDefault()==null)
+                            {
+                                user.Stocks.Add(new Stocks
+                                {
+                                    CompanyLogoUrl = stockSymbol.CompanyIconUrl,
+                                    CompanyName = stockSymbol.CompanyName,
+                                    IsActive = true,
+                                    StockNotification = false,
+                                    BuySellSignal = null,
+                                    Symbol = stockSymbol.Symbol,
+                                });
+                            }
+                        }
+                       var updateuser= await _userRepository.AddUserStocks(user);
+                        if (updateuser)
+                        {
+                            _fyersWebSocket.Connect(user.Stocks.ToList());
+                            ViewBag.succesmessage = "Added stock succesfully";
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                }
+            }
+            return RedirectToAction("Index", "Home");
+
+        }
+       
         //[HttpPost]
         //public async Task<IActionResult> CreateSymbol(StockSymbol stockSymbol)
         //{

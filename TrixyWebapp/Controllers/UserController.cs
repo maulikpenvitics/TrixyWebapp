@@ -40,42 +40,36 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
-            if (ModelState.IsValid) 
+            if (user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
             {
-                if (user.Id.ToString() !=null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
-                {
-                    await _userRepository.UpdateAsync(user.Id.ToString(), user);
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    var existuser= await _user.GetByEmail(user?.Email??"");
-                    if (existuser ==null)
-                    {
-                        var result = await _userRepository.InsertAsync(user);
-                        if (result == 1)
-                        {
-                            return RedirectToAction("Index");
-                        }
-                        else
-                        {
-                            ViewBag.Errormessage = "Please try agin";
-                            return View();
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.Errormessage = "This user already exists.";
-                        return View();
-                    }
-                }
-               
+                await _userRepository.UpdateAsync(user.Id.ToString(), user);
+                return RedirectToAction("Index");
             }
             else
             {
-                ViewBag.Errormessage = "Please try agin";
-                return View();
+                var existuser = await _user.GetByEmail(user?.Email ?? "");
+                if (existuser == null)
+                {
+                    user.Stocks = new List<Stocks>();
+                    user.UserStrategy = new List<UserStrategy>();
+                    var result = await _userRepository.InsertAsync(user);
+                    if (result == 1)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        ViewBag.Errormessage = "Please try agin";
+                        return View();
+                    }
+                }
+                else
+                {
+                    ViewBag.Errormessage = "This user already exists.";
+                    return View();
+                }
             }
+
         }
         [HttpGet]
         public async Task<IActionResult> DeleteUser(string Id)

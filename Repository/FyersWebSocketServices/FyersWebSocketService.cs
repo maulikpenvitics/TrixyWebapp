@@ -27,11 +27,11 @@ namespace Repository.FyersWebSocketServices
         private readonly object _lock = new();
         private readonly IHubContext<StockHub> _hubContext;
         private readonly HttpClient _httpClient;
-        public  List<string> _stocklist=new();
+        public  List<string?> _stocklist=new();
     
         //private const string BaseUrl = "https://api-t1.fyers.in/data/history";
         private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDEzMjcyMjUsImV4cCI6MTc0MTM5MzgyNSwibmJmIjoxNzQxMzI3MjI1LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbnlvdDVVUWF0Q1h0NWpHaFhxeGlCRUViT21uLUJLN0xQbnh6aGFlSnZqakZCZVBLNUlXU09RQVZEd200UmYwNnVPWlBlWGY1aUdlZmZTNG1uTW9nWjVSOW5UQVB5N2F0MWV0RkUyNTUyd3hoenRmaz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.im-BHe-x-4rNZDAalftZYMQYXBnXFv1sR1IimPmUQ7I";
+        private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDE2NzE4NzIsImV4cCI6MTc0MTczOTQzMiwibmJmIjoxNzQxNjcxODcyLCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbno4M0E1ZklHRHhZZTROT09qQ0Iya1hPT3BjZ1dVNWVUdks0YURmLV9WNk1qQVI4X2Juc1ZfMjFNMXl0eUpvak9HVmM5MHhuOGM2YzZTbFhEcm9OQ1pBRGEtczhPZHpmMTgtVURfb01ZRlczV3Vacz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.bg9VD1aZLNp15i7zUopVzfR-04U_OYTN6p0600dNmWg";
       
       
         public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient)
@@ -87,16 +87,16 @@ namespace Repository.FyersWebSocketServices
         public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync()
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
-            string? symbol = "NSE:OFSS-EQ"; // Ensure the correct format
+            string? symbol = "NSE:BAJFINANCE-EQ"; // Ensure the correct format
             string? rangefrom = "2025-01-01";
-            string? rangeto = "2025-03-07";
-            string apiUrl = "https://api-t1.fyers.in/data/history?symbol=NSE:OFSS-EQ&resolution=240&date_format=1&range_from=2025-01-01&range_to=2025-03-04";
+            string? rangeto = "2025-03-10";
+            string apiUrl = "https://api-t1.fyers.in/data/history?symbol=NSE:OFSS-EQ&resolution=240&date_format=1&range_from=2025-01-01&range_to=2025-03-10";
             //string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={symbol}&resolution=15&date_format=1&range_from={rangefrom}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDEzMjcyMjUsImV4cCI6MTc0MTM5MzgyNSwibmJmIjoxNzQxMzI3MjI1LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbnlvdDVVUWF0Q1h0NWpHaFhxeGlCRUViT21uLUJLN0xQbnh6aGFlSnZqakZCZVBLNUlXU09RQVZEd200UmYwNnVPWlBlWGY1aUdlZmZTNG1uTW9nWjVSOW5UQVB5N2F0MWV0RkUyNTUyd3hoenRmaz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.im-BHe-x-4rNZDAalftZYMQYXBnXFv1sR1IimPmUQ7I"; // Replace with actual token
+            string token = "NGX016JVE9-100:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDE2NzE4NzIsImV4cCI6MTc0MTczOTQzMiwibmJmIjoxNzQxNjcxODcyLCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbno4M0E1ZklHRHhZZTROT09qQ0Iya1hPT3BjZ1dVNWVUdks0YURmLV9WNk1qQVI4X2Juc1ZfMjFNMXl0eUpvak9HVmM5MHhuOGM2YzZTbFhEcm9OQ1pBRGEtczhPZHpmMTgtVURfb01ZRlczV3Vacz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.bg9VD1aZLNp15i7zUopVzfR-04U_OYTN6p0600dNmWg"; // Replace with actual token
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -165,14 +165,18 @@ namespace Repository.FyersWebSocketServices
             _hubContext.Clients.All.SendAsync("ReceiveStockData", _stockDataList);
         }
 
-        public async void Connect(List<Stocks> stocks)
+        public async void Connect(List<Stocks>? stocks)
         {
             try
             {
                 FyersClass fyersModel = FyersClass.Instance;
                 fyersModel.ClientId = ClientId;
                 fyersModel.AccessToken = AccessToken;
-                _stocklist = stocks.Select(x => x.Symbol).ToList();
+                if (stocks!=null)
+                {
+                    _stocklist = stocks.Select(x => x.Symbol).ToList();
+                }
+                
                 Methods t = new Methods(this); // Pass the HubContext
                 await t.DataWebSocket();
             }
@@ -181,6 +185,11 @@ namespace Repository.FyersWebSocketServices
                 LogFilegenerate(ex, "FyersWebSocketService");
             }
             
+        }
+
+        public async void connectionclose()
+        {
+
         }
     }
     public class Methods : FyersSocketDelegate

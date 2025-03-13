@@ -1,30 +1,91 @@
-﻿
-@{
-	Layout = "~/Pages/Shared/_Layout.cshtml";
-}
+﻿@using TrixyWebapp.Helpers
 
+@model Repository.Models.User
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+@{
+    var stocks = Model?.Stocks?.FirstOrDefault();
+    var companylogo = stocks?.CompanyLogoUrl;
+    var companyname = stocks?.CompanyName;
+    var symbole = stocks?.Symbol;
+}
 <!-- Content Wrapper. Contains page content -->
+<input type="hidden" id="symbol" value="@symbole" />
 <div class="content-wrapper">
-	<div class="container-full">
-		<!-- Main content -->
-		<section class="content">
-			<div class="row">
-				<div class="col-xl-12 col-12">
-					<div class="box">
-						<div class="box-body">
-							<div class="table-responsive customize-responsive-table">
-								<table id="tickets" class="table mt-0 table-hover no-wrap" data-page-size="10">
-									<thead>
-										<tr>
-											<th>Company</th>
-											<th>Current Price</th>
-											<th>Change</th>
-											<th>Recommendation</th>
-											<th>Action</th>
-										</tr>
-									</thead>
-									<tbody id="realstockdatatbl">
-										@* <tr id="stock-RELIANCE">
+    <div class="container-full">
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-xl-12 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="table-responsive customize-responsive-table">
+                                <table id="tickets" class="table mt-0 table-hover no-wrap" data-page-size="10">
+                                    <thead>
+                                        <tr>
+                                            <th>Company</th>
+                                            <th>Current Price</th>
+                                            <th>Change</th>
+                                            <th>Recommendation</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="realstockdatatbl">
+                                        @if (Model?.Stocks != null && Model?.Stocks.Count > 0)
+                                        {
+                                            @foreach (var item in Model?.Stocks)
+                                            {
+                                                <tr id="stock-@item.Symbol">
+                                                    <td>
+                                                        <a href="#realtime_stock_detail">
+                                                            @if (!string.IsNullOrEmpty(item?.CompanyLogoUrl))
+                                                            {
+                                                                <img src="@Context.GetFullUrl(item?.CompanyLogoUrl)" width="30"
+                                                                     alt="reliance" />
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <img src="~/assets/images/company-logo/logo01.png" width="30"
+                                                                     alt="reliance" />
+                                                            }
+                                                            &nbsp;
+
+                                                            @item?.CompanyName
+                                                        </a>
+                                                    </td>
+                                                    <td class="stock-price">
+                                                        <lable class="label label-success text-black"></lable>
+                                                    </td>
+                                                    <td class="stock-changepr">
+                                                        <span class="badge badge-pill badge-success">
+                                                            <i class="ti-stats-up" aria-hidden="true"></i>
+                                                        </span>
+                                                        <lable class="text-success"><b></b></lable>
+                                                    </td>
+                                                    <td id="recomendation_@item?.Symbol">
+                                                        @if (item?.StockNotification != null && (bool)item.StockNotification)
+                                                        {
+                                                            <span class="label label-success">Buy</span>
+                                                        }
+                                                    </td>
+                                                    <td class="stock_notification">
+                                                        <a href="javascript:void(0);"
+                                                           class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
+                                                           data-symbol="@item?.Symbol"
+                                                           data-enable="@((item?.StockNotification != null && (bool)item.StockNotification) ? "false" : "true")"
+                                                           data-toggle="tooltip"
+                                                           data-original-title="@(item?.StockNotification != null && (bool)item.StockNotification ? "Disable Notification" : "Enable Notification")">
+                                                            <i class="ti-bell" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+
+                                            }
+                                        }
+
+                                        @* <tr id="stock-RELIANCE">
 											<td>
 												<a href="#realtime_stock_detail">
 													<img src="~/assets/images/company-logo/logo01.png" width="30"
@@ -286,54 +347,50 @@
 												</a>
 											</td>
 										</tr> *@
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
-					<div class="box" id="realtime_stock_detail">
-						<div class="box-body bb-1 d-lg-block bbsr-0 bber-0">
-							<div class="d-flex justify-content-between stock_detail_header">
-								<h3 class="my-0">
-									<img src="~/assets/images/company-logo/logo01.png" width="45"
-										 alt="reliance" />&nbsp;
-									<span class="text-primary">Reliance</span>
-								</h3>
-								<h5 class="mb-0">
-									<span>Current Price</span><br class="d-lg-block d-none">
-									<span class="text-success">1,278.50</span>
-								</h5>
-								<h5 class="mb-0">
-									<span>High/Low</span><br class="d-lg-block d-none">
-									<span>
-										<span class="text-success">1,288.00</span>/<span class="text-danger">1,270.35</span>
-									</span>
-								</h5>
-								<h5 class="mb-0">
-									<span>Volume</span><br class="d-lg-block d-none">
-									<span class="text-info">9,956,001</span>
-								</h5>
-								<div class="close-btn">
-									<button type="button"
-											class="waves-effect waves-circle btn btn-circle btn-light btn-xs">
-										<i class="ti-close"></i>
-									</button>
-								</div>
-							</div>
-						</div>
-						<div class="box-body">
-							<div id="bitcoin-stock" class="mb-15"></div>
-						</div>
-					</div>
+                    <div class="box" id="realtime_stock_detail" style="display:none">
+                        <div class="box-body bb-1 d-lg-block bbsr-0 bber-0">
+                            <div class="d-flex justify-content-between stock_detail_header">
+                                <h3 class="my-0">
+                                    <img src="~/assets/images/company-logo/logo01.png" width="45"
+                                         alt="reliance" />&nbsp;
+                                    <span class="text-primary" id="stockname">Reliance</span>
+                                </h3>
+                                <h5 class="mb-0">
+                                    <span>Today High/Low</span><br class="d-lg-block d-none">
+                                    <span>
+                                        <span class="text-success" id="highprice"></span>/<span class="text-danger" id="lowprice"></span>
+                                    </span>
+                                </h5>
+                                <h5 class="mb-0">
+                                    <span>Today Volume</span><br class="d-lg-block d-none">
+                                    <span class="text-info" id="volumprice"></span>
+                                </h5>
+                                <div class="close-btn">
+                                    <button type="button"
+                                            class="waves-effect waves-circle btn btn-circle btn-light btn-xs">
+                                        <i class="ti-close"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div id="bitcoin-stock-chart" class="mb-15"></div>
+                        </div>
+                    </div>
 
-				</div>
+                </div>
 
-			</div>
+            </div>
 
-		</section>
-		<!-- /.content -->
-	</div>
+        </section>
+        <!-- /.content -->
+    </div>
 </div>
 
 <!-- /.content-wrapper -->
@@ -344,156 +401,115 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
+
 <script>
-	let selectedStockSymbol = null;
+      let selectedStockSymbol = null;
 
-	$(document).ready(function () {
-		// Click event for stock row
-		$("tr[id^='stock-']").click(function () {
-			selectedStockSymbol = $(this).attr("id").replace("stock-", "");
-			let stockName = $(this).find("td a").text().trim();
-			let stockLogo = $(this).find("td a img").attr("src");
-			let stockPrice = $(this).find(".stock-price label").text().trim();
+     $(document).ready(function () {
+               // Click event for stock row
+               $(".close-btn button").click(function () {
+                   $("#realtime_stock_detail").fadeOut();
+                   selectedStockSymbol = null;
+               });
 
-			// Update the stock detail section dynamically
-			$("#realtime_stock_detail h3 img").attr("src", stockLogo);
-			$("#realtime_stock_detail h3 span.text-primary").text(stockName)
-			$("#realtime_stock_detail h5:nth-child(2) span.text-success").text(stockPrice);
+               updateStockPrices();
 
-			// Show the stock detail div
-			$("#realtime_stock_detail").fadeIn();
-		});
+     } );
+ function updateStockPrices() {
+    $.ajax({
+		url: '/Home/RealTimeData',
+        type: 'GET',
+        dataType: 'html',
+        success: function (stockData) {
+                       $("#realstockdatatbl").html(stockData);
+        },
+         error: function (xhr, status, error) {
+                console.error("Error fetching stock data:", error);
+       }
+    });
+  };
 
-		// Close button functionality
-		$(".close-btn button").click(function () {
-			$("#realtime_stock_detail").fadeOut();
-			selectedStockSymbol = null;
-		});
+  setInterval(updateStockPrices, 1000);
+   $(document).on("click", "#tickets .stock-row", function () {
+            debugger
+               var symbol = $(this).data("symbol");
+				  var price = $(this).data("price");
+               selectedStockSymbol = symbol;
+               getchart(symbol, this);
+   });
+       function getchart(sym,rowElement){
+           debugger
+           selectedStockSymbol = sym;
+           $.ajax({
+               url:'GetChartDetails',
+               type:'GET',
+               data:{sym:sym,},
+               dataType:'json',
+               success:function(response)
+			   {
+				 Chartdatabind(sym);
+				
+                let stockLogo = $(rowElement).find("td a img").attr("src");
+                    $("#realtime_stock_detail h3 img").attr("src", stockLogo);
+					$("#stockname").text(response.companyName);
+					   $("#highprice").text(response.high);
+					   $("#lowprice").text(response.low);
+					   $("#volumprice").text(response.volume);
+                    $("#realtime_stock_detail").fadeIn();
+					$("#realtime_stock_detail").css("display", "block");
+               },
+               error:function(error){
+                     console.error("Error fetching stock data:", error);
+               }
+           });
 
-		$.ajax({
-		url: '/Home/FetchData',
-		type: 'GET',
-		dataType: 'json',
-		success: function (data) {
-			let seriesData = [];
 
-			data.forEach(item => {
-				seriesData.push({
-					x: new Date(item.x).toLocaleString('en-GB', {
-						weekday: 'short', day: '2-digit', month: 'short',
-						hour: '2-digit', minute: '2-digit'
-					}), // Format time to display only trading hours
-					y: item.y  // OHLC array [Open, High, Low, Close]
-				});
-			});
+       };
 
-			var options = {
-				chart: {
-					type: 'candlestick',
-					height: 350
-				},
-				series: [{
-					name: 'Stock Price',
-					data: seriesData
-				}],
-				xaxis: {
-					type: 'category',  // Prevents gaps by treating time as discrete values
-					labels: {
-						show: true,
-						rotate: 0,  // Keeps labels readable
-						formatter: function (val) {
-							return val; // Directly use formatted date
-						}
-					}
-				},
-				yaxis: {
-					tooltip: {
-						enabled: true
-					}
-				}
-			};
+           function Chartdatabind(sym){
+			   debugger
+                   $.ajax({
+                           url: '/Home/FetchData',
+                           type:'GET',
+                           data:{sym:sym},
+                           dataType:'json',
+                       success:function(response){
+                           if(response.length>0){
+							   debugger
+                               renderChart(response);
+                           }
 
-			var chart = new ApexCharts(document.querySelector("#bitcoin-stock"), options);
-			chart.render();
-		},
-		error: function (error) {
-			console.log('Error:', error);
-		}
-	});
+                       },
+                       error:function(error){
+                                  console.error("Error fetching stock data:", error);
+                       }
 
-	});
+               });
+       }
+           function renderChart(data) {
+           var options = {
 
-	updateStockPrices();
+               series: [{
+                   data: data // OHLC data
+               }],
+               chart: {
+                   type: 'candlestick',
+                   height: 350
+               },
+               xaxis: {
+                   type: 'datetime'
+               }
+           };
 
-	function updateStockPrices() {
-		$.ajax({
-			url: '/Home/RealTimeData',
-			type: 'GET',
-			dataType: 'html',
-			success: function (stockData) {
-				debugger
-				 $("#realstockdatatbl").html(stockData);
-				// stockData.forEach(stock => {
-				// 	debugger
-				// 	let Symbol = stock.symbol.split(":")[1]?.split("-")[0]; // Extract symbol correctly
-				// 	let price = stock.price;
-				// 	let row = document.getElementById(`stock-${Symbol}`);
-				// 	if (row) {
-				// 			const stockPrice = row.querySelector(".stock-price");
-	   //              if (stockPrice) {
-	   //                      	stockPrice.innerHTML =
-		  //                	`<label class="label label-success text-black">${price}</label>`;
-	   //                     }
-	  
-				// 	}
-				// 	// If this stock is currently selected, update the stock detail price in real-time
-				// 	if (selectedStockSymbol === Symbol) {
-				// 		$("#realtime_stock_detail h5:nth-child(2) span.text-success").text(price);
-				// 	}
-				// });
-			},
-			error: function (xhr, status, error) {
-				console.error("Error fetching stock data:", error);
-			}
-		});
-	}
+			  var chartElement = document.querySelector("#bitcoin-stock-chart");
 
-	setInterval(updateStockPrices, 1000);
+           if (!chartElement) {
+               console.error("Chart element not found");
+               return;
+           }
+
+           var chart = new ApexCharts(chartElement, options);
+           chart.render();
+       }
 
 </script>
-@* <script>
-	  $(".notification-toggle").on("click", function (e) {
-		e.preventDefault(); // Prevent default hyperlink behavior
-		debugger
-		var symbol = $(this).data("symbol");
-		var isEnable = $(this).data("enable") === "true";
-
-		$.ajax({
-			url: "/Home/EnableDisableStratgey",
-			type: "POST",
-			data: { sym: symbol, isEnable: isEnable },
-			success: function (response) {
-				if (response.finalsignal!=null) {
-					let row = document.getElementById(`stock-${Symbol}`);
-					if(row!=null){
-						const recomdeation= row.querySelector(`recomendation_${Symbol}`);
-						if(response.finalsignal=="BUY"){
-							recomdeation.innerHTML =
-							`<span class="label label-success">Buy</span>`;
-						}
-						else{
-							recomdeation.innerHTML =
-							`<span class="label label-danger">Sell</span>`;
-						}
-						
-					}
-				} else {
-					alert("Failed to update notification settings.");
-				}
-			},
-			error: function () {
-				alert("An error occurred. Please try again.");
-			}
-		});
-	});
-</script> *@

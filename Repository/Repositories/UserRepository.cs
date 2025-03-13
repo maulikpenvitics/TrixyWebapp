@@ -80,14 +80,26 @@ namespace Repository.Repositories
             await _users.UpdateOneAsync(filter, update);
         }
 
-        public async Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked)
+        public async Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked,string BuySellSignal)
         {
             var filter = Builders<User>.Filter.And(
-                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
+                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
                          Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
-            var update = Builders<User>.Update.Set("Stocks.$.StockNotification", isChecked); // Update the StrategyEnableDisable field
-
+            var update = Builders<User>.Update.Set("Stocks.$.StockNotification", isChecked)
+                .Set("Stocks.$.BuySellSignal", BuySellSignal); 
+            
             await _users.UpdateOneAsync(filter, update);
+        }
+
+        public async Task<bool> AddUserStocks(User user)
+        {
+            var filter = Builders<User>.Filter.And(
+                         Builders<User>.Filter.Eq("_id", user.Id)
+                     );
+            var update = Builders<User>.Update.Set("Stocks", user.Stocks);
+
+           var result=await _users.UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0;
         }
         #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
@@ -96,7 +108,11 @@ namespace Repository.Repositories
         }
         public async Task<AdminSettings> GetUserSettings(string userId)
         {
-            return await _userSettingsCollection.Find(s => s.UserId == userId).FirstOrDefaultAsync();
+            var settings = await _userSettingsCollection
+            .Find(_ => true) // This retrieves the first record without any filter
+           .FirstOrDefaultAsync();
+
+            return settings ?? new AdminSettings(); //
         }
         public async Task UpdateUserSettings(string userId, AdminSettings settings)
         {
