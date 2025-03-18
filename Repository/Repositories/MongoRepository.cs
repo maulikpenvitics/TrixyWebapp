@@ -109,6 +109,6 @@ namespace Repository.Repositories
         {
             return await _collection.Find(filter).ToListAsync();
         }
-      
+
     }
 }

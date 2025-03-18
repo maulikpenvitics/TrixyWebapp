@@ -121,7 +121,7 @@ namespace TrixyWebapp.Controllers
         {
             var userIdBytes = HttpContext.Session.Get("UserId");
             string userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
-            var adminseting= _user.GetUserSettings("67bef9c5bc1d49323084998f");
+            var adminseting= _user.GetUserSettings();
             
             return View(adminseting);
         }

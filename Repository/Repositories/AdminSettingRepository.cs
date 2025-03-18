@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Hangfire;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.IRepositories;
@@ -18,6 +19,11 @@ namespace Repository.Repositories
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _adminSettings = database.GetCollection<AdminSettings>("AdminSettings");
+        }
+        public async Task<string> GetJobFrequencyAsync()
+        {
+            var setting = await _adminSettings.Find(_ => true).FirstOrDefaultAsync();
+            return setting.Frequency > 0 ? setting.Frequency.ToString() :Cron.Daily(); // Default to daily if not found
         }
     }
 }

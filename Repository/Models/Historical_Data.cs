@@ -23,5 +23,11 @@ namespace Repository.Models
         public decimal Low { get; set; }
         public decimal Close { get; set; }
         public decimal Volume { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime Createddate { get; set; }
+        public Historical_Data()
+        {
+            Createddate= DateTime.UtcNow;
+        }
     }
 }

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,16 +29,17 @@ namespace Repository.FyersWebSocketServices
         private readonly IHubContext<StockHub> _hubContext;
         private readonly HttpClient _httpClient;
         public  List<string?> _stocklist=new();
-    
+        private readonly IServiceProvider _serviceProvider;
         //private const string BaseUrl = "https://api-t1.fyers.in/data/history";
         private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDE2NzE4NzIsImV4cCI6MTc0MTczOTQzMiwibmJmIjoxNzQxNjcxODcyLCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbno4M0E1ZklHRHhZZTROT09qQ0Iya1hPT3BjZ1dVNWVUdks0YURmLV9WNk1qQVI4X2Juc1ZfMjFNMXl0eUpvak9HVmM5MHhuOGM2YzZTbFhEcm9OQ1pBRGEtczhPZHpmMTgtVURfb01ZRlczV3Vacz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.bg9VD1aZLNp15i7zUopVzfR-04U_OYTN6p0600dNmWg";
+        private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDIyNzkwNTgsImV4cCI6MTc0MjM0NDIxOCwibmJmIjoxNzQyMjc5MDU4LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbjJSR1MzMzBQNG14eENLS0RyUDdyQmlkZ1E5Slc2MktxWjJxV3VYZVRicmw4SFdCMXY4ZmlnUDA4NWRJMlZ6TndWUlZNSG5CREZmSGgybnNwZWpxbFpPOW1nMkZGUmhiR1ZvcHdvclJFS3VHbzlTZz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.HFrTKIe7lxSFne_KIjlYn_cXnR_Fw9dhBM2EaC3bpz4";
       
       
-        public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient)
+        public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient, IServiceProvider serviceProvider)
         {
             _hubContext = hubContext;
             _httpClient = httpClient;
+            _serviceProvider = serviceProvider;
         }
         public void LogFilegenerate(Exception? ex, string path)
         {
@@ -84,19 +86,16 @@ namespace Repository.FyersWebSocketServices
         {
             return _stocklist;
         }
-        public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync()
+        public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync(string sym,string rangform,string rangeto)
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
-            string? symbol = "NSE:BAJFINANCE-EQ"; // Ensure the correct format
-            string? rangefrom = "2025-01-01";
-            string? rangeto = "2025-03-10";
-            string apiUrl = "https://api-t1.fyers.in/data/history?symbol=NSE:OFSS-EQ&resolution=240&date_format=1&range_from=2025-01-01&range_to=2025-03-10";
-            //string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={symbol}&resolution=15&date_format=1&range_from={rangefrom}&range_to={rangeto}";
+           
+            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution=240&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDE2NzE4NzIsImV4cCI6MTc0MTczOTQzMiwibmJmIjoxNzQxNjcxODcyLCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbno4M0E1ZklHRHhZZTROT09qQ0Iya1hPT3BjZ1dVNWVUdks0YURmLV9WNk1qQVI4X2Juc1ZfMjFNMXl0eUpvak9HVmM5MHhuOGM2YzZTbFhEcm9OQ1pBRGEtczhPZHpmMTgtVURfb01ZRlczV3Vacz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.bg9VD1aZLNp15i7zUopVzfR-04U_OYTN6p0600dNmWg"; // Replace with actual token
+            string token = "NGX016JVE9-100:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDIyNzkwNTgsImV4cCI6MTc0MjM0NDIxOCwibmJmIjoxNzQyMjc5MDU4LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbjJSR1MzMzBQNG14eENLS0RyUDdyQmlkZ1E5Slc2MktxWjJxV3VYZVRicmw4SFdCMXY4ZmlnUDA4NWRJMlZ6TndWUlZNSG5CREZmSGgybnNwZWpxbFpPOW1nMkZGUmhiR1ZvcHdvclJFS3VHbzlTZz0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.HFrTKIe7lxSFne_KIjlYn_cXnR_Fw9dhBM2EaC3bpz4"; // Replace with actual token
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -119,9 +118,10 @@ namespace Repository.FyersWebSocketServices
                         stockHistory.Low = Convert.ToDecimal(item[3]);
                         stockHistory.Close = Convert.ToDecimal(item[4]);
                         stockHistory.Volume = Convert.ToDecimal(item[5]);
-                        stockHistory.from_date = rangefrom;
+                        stockHistory.from_date = rangform;
                         stockHistory.to_date = rangeto;
-                        stockHistory.symbol = symbol;
+                        stockHistory.symbol = sym;
+                        stockHistory.Createddate = DateTime.UtcNow;
                         stockHistorylist.Add(stockHistory);
                     }
                 }

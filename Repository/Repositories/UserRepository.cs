@@ -90,7 +90,16 @@ namespace Repository.Repositories
             
             await _users.UpdateOneAsync(filter, update);
         }
+        public async Task UpdateAsyncUserStocks(string userId, string sym, string BuySellSignal)
+        {
+            var filter = Builders<User>.Filter.And(
+                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+                         Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+            var update = Builders<User>.Update.Set("Stocks.$.BuySellSignal", BuySellSignal)
+                .Set("Stocks.$.BuySellSignal", BuySellSignal);
 
+            await _users.UpdateOneAsync(filter, update);
+        }
         public async Task<bool> AddUserStocks(User user)
         {
             var filter = Builders<User>.Filter.And(
@@ -101,12 +110,19 @@ namespace Repository.Repositories
            var result=await _users.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
         }
+
+        public async Task<IEnumerable<User>> GetallUser()
+        {
+            return await GetAllAsync();
+        }
+
+        
         #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
         {
             await _userSettingsCollection.InsertOneAsync(model);
         }
-        public async Task<AdminSettings> GetUserSettings(string userId)
+        public async Task<AdminSettings> GetUserSettings()
         {
             var settings = await _userSettingsCollection
             .Find(_ => true) // This retrieves the first record without any filter

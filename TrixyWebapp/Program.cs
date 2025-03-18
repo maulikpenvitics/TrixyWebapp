@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Repository.DbModels;
@@ -15,6 +18,7 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
 
+
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -23,6 +27,23 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
+// 🔹 Register Hangfire with MongoDB
+var mongoSettings = builder.Configuration.GetSection("MongoDB");
+var connectionString = mongoSettings.GetValue<string>("ConnectionString");
+var databaseName = mongoSettings.GetValue<string>("DatabaseName");
+var mongoUrl = new MongoUrl(connectionString);
+var mongoClient = new MongoClient(mongoUrl);
+// Register Hangfire with MongoDB
+builder.Services.AddHangfire(config =>
+{
+    config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
+    {
+        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
+    });
+});
+//builder.Services.AddHangfireServer();
+//builder.Services.AddHostedService<JobSchedulerService>();
+builder.Services.AddHostedService<StockNotificationService>();
 // Configure Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -41,6 +62,8 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
+
+
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddSingleton<FyersWebSocketService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -97,5 +120,6 @@ app.MapControllerRoute(
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.MapHub<StockHub>("/stockHub");
+app.MapHub<StockNotificationHub>("/stockNotificationHub");
 
 app.Run();

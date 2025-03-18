@@ -385,7 +385,7 @@
                     </div>
 
                 </div>
-
+				
             </div>
 
         </section>
@@ -400,7 +400,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
       let selectedStockSymbol = null;
@@ -513,3 +513,17 @@
        }
 
 </script>
+@* <script>
+	debugger
+	const connection = new signalR.HubConnectionBuilder()
+		.withUrl("/stockNotificationHub")
+		.build();
+
+	connection.on("ReceiveStockUpdate", (stockSymbol, stockPrice) => {
+		let li = document.createElement("li");
+		li.textContent = `${stockSymbol}: $${stockPrice}`;
+		document.getElementById("stockList").appendChild(li);
+	});
+
+	connection.start().catch(err => console.error(err));
+</script> *@

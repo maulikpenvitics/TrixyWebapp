@@ -28,7 +28,7 @@ namespace TrixyWebapp.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IStockSymbolRepository _stockSymbol;
         public HomeController(FyersWebSocketService fyersWebSocket,
-            IRepository<Historical_Data> userRepository, 
+            IRepository<Historical_Data> userRepository,
             IRepository<Strategy> strategyRepository,
             IRepository<User> masterRepository,
             IWebStockRepository stockRepository,
@@ -42,10 +42,10 @@ namespace TrixyWebapp.Controllers
             _masterRepository = masterRepository;
             _stockRepository = stockRepository;
             _user = user;
-            _env=env;
+            _env = env;
             _stockSymbol = stockSymbolRepository;
         }
-        
+
         public async Task<IActionResult> Index()
         {
             try
@@ -63,6 +63,12 @@ namespace TrixyWebapp.Controllers
 
                 //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
 
+                //NSE: OFSS - EQ
+                //NSE:ITC-EQ
+                //NSE:RELIANCE-EQ
+                //NSE: BAJFINANCE - EQ
+                //NSE:ABFRL-EQ
+                //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync("NSE:BAJFINANCE-EQ", DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
                 //await _HistoricalStockdata.InsertManyAsync(data);
                 var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
 
@@ -77,8 +83,8 @@ namespace TrixyWebapp.Controllers
                 Helper.LogFilegenerate(ex, "Login Action", _env);
                 return View();
             }
-       
-           
+
+
         }
 
         [HttpGet]
@@ -86,11 +92,11 @@ namespace TrixyWebapp.Controllers
         {
             try
             {
-                List<StockData> stockData =  _fyersWebSocket.GetStockData();
+                List<StockData> stockData = _fyersWebSocket.GetStockData();
                 var formateddata = stockData.Select(x => new
                 {
-                    symbol= x.Symbol,
-                    change =  x.Change,
+                    symbol = x.Symbol,
+                    change = x.Change,
                 }).ToList();
                 //return Json(formateddata);
                 return PartialView("_RealStockData", stockData);
@@ -139,20 +145,27 @@ namespace TrixyWebapp.Controllers
         public async Task<IActionResult> GetChartDetails(string sym)
         {
             var stocks = await _stockSymbol.GetStockBySymbol(sym);
-            var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
-            var historicaldata = gethistoricaldata.OrderByDescending(x=>x.Timestamp).FirstOrDefault();
-            StockCandleChartVM returndata = new StockCandleChartVM()
+            if (stocks != null)
             {
-                Symbol=stocks.Symbol,
-                Companylogo=stocks.CompanyIconUrl,
-                CompanyName=stocks.CompanyName,
-                Currentprice= historicaldata?.Open,
-                High=historicaldata?.High,
-                low=historicaldata?.Low,
-                close=historicaldata?.Close,
-                volume=historicaldata?.Volume
-            };
-            return Json(returndata);
+                var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
+                var historicaldata = gethistoricaldata.OrderByDescending(x => x.Timestamp).FirstOrDefault();
+                StockCandleChartVM returndata = new StockCandleChartVM()
+                {
+                    Symbol = stocks.Symbol,
+                    Companylogo = stocks.CompanyIconUrl,
+                    CompanyName = stocks.CompanyName,
+                    Currentprice = historicaldata?.Open,
+                    High = historicaldata?.High,
+                    low = historicaldata?.Low,
+                    close = historicaldata?.Close,
+                    volume = historicaldata?.Volume
+                };
+                return Json(returndata);
+            }
+            else
+            {
+                return Json(null);
+            }
         }
 
         [HttpPost]
@@ -166,7 +179,7 @@ namespace TrixyWebapp.Controllers
             strategyName = strategyName.Replace(" ", "_");
             bool isChecked;
 
-            if(status == "True")
+            if (status == "True")
             {
                 isChecked = true;
             }
@@ -180,19 +193,19 @@ namespace TrixyWebapp.Controllers
             return Ok(new { message = "Strategy updated successfully." });
         }
 
-       
-        public async Task<IActionResult> EnableDisableStratgey(string sym,bool isEnable)
+
+        public async Task<IActionResult> EnableDisableStratgey(string sym, bool isEnable)
         {
-            string finalsignal=string.Empty;
+            string finalsignal = string.Empty;
             var userIdBytes = HttpContext.Session.Get("UserId");
             string userId = Encoding.UTF8.GetString(userIdBytes);
-            var weightedsignal = await _user.GetUserSettings(userId);
-           
+            var weightedsignal = await _user.GetUserSettings();
+
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
-            if (gethistoricaldata!=null && gethistoricaldata.Count>0)
+            if (gethistoricaldata != null && gethistoricaldata.Count > 0)
             {
                 #region Moving Average Crossover Strategy
-               
+
 
                 var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: 10, longTerm: 50);
 
@@ -224,6 +237,6 @@ namespace TrixyWebapp.Controllers
 
             return RedirectToAction("Index");
         }
-        
+
     }
 }

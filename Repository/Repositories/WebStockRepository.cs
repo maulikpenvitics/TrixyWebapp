@@ -1,5 +1,8 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using Repository.BusinessLogic;
+using Repository.DbModels;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
@@ -15,10 +18,17 @@ namespace Repository.Repositories
     {
         private readonly IRepository<Historical_Data> _collection;
         private readonly IRepository<Stock_master_data> _stcock;
-        public WebStockRepository(IRepository<Historical_Data> collection, IRepository<Stock_master_data> stcock)
+        private readonly IMongoCollection<Historical_Data> _historicaldata;
+        private readonly IMongoCollection<AdminSettings> _adminsetting;
+        public WebStockRepository(IRepository<Historical_Data> collection,
+            IRepository<Stock_master_data> stcock, IMongoClient mongoClient,
+            IOptions<MongoDBSettings> settings)
         {
             _collection = collection;
             _stcock = stcock;
+            var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
+            _historicaldata = database.GetCollection<Historical_Data>("Historical_Data");
+            _adminsetting = database.GetCollection<AdminSettings>("AdminSettings");
         }
         public async Task<List<Historical_Data>> GetHistoricalData()
         {
@@ -101,5 +111,30 @@ namespace Repository.Repositories
 
             return await _collection.FindAsync(filter);
         }
+
+        public async Task DeleteHistoricaldata()
+        {
+            
+            var frequency = await _adminsetting
+            .Find(_ => true)
+           .FirstOrDefaultAsync();
+            if (frequency != null)
+            {
+               DateTime HoursAgo = DateTime.UtcNow.AddHours(-(frequency.Frequency));
+                var filter = Builders<Historical_Data>.Filter.And(
+                Builders<Historical_Data>.Filter.Eq(s => s.Timestamp, HoursAgo)
+            );
+                await _historicaldata.DeleteManyAsync(filter);
+            }
+        }
+        public async Task InsertNewHistoricalData(List<Historical_Data> newData)
+        {
+            if (newData !=null && newData.Any()) 
+            {
+                await _historicaldata.InsertManyAsync(newData);
+            }
+        
+        }
+
     }
 }

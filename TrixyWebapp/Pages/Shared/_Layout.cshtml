@@ -47,7 +47,9 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 </head>
+
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
+	<input type="hidden" id="userId" value="@userId?.ToString()" />
 	<header class="main-header">
 		<div class="d-flex align-items-center logo-box justify-content-start">
 			<!-- Logo -->
@@ -235,20 +237,16 @@
 		<div class="tab-content">
 			<!-- Home tab content -->
 			<div class="tab-pane active" id="control-sidebar-home-tab">
-				<div class="media-list media-list-hover mt-20">
-					<div class="media py-10 px-0">
+				<div class="media-list media-list-hover mt-20" id="notificationContainer">
+				@* 	<div class="media py-10 px-0" >
 						<a class="avatar avatar-lg status-success" href="#">
 							<img src="~/assets/images/1.jpg" alt="...">
 						</a>
-						<div class="media-body">
-							<p class="fs-16">
-								<a class="hover-primary" href="#"><strong>Tyler</strong></a>
-							</p>
-							<p>Praesent tristique diam...</p>
-							<span>Just now</span>
+						<div class="media-body" id="notification">
+							
 						</div>
-					</div>
-					<div class="media py-10 px-0">
+					</div> *@
+@* 					<div class="media py-10 px-0">
 						<a class="avatar avatar-lg status-danger" href="#">
 							<img src="~/assets/images/avatar-1.png" alt="...">
 						</a>
@@ -283,7 +281,7 @@
 							<p>Cras tempor diam ...</p>
 							<span>33 min ago</span>
 						</div>
-					</div>
+					</div> *@
 				</div>
 			</div>
 			<!-- /.tab-pane -->
@@ -413,7 +411,11 @@
 		}
 		});
 	</script>
-	
+
+   
+	<!--SignalRconnect-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script src="~/js/stocknotificationchat.js"></script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

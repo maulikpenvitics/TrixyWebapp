@@ -13,5 +13,7 @@ namespace Repository.IRepositories
         Task<List<Historical_Data>> GetHistoricalData();
         Task InsertStockAsync(Stock_master_data stock);
         Task<List<Historical_Data>> GetStockDataBySymbolAsync(string symbol);
+        Task DeleteHistoricaldata();
+        Task InsertNewHistoricalData(List<Historical_Data> newData);
     }
 }

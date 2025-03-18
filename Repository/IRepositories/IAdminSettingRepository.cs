@@ -8,6 +8,6 @@ namespace Repository.IRepositories
 {
     public interface IAdminSettingRepository
     {
-
+        Task<string> GetJobFrequencyAsync();
     }
 }
