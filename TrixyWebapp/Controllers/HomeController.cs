@@ -68,8 +68,8 @@ namespace TrixyWebapp.Controllers
                 //NSE:RELIANCE-EQ
                 //NSE: BAJFINANCE - EQ
                 //NSE:ABFRL-EQ
-                var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync("NSE:VEDL-EQ", DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
-                await _HistoricalStockdata.InsertManyAsync(data);
+                //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync("NSE:VEDL-EQ", DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
+                //await _HistoricalStockdata.InsertManyAsync(data);
                 var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
 
                 //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
