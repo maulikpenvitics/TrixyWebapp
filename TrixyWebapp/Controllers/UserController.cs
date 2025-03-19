@@ -44,6 +44,9 @@ namespace TrixyWebapp.Controllers
             {
                 var existuser = await _user.GetByEmail(user?.Email ?? "");
                 user.ProfileImageUrl = existuser.ProfileImageUrl;   
+                user.UserStrategy = existuser.UserStrategy;   
+                user.Status = existuser.Status;   
+                user.Stocks = existuser.Stocks;   
                 await _userRepository.UpdateAsync(user.Id.ToString(), user);
                 return RedirectToAction("Index");
             }
