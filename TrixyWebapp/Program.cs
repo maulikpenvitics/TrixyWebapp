@@ -1,6 +1,4 @@
-﻿using Hangfire;
-using Hangfire.Mongo;
-using Hangfire.Mongo.Migration.Strategies;
+﻿
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -34,13 +32,13 @@ var databaseName = mongoSettings.GetValue<string>("DatabaseName");
 var mongoUrl = new MongoUrl(connectionString);
 var mongoClient = new MongoClient(mongoUrl);
 // Register Hangfire with MongoDB
-builder.Services.AddHangfire(config =>
-{
-    config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
-    {
-        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
-    });
-});
+//builder.Services.AddHangfire(config =>
+//{
+//    config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
+//    {
+//        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
+//    });
+//});
 //builder.Services.AddHangfireServer();
 //builder.Services.AddHostedService<JobSchedulerService>();
 builder.Services.AddHostedService<StockNotificationService>();

@@ -50,8 +50,28 @@ namespace TrixyWebapp.Controllers
                 var existuser = await _user.GetByEmail(user?.Email ?? "");
                 if (existuser == null)
                 {
+                    List<UserStrategy> strategyWeight = new List<UserStrategy>();
+                    var adminsetting =await _user.GetUserSettings();
+                    if (adminsetting != null)
+                    {
+                      var stretagy= adminsetting?.StrategyWeighted?.Where(x => x.IsActive == true).ToList();
+                        if (stretagy!=null && stretagy.Any())
+                        {
+                            foreach (var item in stretagy)
+                            {
+                                strategyWeight.Add(new UserStrategy()
+                                {
+                                    IsActive = true,
+                                    StretagyEnableDisable = false,
+                                    StretagyName = item.Strategy
+                                });
+
+                            }
+                        }
+                       
+                    }
                     user.Stocks = new List<Stocks>();
-                    user.UserStrategy = new List<UserStrategy>();
+                    user.UserStrategy = strategyWeight;
                     var result = await _userRepository.InsertAsync(user);
                     if (result == 1)
                     {

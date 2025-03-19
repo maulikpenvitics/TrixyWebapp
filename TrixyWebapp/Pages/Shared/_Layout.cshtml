@@ -161,7 +161,7 @@
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="#" style="display:none"><i class="ti-power-off me-2"></i> Logout</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="@Url.Action("Logout","Account")"><i class="ti-power-off me-2"></i> Logout</a>
+								<a class="dropdown-item" id="logoutButton" href="@Url.Action("Logout","Account")"><i class="ti-power-off me-2"></i> Logout</a>
 							</li>
 						</ul>
 					</li>
@@ -412,7 +412,22 @@
 		});
 	</script>
 
-   
+	<script>
+		document.getElementById("logoutButton").addEventListener("click", logout);
+	 function logout() {
+		 debugger
+			console.log("User logging out...");
+
+			// Clear local storage
+			localStorage.removeItem("stockNotifications");
+
+			// Optional: Clear session storage if needed
+			sessionStorage.clear();
+
+			// Redirect user to the login page (modify the URL accordingly)
+			window.location.href = "/login";
+		}
+	</script>
 	<!--SignalRconnect-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 	<script src="~/js/stocknotificationchat.js"></script>

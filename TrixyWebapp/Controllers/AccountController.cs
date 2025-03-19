@@ -78,6 +78,7 @@ namespace TrixyWebapp.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
+                   
                     _fyersWebSocket.Connect(user?.Stocks?.ToList());
                     return RedirectToAction("Index", "Home");
                 }
@@ -97,7 +98,10 @@ namespace TrixyWebapp.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            _fyersWebSocket.Disconnect();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear();
+           
             return RedirectToAction("Login", "Account");
         }
         [HttpGet]

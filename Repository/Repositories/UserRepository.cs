@@ -125,7 +125,7 @@ namespace Repository.Repositories
         public async Task<AdminSettings> GetUserSettings()
         {
             var settings = await _userSettingsCollection
-            .Find(_ => true) // This retrieves the first record without any filter
+            .Find(_ => true) 
            .FirstOrDefaultAsync();
 
             return settings ?? new AdminSettings(); //

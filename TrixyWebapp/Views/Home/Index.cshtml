@@ -466,7 +466,7 @@
 
        };
 
-           function Chartdatabind(sym){
+       function Chartdatabind(sym){
 			   debugger
                    $.ajax({
                            url: '/Home/FetchData',
@@ -486,8 +486,8 @@
 
                });
        }
-           function renderChart(data) {
-           var options = {
+       function renderChart(data) {
+          var options = {
 
                series: [{
                    data: data // OHLC data
