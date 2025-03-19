@@ -42,6 +42,8 @@ namespace TrixyWebapp.Controllers
         {
             if (user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
             {
+                var existuser = await _user.GetByEmail(user?.Email ?? "");
+                user.ProfileImageUrl = existuser.ProfileImageUrl;   
                 await _userRepository.UpdateAsync(user.Id.ToString(), user);
                 return RedirectToAction("Index");
             }
