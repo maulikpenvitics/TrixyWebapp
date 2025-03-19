@@ -1,5 +1,4 @@
-﻿using Hangfire;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.IRepositories;
@@ -23,7 +22,7 @@ namespace Repository.Repositories
         public async Task<string> GetJobFrequencyAsync()
         {
             var setting = await _adminSettings.Find(_ => true).FirstOrDefaultAsync();
-            return setting.Frequency > 0 ? setting.Frequency.ToString() :Cron.Daily(); // Default to daily if not found
+            return setting.Frequency > 0 ? setting.Frequency.ToString() : "1";
         }
     }
 }
