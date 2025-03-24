@@ -120,7 +120,7 @@ namespace Repository.Repositories
            .FirstOrDefaultAsync();
             if (frequency != null)
             {
-               DateTime HoursAgo = DateTime.UtcNow.AddHours(-(frequency.Frequency));
+               DateTime HoursAgo = DateTime.UtcNow.AddDays(-1);
                 var filter = Builders<Historical_Data>.Filter.And(
                 Builders<Historical_Data>.Filter.Eq(s => s.Timestamp, HoursAgo)
             );

@@ -1,0 +1,77 @@
+﻿@model Repository.Models.User
+
+@{
+	Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div class="content-wrapper">
+	<div class="container-full">
+		<!-- Main content -->
+		<section class="content">
+			<div class="row">
+				<div class="col-xl-12 col-12">
+                    <div class="box">
+                        <ul class="todo-list mt-20">
+                            @if (Model?.UserStrategy != null && Model.UserStrategy.Any())
+                            {
+                                var properties = Model?.UserStrategy.ToList(); // Get all properties of the Master object
+
+                                foreach (var prop in Model?.UserStrategy.ToList())
+                                {
+                                    var strategyName = prop.StretagyName;
+                                    var isChecked = prop.StretagyEnableDisable;
+
+                                    <li class="py-15 px-5 by-1">
+                                        <input type="checkbox" id="basic_checkbox_@strategyName"
+                                               class="filled-in strategy-checkbox"
+                                               data-strategy="@strategyName"
+                                        @(isChecked ? "checked=\"checked\"" : "")>
+                                        <label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
+                                        <span>@strategyName</span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="py-15 px-5">No strategies available.</li>
+                            }
+                        </ul>
+                    </div>
+                    
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+         $(".strategy-checkbox").change(function () {
+                var strategyName = $(this).data("strategy");
+                var isChecked = $(this).is(":checked") ? "True" : "False";
+
+                $.ajax({
+                    url: "/Home/UpdateStrategyStatus",
+                    type: "POST",
+                    data: {
+                        userId: userId,
+                        strategyName: strategyName,
+                        status: isChecked
+                    },
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (error) {
+                        console.log("Error:", error);
+                    }
+                });
+
+                $("#logoutButton").on("click",function(){
+                    logout();
+                });
+            });
+
+    });
+</script>

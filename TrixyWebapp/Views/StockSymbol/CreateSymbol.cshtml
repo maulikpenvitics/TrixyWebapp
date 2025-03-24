@@ -39,7 +39,7 @@
 
                                             <div class="form-group">
                                                 <label class="control-label">Upload Icon</label>
-                                                <input name="IconFile" id="IconFile" type="file" class="form-control" @(Model?.Id != null ? "" : "required") />
+                                                <input name="IconFile" id="IconFile" type="file" class="form-control"/>
 
                                                 <!-- Show the existing image if available (Edit mode) -->
                                                 @if (!string.IsNullOrEmpty(Model?.CompanyIconUrl))

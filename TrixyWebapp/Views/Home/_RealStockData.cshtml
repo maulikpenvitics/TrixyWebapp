@@ -15,16 +15,17 @@
 	}
 	
 }
+
 @if (Model != null && Model.Count>0)
 {
 	@foreach (var item in Model)
 	{
-		<tr id="stock-@item.Symbol" data-symbol="@item.Symbol" data-price="@item.Price" class="stock-row">
+		<tr class="stock-row">
 			<td>
 				@{
 					var userstock = user?.Stocks?.Where(testc => testc.Symbol == item.Symbol).FirstOrDefault();
 				}
-				<a href="#realtime_stock_detail">
+				<a class="stock-compny" id="stock-@item.Symbol" data-symbol="@item.Symbol" data-price="@item.Price">
 					@if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
 					{
 						<img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl??"")" width="30"
@@ -41,7 +42,13 @@
 				</a>
 			</td>
 			<td class="stock-price">
-				<lable class="label label-success text-black">@item.Price</lable>
+				@if (item.Change>0){
+					<lable class="label label-success text-black">@item.Price</lable>
+				}
+				else{
+					<lable class="label label-danger text-black">@item.Price</lable>
+				}
+			
 			</td>
 			<td>
 				

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Repository.IRepositories;
 using Repository.Models;
@@ -7,6 +8,7 @@ using System.Text;
 
 namespace TrixyWebapp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminSettingController : Controller
     {
         private readonly IRepository<AdminSettings> _adminSettingsRepository;

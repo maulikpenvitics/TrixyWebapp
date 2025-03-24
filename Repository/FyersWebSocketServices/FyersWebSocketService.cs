@@ -9,6 +9,7 @@ using Repository.IRepositories;
 using Repository.Models;
 using SharpCompress.Common;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -35,7 +36,7 @@ namespace Repository.FyersWebSocketServices
         private readonly IServiceProvider _serviceProvider;
         //private const string BaseUrl = "https://api-t1.fyers.in/data/history";
         private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDIzNTkwNjYsImV4cCI6MTc0MjQzMDY0NiwibmJmIjoxNzQyMzU5MDY2LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbjJrb2FiSzIxQ3Z6dTAyOWVVaU9YSEJ6NFhsT05ieTR3SkNPcWRWcTU4SHgzRW5ZeVR4cmNkY0R4M09sclRTanlSeUpldy0xZnVzaHBnNG5zS0FXeUxvNE1OdVQ3b0VSS1E1U0dIZi1FZno1bUhVND0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.TUXvji0B3RkvqOhRgmu3G-urSwgegpxQnHhQupi1zIY";
+        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbjRRZ3VLQWk3Z29xQm5lZ3RUS0hiX1g2RllObHFKclVTLW9lMHQyZXg3Ui1JNjloTFRUWUtkclRSN1hhX2NxWXZ1MzMyaTlNTERpNDRuNVZwYlVWMW43dGMtaUpRdTBzWmVZblJpWlpxMWlBdTRIQT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQyODYyNjAwLCJpYXQiOjE3NDI4MDA5NDIsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0MjgwMDk0Miwic3ViIjoiYWNjZXNzX3Rva2VuIn0.q6gG-CQMkYXI14uluXuH4M2a31s-P5nZuFrSjV1jpRI";
       
       
         public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient, IServiceProvider serviceProvider)
@@ -78,16 +79,19 @@ namespace Repository.FyersWebSocketServices
                 writer.WriteLine(errorMessage);
             }
         }
-        public List<StockData> GetStockData()
+        public List<StockData> GetStockData(List<Stocks>? stocks)
         {
+            if (stocks != null)
+            {
+                var list = stocks.Select(x => x.Symbol).ToList();
+                _stocklist.AddRange(list);
+                _stocklist.ToList();
+            }
+
             lock (_lock)
             {
                 return _stockDataList.Where(x=> _stocklist.Contains(x.Symbol)).ToList();
             }
-        }
-        public List<string?> GetStockList()
-        {
-            return _stocklist;
         }
         public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync(string sym,string rangform,string rangeto)
         {
@@ -98,7 +102,7 @@ namespace Repository.FyersWebSocketServices
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE3NDIzNTkwNjYsImV4cCI6MTc0MjQzMDY0NiwibmJmIjoxNzQyMzU5MDY2LCJhdWQiOlsieDowIiwieDoxIiwieDoyIiwiZDoxIiwiZDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCbjJrb2FiSzIxQ3Z6dTAyOWVVaU9YSEJ6NFhsT05ieTR3SkNPcWRWcTU4SHgzRW5ZeVR4cmNkY0R4M09sclRTanlSeUpldy0xZnVzaHBnNG5zS0FXeUxvNE1OdVQ3b0VSS1E1U0dIZi1FZno1bUhVND0iLCJkaXNwbGF5X25hbWUiOiJWQVJTSEFCRU4gTkFSQVlBTkJIQUkgREFCSEkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwicG9hX2ZsYWciOiJOIn0.TUXvji0B3RkvqOhRgmu3G-urSwgegpxQnHhQupi1zIY"; // Replace with actual token
+            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbjRRZ3VLQWk3Z29xQm5lZ3RUS0hiX1g2RllObHFKclVTLW9lMHQyZXg3Ui1JNjloTFRUWUtkclRSN1hhX2NxWXZ1MzMyaTlNTERpNDRuNVZwYlVWMW43dGMtaUpRdTBzWmVZblJpWlpxMWlBdTRIQT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQyODYyNjAwLCJpYXQiOjE3NDI4MDA5NDIsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0MjgwMDk0Miwic3ViIjoiYWNjZXNzX3Rva2VuIn0.q6gG-CQMkYXI14uluXuH4M2a31s-P5nZuFrSjV1jpRI"; // Replace with actual token
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -168,34 +172,27 @@ namespace Repository.FyersWebSocketServices
             _hubContext.Clients.All.SendAsync("ReceiveStockData", _stockDataList);
         }
 
-        public async void Connect(List<Stocks>? stocks)
+        public void Connect()
         {
             try
             {
                 List<string?> symlist = new List<string?>();
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var stockssym = scope.ServiceProvider.GetRequiredService<IRepository<StockSymbol>>();
-                    var sym = await stockssym.GetAllAsync();
-                    if (sym.Any() && sym!=null)
+                    var stockssym = scope.ServiceProvider.GetRequiredService<IStockSymbolRepository>();
+                    var sym = stockssym.Getallsym();
+                    if (sym.Any() && sym != null)
                     {
-                        symlist = sym.Where(x=>x.Status==true).Select(x => x.Symbol).ToList();
+                        symlist = sym.Where(x => x.Status == true).Select(x => x.Symbol).ToList();
                     }
-                    
                 }
-                    if (stocks != null)
-                    {
-                        var list = stocks.Select(x => x.Symbol).ToList();
-                        _stocklist.AddRange(list);
-                        _stocklist.ToList();// = stocks.Select(x => x.Symbol).ToList();
-                    }
-
+               
                 FyersClass fyersModel = FyersClass.Instance;
                 fyersModel.ClientId = ClientId;
                 fyersModel.AccessToken = AccessToken;
               
                 Methods t = new Methods(this); // Pass the HubContext
-                await t.DataWebSocket(symlist);
+                 t.DataWebSocket(symlist);
             }
             catch (Exception ex)
             {
@@ -207,9 +204,7 @@ namespace Repository.FyersWebSocketServices
         public void Disconnect()
         {
             _stocklist.Clear();
-            //_stockDataList.Clear();
-            //Methods methods = new Methods(this);
-            //methods.closeconnection();
+           
         }
 
     }
@@ -224,7 +219,7 @@ namespace Repository.FyersWebSocketServices
             _service = service;
         }
 
-        public async Task DataWebSocket(List<string> stock)
+        public void DataWebSocket(List<string> stock)
         {
             try
             {
@@ -232,7 +227,7 @@ namespace Repository.FyersWebSocketServices
                 //client.ReconnectAttemptsCount = 1;
                 client.webSocketDelegate = this;
 
-                await client.Connect();
+                 client.Connect();
                 client.ConnectHSM(ChannelModes.FULL);
 
                 //var stocklist = _service.GetStockList();
@@ -244,19 +239,6 @@ namespace Repository.FyersWebSocketServices
                 _service.LogFilegenerate(ex, "FyersWebSocketService/Methods");
             }
           
-        }
-        
-        public async void closeconnection()
-        {
-            if (client==null)
-            {
-                client = new FyersSocket();
-                //client.ReconnectAttemptsCount = 1;
-                client.webSocketDelegate = this;
-
-               await client.Close();
-                Console.WriteLine("WebSocket Connection Opened: " + "close");
-            }
         }
         public void OnClose(string status)
         {

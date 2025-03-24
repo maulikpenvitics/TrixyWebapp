@@ -1,65 +1,35 @@
-﻿
+﻿var notifiction = [];
+console.log("Logged-in User ID:", currentUserId);
+$(document).ready(function () {
+    if (!currentUserId) return; // Ensure user is logged in
+
+    let storedData = localStorage.getItem(`stockNotifications_${currentUserId}`);
+    if (storedData) {
+        notifiction = JSON.parse(storedData); 
+        displayStockNotifications(notifiction); 
+       
+    }
+});
 const connection = new signalR.HubConnectionBuilder()
 	.withUrl("/stockNotificationHub")
     .build();
-    debugger
+ 
 connection.on("ReceiveStockUpdate", (stocknotifactiondatas) => {
-    debugger
+   
     console.log("Received Data:", stocknotifactiondatas); // Debugging
     if (!Array.isArray(stocknotifactiondatas) || stocknotifactiondatas.length === 0) {
         console.warn("No data received or incorrect format");
         return;
     }
-
-    let storedData = localStorage.getItem("stockNotifications");
-    let existingData = storedData ? JSON.parse(storedData) : [];
-
-    // Merge old and new notifications (limit to last 50 notifications for performance)
-    let updatedStockNotifications = [...stocknotifactiondatas, ...existingData];
-
-    localStorage.setItem("stockNotifications", JSON.stringify(stocknotifactiondatas));
-
+    let userNotifications = stocknotifactiondatas.filter(item => item.userid === currentUserId);
+    notifiction = [...userNotifications, ...notifiction].slice(0, 50);
+   
+    localStorage.setItem(`stockNotifications_${currentUserId}`, JSON.stringify(notifiction));
+    
     // Display notifications
-    displayStockNotifications(updatedStockNotifications);
-    //let container = document.getElementById("notificationContainer"); // Target div
-    //if (!container) {
-    //    console.error("Target div (notificationContainer) not found");
-    //    return;
-    //}
-
-    //stocknotifactiondatas.forEach(item => {
-    //    let userDiv = document.createElement("div");
-    //    userDiv.classList.add("media", "py-10", "px-0");
-    //    let formattedTime = timeAgo(item.timestamp);
-
-    //    if (item.buySellSignal) {
-    //        if (item.buySellSignal.toUpperCase() === "SELL") {
-    //            recommendationLabel = `<span class="label label-danger">Sell</span>`;
-    //        } else {
-    //            recommendationLabel = `<span class="label label-success">Buy</span>`;
-    //        }
-    //    }
-
-    //    userDiv.innerHTML = `
-    //        <a class="avatar avatar-lg status-danger" href="#">
-    //            <img src="/assets/images/1.jpg" alt="...">
-    //        </a>
-    //        <div class="media-body">
-    //            <p class="fs-16">
-    //                <a class="hover-primary" href="#"><strong>${item.userid}</strong></a>
-    //            </p>
-    //            <p><strong>Stock:</strong>  ${item.symbol} - <strong>Price:</strong>  ${item.price} - Signal: ${item.buySellSignal}</p>
-    //            <p><strong>Strategy used:</strong>  ${item.userStrategy.map(strategy => strategy).join(', ') } </p>
-    //            <span>${formattedTime}</span>
-    //        </div>
-    //    `;
-    //    var recommendationCell = $("#recomendation_" + item.symbol);
-    //    if (recommendationCell.length > 0) {
-    //        recommendationCell.html(recommendationLabel);  // Update the table cell
-    //    }
-    //    container.appendChild(userDiv); // Append new stock update
-    //});
-    console.log("Stock notifications updated!");
+    displayStockNotifications(notifiction);
+   window.location.reload();
+    //console.log("Stock notifications updated!");
 });
 
 connection.start()
@@ -101,19 +71,16 @@ function displayStockNotifications(stocknotifactiondatas) {
         let recommendationLabel = "";
         if (item.buySellSignal) {
             recommendationLabel = item.buySellSignal.toUpperCase() === "SELL"
-                ? `<span class="label label-danger">Sell</span>`
-                : `<span class="label label-success">Buy</span>`;
+                ? `<span class="lable lable-danger">Sell</span>`
+                : `<span class="lable lable-success">Buy</span>`;
         }
 
         userDiv.innerHTML = `
-            <a class="avatar avatar-lg status-danger" href="#">
-                <img src="/assets/images/1.jpg" alt="...">
-            </a>
             <div class="media-body">
                 <p class="fs-16">
-                    <a class="hover-primary" href="#"><strong>${item.userid}</strong></a>
+                    <strong>Stock:</strong> ${item.symbol} 
                 </p>
-                <p><strong>Stock:</strong> ${item.symbol} - <strong>Price:</strong> ${item.price} - Signal: ${item.buySellSignal}</p>
+                <p> <strong>Price:</strong> ${item.price} - Signal: ${item.buySellSignal}</p>
                 <p><strong>Strategy used:</strong> ${item.userStrategy.map(strategy => strategy).join(', ')}</p>
                 <span>${formattedTime}</span>
             </div>
@@ -123,15 +90,13 @@ function displayStockNotifications(stocknotifactiondatas) {
         if (recommendationCell.length > 0) {
             recommendationCell.html(recommendationLabel);  // Update the table cell
         }
-        container.appendChild(userDiv); // Append new stock update
+        container.appendChild(userDiv); 
     });
-
+   
     console.log("Stock notifications updated!");
 }
-document.addEventListener("DOMContentLoaded", () => {
-    let storedData = localStorage.getItem("stockNotifications");
-    if (storedData) {
-        let stocknotifactiondatas = JSON.parse(storedData);
-        displayStockNotifications(stocknotifactiondatas);
-    }
-});
+function getCurrentUserId() {
+   
+    // Example: Fetch user ID from a global JS variable or an API
+    return sessionStorage.getItem("UserId") || null;
+}

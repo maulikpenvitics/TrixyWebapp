@@ -1,4 +1,7 @@
 ﻿
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -94,6 +97,13 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope()) // ✅ Create a scope
+{
+    var webSocketService = scope.ServiceProvider.GetRequiredService<FyersWebSocketService>();
+    webSocketService.Connect();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

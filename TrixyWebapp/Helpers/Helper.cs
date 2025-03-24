@@ -154,7 +154,7 @@ namespace TrixyWebapp.Helpers
             return signal;
         }
 
-        public static string genratesignalsforRSI(List<Historical_Data> stockData)
+        public static string genratesignalsforRSI(List<Historical_Data> stockData,int rsiPeriod,int Overbought, int Oversold)
         {
             string Signal = "HOLD";
             int returnresult = 0;
@@ -163,17 +163,17 @@ namespace TrixyWebapp.Helpers
                 Close = (double)x.Close,
                 Date = x.Timestamp,
             }).ToList();
-            int rsiPeriod = 14; // RSI period (default 14 days)
+           
             StockCalculator.CalculateRSI(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result!=null)
             {
-                if (result.RSI < 30)
+                if (result.RSI < Overbought)
                 {
                     Signal = "BUY";
                     returnresult = 1;
                 }
-                else if (result.RSI > 70)
+                else if (result.RSI > Oversold)
                 {
                     Signal = "SELL";
                     returnresult = -1;
@@ -382,10 +382,12 @@ namespace TrixyWebapp.Helpers
             var thresold = userSettings.Threshold;
             var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, 10, 50);
             
-            var RSI = genratesignalsforRSI(stockData);
+            var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought
+                , userSettings.RSIThresholds.Oversold);
             var bollingerBands = GenerateBuySellSignalsForBB(stockData);
-            var MACD = CalculateMACD(stockData, 12, 26, 9);
-            var MeanReversion = CalculateMeanReversion(stockData, 10, 0.1);
+            var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod,
+               userSettings.MACD_Settings.SignalPeriod);
+            var MeanReversion = CalculateMeanReversion(stockData, 30, 0.1);
             var VWAP = CalculateVWAP(stockData);
            
             double macweight= weightedstrategy?.FirstOrDefault(x=>x.Strategy== "Moving_Average")?.Weight??0;

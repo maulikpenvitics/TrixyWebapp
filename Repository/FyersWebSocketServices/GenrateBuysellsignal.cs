@@ -44,7 +44,7 @@ namespace Repository.FyersWebSocketServices
             return signal;
         }
 
-        public static string genratesignalsforRSI(List<Historical_Data> stockData)
+        public static string genratesignalsforRSI(List<Historical_Data> stockData, int rsiPeriod,int overbought,int oversold)
         {
             string Signal = "HOLD";
             int returnresult = 0;
@@ -53,17 +53,17 @@ namespace Repository.FyersWebSocketServices
                 Close = (double)x.Close,
                 Date = x.Timestamp,
             }).ToList();
-            int rsiPeriod = 14; // RSI period (default 14 days)
+            
             StockCalculator.CalculateRSI(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result != null)
             {
-                if (result.RSI < 30)
+                if (result.RSI < oversold)
                 {
                     Signal = "BUY";
                     returnresult = 1;
                 }
-                else if (result.RSI > 70)
+                else if (result.RSI > overbought)
                 {
                     Signal = "SELL";
                     returnresult = -1;
@@ -270,12 +270,13 @@ namespace Repository.FyersWebSocketServices
         {
             var weightedstrategy = userSettings.StrategyWeighted;
             var thresold = userSettings.Threshold;
-            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, 10, 50);
+            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings.MovingAverage.SMA_Periods, userSettings.MovingAverage.LMA_Periods);
 
-            var RSI = genratesignalsforRSI(stockData);
+            var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought,
+                userSettings.RSIThresholds.Oversold);
             var bollingerBands = GenerateBuySellSignalsForBB(stockData);
-            var MACD = CalculateMACD(stockData, 12, 26, 9);
-            var MeanReversion = CalculateMeanReversion(stockData, 10, 0.1);
+            var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod, userSettings.MACD_Settings.SignalPeriod);
+            var MeanReversion = CalculateMeanReversion(stockData, 30, 0.1);
             var VWAP = CalculateVWAP(stockData);
 
             double macweight = weightedstrategy?.FirstOrDefault(x => x.Strategy == "Moving_Average")?.Weight ?? 0;
@@ -310,24 +311,27 @@ namespace Repository.FyersWebSocketServices
 
             double totalWeight = Math.Round(weights.Sum(), 2);
        
-            double weightedSum = 0;
+            int weightedSum = 0;
             for (int i = 0; i < signals.Count; i++)
             {
                 if (signalMapping.ContainsKey(signals[i]))
                 {
-                    weightedSum += signalMapping[signals[i]] * weights[i];
+                    weightedSum += signalMapping[signals[i]];
                     //totalWeight += weights[i];
                 }
             }
-            double finalScore = totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
+            int finalScore = weightedSum;
 
-            if (finalScore > thresold)
+            if (finalScore >0)
             {
                 return "BUY";
             }
-            else
+            else if (finalScore<0)
             {
                 return "SELL";
+            }
+            else {
+                return "HOLD";
             }
 
         }

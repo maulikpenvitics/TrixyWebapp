@@ -11,5 +11,6 @@ namespace Repository.IRepositories
     {
         Task<StockSymbol> GetStockBySymbol(string Symbol);
         Task<List<StockSymbol>> GetStocklistBySymbol(string Symbol);
+        List<StockSymbol> Getallsym();
     }
 }

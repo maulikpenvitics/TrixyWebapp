@@ -19,6 +19,7 @@ namespace Repository.Models
         public double Threshold { get; set; }
         public double Frequency { get; set; }
         
+        
         public MovingAverageSettings? MovingAverage { get; set; }
         public RSIThresholds? RSIThresholds { get; set; }
         public MACDSettings? MACD_Settings { get; set; }
@@ -40,6 +41,7 @@ namespace Repository.Models
     {
         public int Overbought { get; set; }
         public int Oversold { get; set; }
+        public int RsiPeriod { get; set; }
     }
 
     public class MACDSettings

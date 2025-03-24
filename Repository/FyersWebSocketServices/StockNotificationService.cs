@@ -61,7 +61,7 @@ namespace Repository.FyersWebSocketServices
             if (symbol != null)
             {
                 // _fyersWebSocketService.Connect(symbol);
-                List<StockData> stockData = _fyersWebSocketService.GetStockData();
+                List<StockData> stockData = _fyersWebSocketService.GetStockData(symbol);
                 return stockData;
             }
             else

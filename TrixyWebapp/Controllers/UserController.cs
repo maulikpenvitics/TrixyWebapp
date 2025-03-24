@@ -8,7 +8,7 @@ using System.Text;
 
 namespace TrixyWebapp.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IRepository<User> _userRepository;
@@ -151,5 +151,12 @@ namespace TrixyWebapp.Controllers
             return View(adminseting);
         }
 
+        public IActionResult Setting()
+        {
+            var userIdBytes = HttpContext.Session.Get("UserId");
+            string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
+            var user = _user.GetById(userId);
+            return View(user);
+        }
     }
 }

@@ -21,6 +21,13 @@ namespace Repository.Repositories
             _stockSymbol = database.GetCollection<StockSymbol>("StockSymbol");
         }
 
+        public List<StockSymbol> Getallsym()
+        {
+            return _stockSymbol.Find(Builders<StockSymbol>.Filter.And(
+                 Builders<StockSymbol>.Filter.Eq("Status", true)
+             )).ToList();
+        }
+
         public async Task<StockSymbol> GetStockBySymbol(string Symbol)
         {
             return await _stockSymbol.Find(Builders<StockSymbol>.Filter.And(

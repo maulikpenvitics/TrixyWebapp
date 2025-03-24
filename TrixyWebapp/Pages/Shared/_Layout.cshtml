@@ -2,439 +2,335 @@
 @using Newtonsoft.Json
 @using TrixyWebapp.Helpers
 @{
-	// var strategies = ViewData["Strategies"] as List<Strategy>;
-	var masterDataObj = ViewData["MasterData"];
-	//var userId = ViewData["UserId"] as string;
-	//var userRole = ViewData["UserRole"] as string;
-	var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
-	var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
-	var Username = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
-	var imageurl = HttpContextAccessor.HttpContext?.Session.GetString("imageurl");
-	var userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
-	User user = new User();
-	if (!string.IsNullOrEmpty(userJson))
-	{
-		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
-	}
+    // var strategies = ViewData["Strategies"] as List<Strategy>;
+    var masterDataObj = ViewData["MasterData"];
+    //var userId = ViewData["UserId"] as string;
+    //var userRole = ViewData["UserRole"] as string;
+    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+    var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
+    var Username = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
+    var imageurl = HttpContextAccessor.HttpContext?.Session.GetString("imageurl");
+    var userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
+    User user = new User();
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
+    }
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="">
-	<meta name="author" content="">
-	<link rel="icon" href="~/assets/images/logo.png">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="~/assets/images/logo.png">
 
-	<title>Trixy</title>
+    <title>Trixy</title>
 
-	<!-- Vendors Style-->
-	<link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
+    <!-- Vendors Style-->
+    <link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
+   @*  <link href="~/assets/css/vendors_css.css" rel="stylesheet" />
+ *@
+    <!-- Style-->
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <link rel="stylesheet" href="~/assets/css/skin_color.css">
 
-	<!-- Style-->
-	<link rel="stylesheet" href="~/assets/css/style.css">
-	<link rel="stylesheet" href="~/assets/css/skin_color.css">
+    <!-- custom style -->
+    <link rel="stylesheet" href="~/assets/css/custom.css">
 
-	<!-- custom style -->
-	<link rel="stylesheet" href="~/assets/css/custom.css">
-
-	<!--toastr message-->
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-
-	<!--Autocomplete-->
-	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!--Autocomplete-->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 </head>
 
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
-	<input type="hidden" id="userId" value="@userId?.ToString()" />
-	<header class="main-header">
-		<div class="d-flex align-items-center logo-box justify-content-start">
-			<!-- Logo -->
-			<a href="@Url.Action("Index","Home")" class="logo">
-				<!-- logo-->
-				<div class="logo-mini w-40">
-					<span class="light-logo"><img src="~/assets/images/logo.png" width="35" alt="logo"></span>
-				</div>
-				<div class="logo-lg">
-					<span class="light-logo"><img src="~/assets/images/trixy-text.png" alt="logo" width="60"></span>
-				</div>
-			</a>
-		</div>
+    <input type="hidden" id="userId" value="@userId?.ToString()" />
+    <header class="main-header">
+        <div class="d-flex align-items-center logo-box justify-content-start">
+            <!-- Logo -->
+            <a href="@Url.Action("Index","Home")" class="logo">
+                <!-- logo-->
+                <div class="logo-mini w-40">
+                    <span class="light-logo"><img src="~/assets/images/logo.png" width="35" alt="logo"></span>
+                </div>
+                <div class="logo-lg">
+                    <span class="light-logo"><img src="~/assets/images/trixy-text.png" alt="logo" width="60"></span>
+                </div>
+            </a>
+        </div>
 
-		<!-- Header Navbar -->
-		<nav class="navbar navbar-static-top">
+        <!-- Header Navbar -->
+        <nav class="navbar navbar-static-top">
 
-			<!-- Sidebar toggle button-->
-			<div class="app-menu">
-				<ul class="header-megamenu nav">
-					<li class="btn-group nav-item d-sm-inline-flex d-none">
-						<a href="#" class="waves-effect waves-light nav-link push-btn btn-primary-light"
-						data-toggle="push-menu" role="button">
-							<i data-feather="align-left"></i>
-						</a>
-					</li>
-					<li class="btn-group d-lg-inline-flex">
-						<div class="app-menu">
-							<div class="search-bx mx-5">
-								<form asp-action="AddUserStock" asp-controller="StockSymbol" method="post">
-									<div class="input-group">
-										<input type="search" class="form-control" placeholder="Search"
-											   aria-label="Search" id="searchStock" name="Symbol">
-										<input type="hidden" id="hiddenStockId" name="StockId">
-										<div class="input-group-append">
-											<button class="btn" type="submit" id="button-addonStock">
-												<i data-feather="search"></i>
-											</button>
-										</div>
-									</div>
-								</form>
-							</div>
-						</div>
-					</li>
-				</ul>
-			</div>
+            <!-- Sidebar toggle button-->
+            <div class="app-menu">
+                <ul class="header-megamenu nav">
+                    <li class="btn-group nav-item d-sm-inline-flex d-none">
+                        <a href="#" class="waves-effect waves-light nav-link push-btn btn-primary-light"
+                           data-toggle="push-menu" role="button">
+                            <i data-feather="align-left"></i>
+                        </a>
+                    </li>
+                    <li class="btn-group d-lg-inline-flex">
+                        <div class="app-menu">
+                            <div class="search-bx mx-5">
+                                <form asp-action="AddUserStock" asp-controller="StockSymbol" method="post">
+                                    <div class="input-group">
+                                        <input type="search" class="form-control" placeholder="Search"
+                                               aria-label="Search" id="searchStock" name="Symbol">
+                                        <input type="hidden" id="hiddenStockId" name="StockId">
+                                        <div class="input-group-append">
+                                            <button class="btn" type="submit" id="button-addonStock">
+                                                <i data-feather="search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
 
-			<div class="navbar-custom-menu r-side">
-				<ul class="nav navbar-nav">
+            <div class="navbar-custom-menu r-side">
+                <ul class="nav navbar-nav">
 
-					<li class="btn-group nav-item d-block d-sm-none">
-						<a href="#" class="waves-effect full-screen waves-light btn-primary-light"
-						data-toggle="push-menu" role="button">
-							<i data-feather="align-left"></i>
-						</a>
-					</li>
+                    <li class="btn-group nav-item d-block d-sm-none">
+                        <a href="#" class="waves-effect full-screen waves-light btn-primary-light"
+                           data-toggle="push-menu" role="button">
+                            <i data-feather="align-left"></i>
+                        </a>
+                    </li>
 
-					<li class="btn-group d-lg-inline-flex d-none">
-						<a href="#" data-provide="fullscreen" class="waves-effect waves-light full-screen btn-warning-light" title="Full Screen">
-							<i data-feather="maximize"></i>
-						</a>
-					</li>
+                    <li class="btn-group d-lg-inline-flex d-none">
+                        <a href="#" data-provide="fullscreen" class="waves-effect waves-light full-screen btn-warning-light" title="Full Screen">
+                            <i data-feather="maximize"></i>
+                        </a>
+                    </li>
 
-					<!-- Control Sidebar Toggle Button -->
-					<li class="btn-group nav-item">
-						<a href="#" data-toggle="control-sidebar" title="Setting"
-						class="waves-effect full-screen waves-light btn-danger-light">
-							<i data-feather="settings"></i>
-						</a>
-					</li>
+                    <!-- Control Sidebar Toggle Button -->
+                    <li class="btn-group nav-item">
+                        <a href="#" data-toggle="control-sidebar" title="Setting"
+                           class="waves-effect full-screen waves-light btn-danger-light">
+                            <i class="ti-bell"></i>
+                        </a>
+                    </li>
 
-					<!-- User Account-->
-					<li class="dropdown user user-menu">
-						<a href="#"
-						class="waves-effect waves-light dropdown-toggle w-auto l-h-12 bg-transparent py-0 no-shadow"
-						data-bs-toggle="dropdown" title="User">
-							<div class="d-flex align-items-center">
-								<div class="text-end me-10 d-sm-inline d-none">
-									<p class="pt-5 fs-14 mb-0 fw-700 text-primary">@Username</p>
-									<small class="fs-10 mb-0 text-uppercase text-mute">@userRole</small>
-								</div>
-								@if (!string.IsNullOrEmpty(user?.ProfileImageUrl))
-								{
+                    <!-- User Account-->
+                    <li class="dropdown user user-menu">
+                        <a href="#"
+                           class="waves-effect waves-light dropdown-toggle w-auto l-h-12 bg-transparent py-0 no-shadow"
+                           data-bs-toggle="dropdown" title="User">
+                            <div class="d-flex align-items-center">
+                                <div class="text-end me-10 d-sm-inline d-none">
+                                    <p class="pt-5 fs-14 mb-0 fw-700 text-primary">@Username</p>
+                                    <small class="fs-10 mb-0 text-uppercase text-mute">@userRole</small>
+                                </div>
+                                @if (!string.IsNullOrEmpty(user?.ProfileImageUrl))
+                                {
 
-									<img src="@Context.GetFullUrl(user?.ProfileImageUrl)" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
-								}
-								else
-								{
-									<img src="~/assets/images/avatar-1.png"
-									class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
-								}
+                                    <img src="@Context.GetFullUrl(user?.ProfileImageUrl)" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
+                                }
+                                else
+                                {
+                                    <img src="~/assets/images/avatar-1.png"
+                                         class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
+                                }
 
-							</div>
-						</a>
-						<ul class="dropdown-menu animated flipInX">
-							<li class="user-body">
-								<a class="dropdown-item" href="@Url.Action("UserProfile", "Account", new { Id = userId })">
-									<i class="ti-user text-muted me-2"></i>
-									Profile
-								</a>
-								<a class="dropdown-item" href="#">
-									<i class="ti-settings text-muted me-2"></i>
-									Settings
-								</a>
-								<a class="dropdown-item" href="@Url.Action("ChangePassword","Account",new{Id=userId})" target="_blank">
-									<i class="ti-lock text-muted me-2"></i> Change
-									Password
-								</a>
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="#" style="display:none"><i class="ti-power-off me-2"></i> Logout</a>
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" id="logoutButton" href="@Url.Action("Logout","Account")"><i class="ti-power-off me-2"></i> Logout</a>
-							</li>
-						</ul>
-					</li>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu animated flipInX">
+                            <li class="user-body">
+                                <a class="dropdown-item" href="@Url.Action("UserProfile", "Account", new { Id = userId })">
+                                    <i class="ti-user text-muted me-2"></i>
+                                    Profile
+                                </a>
+                                <a class="dropdown-item" href="/User/Setting">
+                                    <i class="ti-settings text-muted me-2"></i>
+                                    Settings
+                                </a>
+                                <a class="dropdown-item" href="@Url.Action("ChangePassword","Account",new{Id=userId})" target="_blank">
+                                    <i class="ti-lock text-muted me-2"></i> Change
+                                    Password
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" style="display:none"><i class="ti-power-off me-2"></i> Logout</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" id="logoutButton" href="@Url.Action("Logout","Account")"><i class="ti-power-off me-2"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </li>
 
-				</ul>
-			</div>
+                </ul>
+            </div>
 
-		</nav>
+        </nav>
 
-	</header>
-	<aside class="main-sidebar">
-		<!-- sidebar-->
-		<section class="sidebar position-relative">
-			<div class="multinav">
-				<div class="multinav-scroll ps" style="height: 100%;">
-					<!-- sidebar menu-->
-					<ul class="sidebar-menu" data-widget="tree">
-						<li class="treeview active" onclick="location.href=this.querySelector('a').href;">
-							<a href="/Home/Index">
-								<i data-feather="grid"></i><span>Dashboard</span>
-							</a>
-						</li>
-						@if (User.Identity.IsAuthenticated)
-						{
-							@if (User.IsInRole("Admin"))
-							{
-								<li class="treeview active" onclick="window.open(this.querySelector('a').href, '_blank');">
-									<a href="/User/Index" target="">
-										<i data-feather="user"></i><span>Users</span>
-									</a>
-								</li>
-							}
-						}
-						<li class="treeview active" onclick="location.href=this.querySelector('a').href;">
-							<a href="/StockSymbol/Index">
-								<i data-feather="grid"></i><span>Symbols</span>
-							</a>
-						</li>
-						<li class="treeview active" onclick="location.href=this.querySelector('a').href;">
-							<a href="/AdminSetting/AdminSetting">
-								<i data-feather="settings"></i><span>Admin settings</span>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</section>
-	</aside>
-	<div class="container">
-		<main role="main" class="pb-3">
-			@RenderBody()
-		</main>
-	</div>
+    </header>
+    <aside class="main-sidebar">
+        <!-- sidebar-->
+        <section class="sidebar position-relative">
+            <div class="multinav">
+                <div class="multinav-scroll ps" style="height: 100%;">
+                    <!-- sidebar menu-->
+                    <ul class="sidebar-menu" data-widget="tree">
+                        <li class="treeview active" onclick="location.href=this.querySelector('a').href;">
+                            <a href="/Home/Index">
+                                <i data-feather="grid"></i><span>Dashboard</span>
+                            </a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="treeview" onclick="window.open(this.querySelector('a').href, '_blank');">
+                                    <a href="/User/Index" target="">
+                                        <i data-feather="user"></i><span>Users</span>
+                                    </a>
+                                </li>
 
-	<!-- /.content-wrapper -->
-	<footer class="main-footer">
-		&copy;
-		<script>document.write(new Date().getFullYear())</script> Trixy. All Rights Reserved.
-	</footer>
-	<!-- Control Sidebar -->
-	<aside class="control-sidebar">
+                                <li class="treeview" onclick="location.href=this.querySelector('a').href;">
+                                    <a href="/StockSymbol/Index">
+                                        <i data-feather="grid"></i><span>Symbols</span>
+                                    </a>
+                                </li>
+                                <li class="treeview" onclick="location.href=this.querySelector('a').href;">
+                                    <a href="/AdminSetting/AdminSetting">
+                                        <i data-feather="settings"></i><span>Admin settings</span>
+                                    </a>
+                                </li>
+                            }
 
-		<div class="rpanel-title">
-			<span class="pull-right btn btn-circle btn-danger"
-			data-toggle="control-sidebar"><i class="ti-close text-white"></i></span>
-		</div>
-		<!-- Create the tabs -->
-		<ul class="nav nav-tabs control-sidebar-tabs">
-			<li class="nav-item"><a href="#control-sidebar-home-tab" class="active" data-bs-toggle="tab"><i class="ti-bell" aria-hidden="true"></i></a></li>
-			<li class="nav-item"><a href="#control-sidebar-settings-tab" data-bs-toggle="tab"><i class="ti-user" aria-hidden="true"></i></a></li>
-		</ul>
-		<!-- Tab panes -->
-		<div class="tab-content">
-			<!-- Home tab content -->
-			<div class="tab-pane active" id="control-sidebar-home-tab">
-				<div class="media-list media-list-hover mt-20" id="notificationContainer">
-				@* 	<div class="media py-10 px-0" >
-						<a class="avatar avatar-lg status-success" href="#">
-							<img src="~/assets/images/1.jpg" alt="...">
-						</a>
-						<div class="media-body" id="notification">
-							
-						</div>
-					</div> *@
-@* 					<div class="media py-10 px-0">
-						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="~/assets/images/avatar-1.png" alt="...">
-						</a>
-						<div class="media-body">
-							<p class="fs-16">
-								<a class="hover-primary" href="#"><strong>Luke</strong></a>
-							</p>
-							<p>Cras tempor diam ...</p>
-							<span>33 min ago</span>
-						</div>
-					</div>
-					<div class="media py-10 px-0">
-						<a class="avatar avatar-lg status-success" href="#">
-							<img src="~/assets/images/1.jpg" alt="...">
-						</a>
-						<div class="media-body">
-							<p class="fs-16">
-								<a class="hover-primary" href="#"><strong>Tyler</strong></a>
-							</p>
-							<p>Praesent tristique diam...</p>
-							<span>Just now</span>
-						</div>
-					</div>
-					<div class="media py-10 px-0">
-						<a class="avatar avatar-lg status-danger" href="#">
-							<img src="~/assets/images/avatar-1.png" alt="...">
-						</a>
-						<div class="media-body">
-							<p class="fs-16">
-								<a class="hover-primary" href="#"><strong>Luke</strong></a>
-							</p>
-							<p>Cras tempor diam ...</p>
-							<span>33 min ago</span>
-						</div>
-					</div> *@
-				</div>
-			</div>
-			<!-- /.tab-pane -->
-			<!-- Settings tab content -->
-			<div class="tab-pane" id="control-sidebar-settings-tab">
-				<ul class="todo-list mt-20">
-					@if (user?.UserStrategy != null && user.UserStrategy.Any())
-					{
-						var properties = user?.UserStrategy.ToList(); // Get all properties of the Master object
+                        }
+                      
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </aside>
+    <div>
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
 
-						foreach (var prop in user?.UserStrategy.ToList())
-						{
-							var strategyName = prop.StretagyName;
-							var isChecked = prop.StretagyEnableDisable;
+    <!-- /.content-wrapper -->
+    <footer class="main-footer">
+        &copy;
+        <script>document.write(new Date().getFullYear())</script> Trixy. All Rights Reserved.
+    </footer>
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar">
 
-							<li class="py-15 px-5 by-1">
-								<input type="checkbox" id="basic_checkbox_@strategyName"
-									   class="filled-in strategy-checkbox"
-									   data-strategy="@strategyName"
-								@(isChecked ? "checked=\"checked\"" : "")>
-								<label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
-								<span>@strategyName</span>
-							</li>
-						}
-					}
-					else
-					{
-						<li class="py-15 px-5">No strategies available.</li>
-					}
-				</ul>
+        <div class="rpanel-title">
+            <span class="pull-right btn btn-circle btn-danger"
+                  data-toggle="control-sidebar"><i class="ti-close text-white"></i></span>
+        </div>
+        <!-- Create the tabs -->
+        <ul class="nav nav-tabs control-sidebar-tabs">
+            <li class="nav-item"><a href="#control-sidebar-home-tab" class="active" data-bs-toggle="tab"><i class="ti-bell" aria-hidden="true"></i></a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <!-- Home tab content -->
+            <div class="tab-pane active" id="control-sidebar-home-tab">
+                <div class="media-list media-list-hover mt-20" id="notificationContainer">
+                   
+                </div>
+            </div>
+            <!-- /.tab-pane -->
 
-			</div>
-			<!-- /.tab-pane -->
+        </div>
+    </aside>
 
-		</div>
-	</aside>
-	
-	<!-- /.control-sidebar -->
-	<!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
-	<div class="control-sidebar-bg"></div>
+    <!-- /.control-sidebar -->
+    <!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
+    <div class="control-sidebar-bg"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Vendor JS -->
     <script src="https://specie-admin-template.multipurposethemes.com/main/js/vendors.min.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/assets/vendor_components/datatable/datatables.min.js"></script>
     <script src="https://specie-admin-template.multipurposethemes.com/assets/icons/feather-icons/feather.min.js"></script>
 
-    <!-- Charts JS -->
-    <script src="https://specie-admin-template.multipurposethemes.com/assets/vendor_components/apexcharts-bundle/irregular-data-series.js"></script>
-    <script src="https://specie-admin-template.multipurposethemes.com/assets/vendor_components/apexcharts-bundle/dist/apexcharts.js"></script>
-
     <!-- Specie Admin App -->
-    <script src="https://specie-admin-template.multipurposethemes.com/main/js/template.js"></script>
-    <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/data-table.js"></script>
-    <script src="https://specie-admin-template.multipurposethemes.com/main/js/pages/dashboard.js"></script>
-	<!--toaster messages-->
+   
+    <script src="~/js/dashboard/data-table.js"></script>
+    <script src="~/js/dashboard/template.js"></script>
+    <!--Autocomplete-->
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!--SignalRconnect-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
+    <script>
+        var currentUserId ="@userId";
+    </script>
 
-	<!--Autocomplete-->
-	
-	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-	<script>
-		var userId = "@userId";
-		$(document).ready(function () {
-			$(".strategy-checkbox").change(function () {
-				var strategyName = $(this).data("strategy");
-				var isChecked = $(this).is(":checked") ? "True" : "False";
+    <script src="~/js/stocknotificationchat.js"></script>
 
-				$.ajax({
-					url: "/Home/UpdateStrategyStatus",
-					type: "POST",
-					data: {
-						userId: userId,
-						strategyName: strategyName,
-						status: isChecked
-					},
-					success: function (response) {
-						console.log(response);
-					},
-					error: function (error) {
-						console.log("Error:", error);
-					}
-				});
-			});
-		});
-		$("#searchStock").autocomplete({
-			 autoFocus: true,
-			source: function (request, response) {
-				debugger
-				$.ajax({
-					url: "/StockSymbol/GetStockList", // Replace with your API URL
-					type: "GET",
-					dataType: "json",
-					data: { stocksym: request.term }, // Pass user input
-					success: function (data) {
-						debugger
+    <script>
+        var userId = "@userId";
+        $(document).ready(function () {
+           
+        function logout() {
+            debugger
 
-					if (!data.length) {
-						var result = [
-							{
-								label: 'No matches found',
-								value: response.term
-							}
-						];
-						response(result);
-					}
-					else {
-					response($.map(data, function (item) {
-							return {
-								label: item.symbol,
-								value: item.symbol,
-								 id: item.id,
-							};
-						}));
-					}
-						
-					}
-				});
-			},
-			minLength: 0,
-		    select: function (event, ui) {
-			$("#searchStock").val(ui.item.label); // Show selected text
-			$("#hiddenStockId").val(ui.item.id); // Store ID in a hidden field
-			return false; // Prevent default behavior
-		}
-		});
-	</script>
+               localStorage.removeItem(`stockNotifications_${userId}`);
+               sessionStorage.clear();
 
-	<script>
-		document.getElementById("logoutButton").addEventListener("click", logout);
-	 function logout() {
-		 debugger
-			console.log("User logging out...");
+               window.location.href = "/login";
+           }
+         $("#searchStock").autocomplete({
+             autoFocus: true,
+            source: function (request, response) {
+               
+                $.ajax({
+                    url: "/StockSymbol/GetStockList", // Replace with your API URL
+                    type: "GET",
+                    dataType: "json",
+                    data: { stocksym: request.term }, // Pass user input
+                    success: function (data) {
+                        debugger
 
-			// Clear local storage
-			localStorage.removeItem("stockNotifications");
+                    if (!data.length) {
+                        var result = [
+                            {
+                                label: 'No matches found',
+                                value: response.term
+                            }
+                        ];
+                        response(result);
+                    }
+                    else {
+                    response($.map(data, function (item) {
+                            return {
+                                label: item.symbol,
+                                value: item.symbol,
+                                 id: item.id,
+                            };
+                        }));
+                    }
 
-			// Optional: Clear session storage if needed
-			sessionStorage.clear();
+                    }
+                });
+            },
+            minLength: 0,
+            select: function (event, ui) {
+            $("#searchStock").val(ui.item.label); 
+            $("#hiddenStockId").val(ui.item.id);
+            return false; 
+        }
+        });
 
-			// Redirect user to the login page (modify the URL accordingly)
-			window.location.href = "/login";
-		}
-	</script>
-	<!--SignalRconnect-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-	<script src="~/js/stocknotificationchat.js"></script>
+        });
+    </script>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+  
+   
 	
     @await RenderSectionAsync("Scripts", required: false)
 </body>

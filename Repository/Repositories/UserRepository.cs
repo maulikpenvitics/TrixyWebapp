@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Repository.Repositories
 {
@@ -115,8 +116,15 @@ namespace Repository.Repositories
         {
             return await GetAllAsync();
         }
+        public User GetById(string Id)
+        {
+            if (!ObjectId.TryParse(Id, out ObjectId objectId))
+            {
+                throw new ArgumentException("Invalid ObjectId format", nameof(Id));
+            }
+            return _users.Find(Builders<User>.Filter.Eq("_id", objectId)).FirstOrDefault();
+        }
 
-        
         #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
         {

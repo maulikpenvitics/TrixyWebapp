@@ -20,13 +20,11 @@ namespace TrixyWebapp.Controllers
     public class HomeController : Controller
     {
         private readonly FyersWebSocketService _fyersWebSocket;
-        private readonly IRepository<Historical_Data> _HistoricalStockdata;
-        private readonly IRepository<Strategy> _strategyRepository;
-        private readonly IRepository<User> _masterRepository;
         private readonly IWebStockRepository _stockRepository;
         private readonly IUserRepository _user;
         private readonly IWebHostEnvironment _env;
         private readonly IStockSymbolRepository _stockSymbol;
+        
         public HomeController(FyersWebSocketService fyersWebSocket,
             IRepository<Historical_Data> userRepository,
             IRepository<Strategy> strategyRepository,
@@ -37,16 +35,13 @@ namespace TrixyWebapp.Controllers
             IStockSymbolRepository stockSymbolRepository)
         {
             _fyersWebSocket = fyersWebSocket;
-            _HistoricalStockdata = userRepository;
-            _strategyRepository = strategyRepository;
-            _masterRepository = masterRepository;
             _stockRepository = stockRepository;
             _user = user;
             _env = env;
             _stockSymbol = stockSymbolRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             try
             {
@@ -58,25 +53,11 @@ namespace TrixyWebapp.Controllers
                 string userRole = Encoding.UTF8.GetString(UserRole);
                 ViewData["UserRole"] = userRole;
 
-                var user = await _masterRepository.GetByIdAsync(userId);
+                var user = _user.GetById(userId);
                 HttpContext.Session.SetString("User", JsonSerializer.Serialize(user));
 
-                //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync();
-
-                //NSE:OFSS-EQ
-                //NSE:ITC-EQ
-                //NSE:RELIANCE-EQ
-                //NSE: BAJFINANCE - EQ
-                //NSE:ABFRL-EQ
-                //var data = await _fyersWebSocket.FetchAndStoreHistoricalStockDataAsync("NSE:VEDL-EQ", DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
-                //await _HistoricalStockdata.InsertManyAsync(data);
-                var gethistoricaldata = await _HistoricalStockdata.GetAllAsync();
-
-                //var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync("NSE:OFSS - EQ");
-                // var weightedsignal = await _user.GetUserSettings(userId);
-
-                //EnableDisableStratgey("NSE:OFSS-EQ");
-                return View();
+                List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                return View(stockData);
             }
             catch (Exception ex)
             {
@@ -92,14 +73,18 @@ namespace TrixyWebapp.Controllers
         {
             try
             {
-                List<StockData> stockData = _fyersWebSocket.GetStockData();
+                var userIdBytes = HttpContext.Session.Get("UserId");
+                string userId = Encoding.UTF8.GetString(userIdBytes);
+                var user = _user.GetById(userId);
+                List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
                 var formateddata = stockData.Select(x => new
                 {
                     symbol = x.Symbol,
                     change = x.Change,
+                    price = x.Price,
                 }).ToList();
-                //return Json(formateddata);
-                return PartialView("_RealStockData", stockData);
+                return Json(formateddata);
+              //  return PartialView("_RealStockData", stockData);
             }
             catch (Exception ex)
             {
@@ -107,6 +92,15 @@ namespace TrixyWebapp.Controllers
                 Helper.LogFilegenerate(ex, "Login Action", _env);
             }
             return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public IActionResult Stocksdata()
+        {
+            var userIdBytes = HttpContext.Session.Get("UserId");
+            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var user = _user.GetById(userId);
+            List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+            return PartialView("_RealStockData", stockData);
         }
 
         [HttpGet]
@@ -118,8 +112,8 @@ namespace TrixyWebapp.Controllers
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
 
             var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
-            var oneWeekAgoUtc = DateTime.UtcNow.AddDays(-7);
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-30);
+            var oneWeekAgoUtc = DateTime.UtcNow.AddDays(-30);
             var oneWeekAgoIST = TimeZoneInfo.ConvertTimeFromUtc(oneWeekAgoUtc, istTimeZone);
             var formattedData = gethistoricaldata
                 .Select(item => new
@@ -207,12 +201,14 @@ namespace TrixyWebapp.Controllers
                 #region Moving Average Crossover Strategy
 
 
-                var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: 10, longTerm: 50);
+                var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: weightedsignal.MACD_Settings.ShortEmaPeriod, 
+                    longTerm: weightedsignal.MACD_Settings.LongEmaPeriod);
 
                 #endregion
 
                 #region Relative Strength Index (RSI)
-                var RSIresult = SignalGenerator.genratesignalsforRSI(gethistoricaldata);
+                var RSIresult = SignalGenerator.genratesignalsforRSI(gethistoricaldata, weightedsignal.RSIThresholds.RsiPeriod,
+                    weightedsignal.RSIThresholds.Overbought, weightedsignal.RSIThresholds.Oversold);
 
                 #endregion
                 #region Bollinger Bands Strategy
@@ -228,7 +224,7 @@ namespace TrixyWebapp.Controllers
                 #endregion
 
                 #region MACD (Moving Average Convergence Divergence) Strategy
-                var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, 12, 26, 9);
+                var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, weightedsignal.MACD_Settings.ShortEmaPeriod, weightedsignal.MACD_Settings.LongEmaPeriod, weightedsignal.MACD_Settings.SignalPeriod);
                 #endregion
                 //combination signal
                 finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata);

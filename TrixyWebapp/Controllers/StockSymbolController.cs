@@ -191,7 +191,7 @@ namespace TrixyWebapp.Controllers
                        var updateuser= await _userRepository.AddUserStocks(user);
                         if (updateuser)
                         {
-                            _fyersWebSocket.Connect(user.Stocks.ToList());
+                           // _fyersWebSocket.Connect(user.Stocks.ToList());
                             ViewBag.succesmessage = "Added stock succesfully";
                             return RedirectToAction("Index", "Home");
                         }
@@ -202,53 +202,6 @@ namespace TrixyWebapp.Controllers
 
         }
        
-        //[HttpPost]
-        //public async Task<IActionResult> CreateSymbol(StockSymbol stockSymbol)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        if (stockSymbol.IconFile != null && stockSymbol.IconFile.Length > 0)
-        //        {
-
-        //        }
-
-
-        //        if (stockSymbol.Id.ToString() != null && stockSymbol.Id != ObjectId.Empty && stockSymbol.Id.ToString() != "000000000000000000000000")
-        //        {
-        //            await _stockSymbolRepository.UpdateAsync(stockSymbol.Id.ToString(), stockSymbol);
-        //            return RedirectToAction("Index");
-        //        }
-        //        else
-        //        {
-        //            var existuser = await _stockSymbol.GetStockBySymbol(stockSymbol?.Symbol ?? "");
-        //            if (existuser == null)
-        //            {
-        //                var result = await _stockSymbolRepository.InsertAsync(stockSymbol);
-        //                if (result == 1)
-        //                {
-        //                    return RedirectToAction("Index");
-        //                }
-        //                else
-        //                {
-        //                    ViewBag.Errormessage = "Please try agin";
-        //                    return View();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                ViewBag.Errormessage = "This user already exists.";
-        //                return View();
-        //            }
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Errormessage = "Please try agin";
-        //        return View();
-        //    }
-        //}
-
         [HttpGet]
         public async Task<IActionResult> DeleteSymbol(string Id)
         {
