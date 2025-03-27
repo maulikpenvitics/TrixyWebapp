@@ -14,6 +14,7 @@ using MongoDB.Bson;
 using TrixyWebapp.Helpers;
 using System.Text.Json;
 using Repository.FyersWebSocketServices;
+using NuGet.ProjectModel;
 
 
 namespace TrixyWebapp.Controllers
@@ -59,12 +60,16 @@ namespace TrixyWebapp.Controllers
 
                 if (user != null)
                 {
-                    HttpContext.Session.Set("UserId", Encoding.UTF8.GetBytes(user.Id.ToString()));
+                    HttpContext.Session.SetString("UserId", user.Id.ToString());
                     HttpContext.Session.SetString("UserRole", user?.Role ?? "");
                     HttpContext.Session.SetString("UserName", user?.Firstname + " " + user?.Lastname);
                     HttpContext.Session.SetString("imageurl", user?.ProfileImageUrl ?? "");
                     HttpContext.Session.SetString("User", JsonSerializer.Serialize(user));
 
+                    var userJson = HttpContext?.Session.GetString("User");
+                    var userId = HttpContext?.Session.GetString("UserId");
+                    Helper.LogFile(userJson.ToString(),_env);
+                    Helper.LogFile(userId.ToString(),_env);
                     var claims = new List<Claim>
                     {
                               new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // ✅ Add User ID
@@ -78,7 +83,7 @@ namespace TrixyWebapp.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
-                   
+
                     //_fyersWebSocket.Connect(user?.Stocks?.ToList());
                     return RedirectToAction("Index", "Home");
                 }

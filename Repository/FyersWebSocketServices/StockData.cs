@@ -22,6 +22,7 @@ namespace Repository.FyersWebSocketServices
             }
         }
         public Dictionary<string, decimal> Stocks { get; set; } = new Dictionary<string, decimal>();
+        public Dictionary<string, string> recommendation { get; set; } = new Dictionary<string, string>();
     }
 
 

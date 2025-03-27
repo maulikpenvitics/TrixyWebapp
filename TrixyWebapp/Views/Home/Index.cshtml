@@ -19,6 +19,12 @@
 }
 <!-- Content Wrapper. Contains page content -->
 @* <input type="hidden" id="symbol" value="@symbole" /> *@
+<style>
+	.tooltip-key {
+		font-weight: bold;
+		color: black;
+	}
+</style>
 <div class="content-wrapper">
     <div class="container-full">
         <!-- Main content -->
@@ -57,8 +63,7 @@
 															}
 															else
 															{
-																<img src="~/assets/images/company-logo/logo01.png" width="30"
-																	 alt="reliance" />
+																<img src="~/assets/images/buy.png" width="30"/>
 															}
 															&nbsp;
 
@@ -94,15 +99,19 @@
 														}
 													</td>
 													<td id="recomendation_@item.Symbol">
-														@if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification == true )
+														@if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification == true && asignstretagy > 0)
 														{
+															var recommendationHtml = string.Join("<br />", item.recommendation.Select(kvp => $"<strong class='tooltip-key'>{kvp.Key}:</strong> {kvp.Value}"));
+
 															if (userstock.BuySellSignal == "SELL")
 															{
-																<span class="label label-danger">Sell</span>
+																<span class="label label-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Sell</span>
+
+
 															}
 															else
 															{
-																<span class="label label-success">Buy</span>
+																<span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Buy</span>
 															}
 
 														}
@@ -196,7 +205,9 @@
 <script>
     $(document).ready(function () {
 		updateStockPrices();
-		
+		$('[data-toggle="tooltip"]').tooltip({
+			html:true
+		});
 
 
 	});

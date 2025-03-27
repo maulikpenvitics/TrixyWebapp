@@ -74,13 +74,15 @@ function displayStockNotifications(stocknotifactiondatas) {
                 ? `<span class="lable lable-danger">Sell</span>`
                 : `<span class="lable lable-success">Buy</span>`;
         }
-
+        const signalClass = item.buySellSignal === 'SELL' ? 'label-danger' : 'label-success';
         userDiv.innerHTML = `
             <div class="media-body">
                 <p class="fs-16">
                     <strong>Stock:</strong> ${item.symbol} 
                 </p>
-                <p> <strong>Price:</strong> ${item.price} - Signal: ${item.buySellSignal}</p>
+                <p> <strong>Price:</strong> ${item.price}</p>
+                <p><strong>Signal:</strong>
+           <span class="label ${signalClass}">${item.buySellSignal}</span></p>
                 <p><strong>Strategy used:</strong> ${item.userStrategy.map(strategy => strategy).join(', ')}</p>
                 <span>${formattedTime}</span>
             </div>

@@ -34,16 +34,16 @@ var connectionString = mongoSettings.GetValue<string>("ConnectionString");
 var databaseName = mongoSettings.GetValue<string>("DatabaseName");
 var mongoUrl = new MongoUrl(connectionString);
 var mongoClient = new MongoClient(mongoUrl);
-// Register Hangfire with MongoDB
-//builder.Services.AddHangfire(config =>
-//{
-//    config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
-//    {
-//        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
-//    });
-//});
-//builder.Services.AddHangfireServer();
-//builder.Services.AddHostedService<JobSchedulerService>();
+//Register Hangfire with MongoDB
+builder.Services.AddHangfire(config =>
+{
+    config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
+                                      {
+                                          MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
+                                      });
+});
+builder.Services.AddHangfireServer();
+builder.Services.AddHostedService<JobSchedulerService>();
 builder.Services.AddHostedService<StockNotificationService>();
 // Configure Session
 builder.Services.AddDistributedMemoryCache();
@@ -82,9 +82,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         option.LoginPath = "/Account/Login";
         option.LogoutPath = "/Account/Logout";
-        option.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        option.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         option.SlidingExpiration = true;
-        option.Cookie.HttpOnly = true;
+        //option.Cookie.HttpOnly = true;
         option.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
@@ -114,6 +114,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseCors("AllowAll");
 
 app.UseAuthorization();

@@ -91,10 +91,11 @@ namespace Repository.FyersWebSocketServices
                     List<string?> userstrategy = users?.UserStrategy?.Where(x => x.StretagyEnableDisable == true).Select(x=>x.StretagyName).ToList();
                     if (assignedStocks != null && assignedStocks.Any())
                     {
+                        users.UserStrategy = users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
                         var stockPrices = GetLiveStockPrice(assignedStocks);
                         foreach (var item in assignedStocks)
                         {
-                            var signal = await getfinalsignal(item.Symbol);
+                            var signal = await getfinalsignal(item.Symbol, users.UserStrategy);
                             if (!string.IsNullOrEmpty(signal))
                             {
                                 await userRepo.UpdateAsyncUserStocks(users?.Id.ToString(), item?.Symbol, signal);
@@ -132,7 +133,7 @@ namespace Repository.FyersWebSocketServices
             }
         }
 
-        private async Task<string> getfinalsignal(string sym)
+        private async Task<string> getfinalsignal(string sym,List<UserStrategy> strategy)
         {
             string result=string.Empty;
             AdminSettings Adminsetting =await GetAdminsetting();
@@ -143,7 +144,7 @@ namespace Repository.FyersWebSocketServices
                 data= data.Where(x=>x.symbol == sym).ToList();
                 if (data!=null && data.Any())
                 {
-                  result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data);
+                  result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data, strategy);
                 }
             }
             return result;

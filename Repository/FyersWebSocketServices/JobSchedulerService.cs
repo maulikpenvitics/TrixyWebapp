@@ -16,7 +16,7 @@ namespace Repository.FyersWebSocketServices
     {
         private readonly FyersWebSocketService _fyersWebSocketService;
         private readonly IServiceProvider _serviceProvider;
-        private string _lastFrequency = Cron.Minutely();
+        private string _lastFrequency = Cron.Daily();
 
         public JobSchedulerService(FyersWebSocketService fyersWebSocketService, IServiceProvider serviceProvider)
         {
@@ -44,12 +44,12 @@ namespace Repository.FyersWebSocketServices
                         RecurringJob.AddOrUpdate(
                             "delete-old-Insertnew-stock-data",
                             () => RunStockDataJob(),
-                            Cron.Minutely
+                            Cron.Daily
                         );
 
                         _lastFrequency = newFrequency;
                     }
-                    await Task.Delay(TimeSpan.FromMinutes(cron), stoppingToken);
+                    await Task.Delay(TimeSpan.FromDays(cron), stoppingToken);
                 }
 
               
@@ -87,7 +87,7 @@ namespace Repository.FyersWebSocketServices
                     {
                         if (!string.IsNullOrEmpty(getstock?.Symbol))
                         {
-                            var signal = await getfinalsignal(getstock.Symbol);
+                            var signal = await getfinalsignal(getstock.Symbol,getstock.userid);
                             if (!string.IsNullOrEmpty(signal))
                             {
                                 await userrepo.UpdateAsyncUserStocks(getstock?.userid, getstock?.Symbol, signal);
@@ -153,7 +153,7 @@ namespace Repository.FyersWebSocketServices
             }
             return symlst;
         }
-        private async Task<string> getfinalsignal(string sym)
+        private async Task<string> getfinalsignal(string sym,string userid)
         {
             string result = string.Empty;
             AdminSettings Adminsetting = await GetAdminsetting();
@@ -162,9 +162,14 @@ namespace Repository.FyersWebSocketServices
                 var historicaldata = scope.ServiceProvider.GetRequiredService<IRepository<Historical_Data>>(); // Resolve scoped service
                 var data = await historicaldata.GetAllAsync();
                 data = data.Where(x => x.symbol == sym).ToList();
+
+                var user=scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                var userstretagy = user.GetById(userid);
+                userstretagy.UserStrategy= userstretagy?.UserStrategy?.Where(x=>x.StretagyEnableDisable==true && x.IsActive==true).ToList();
+
                 if (data != null && data.Any())
                 {
-                    result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data);
+                    result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data, userstretagy.UserStrategy);
                 }
             }
             return result;

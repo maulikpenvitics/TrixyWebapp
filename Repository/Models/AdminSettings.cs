@@ -23,6 +23,7 @@ namespace Repository.Models
         public MovingAverageSettings? MovingAverage { get; set; }
         public RSIThresholds? RSIThresholds { get; set; }
         public MACDSettings? MACD_Settings { get; set; }
+        public MeanReversion? MeanReversion { get; set; }
         public List<StrategyWeight>? StrategyWeighted { get; set; }
     }
     public class StrategyWeight
@@ -49,5 +50,11 @@ namespace Repository.Models
         public int ShortEmaPeriod { get; set; }
         public int LongEmaPeriod { get; set; }
         public int SignalPeriod { get; set; }
+    }
+
+    public class MeanReversion
+    {
+        public int Period { get; set; }
+        public double Threshold { get; set; }
     }
 }

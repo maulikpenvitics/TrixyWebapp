@@ -1,4 +1,5 @@
-﻿using Microsoft.ML;
+﻿using Humanizer;
+using Microsoft.ML;
 using Microsoft.ML.Data;
 using Repository.FyersWebSocketServices;
 using Repository.Models;
@@ -27,6 +28,35 @@ namespace TrixyWebapp.Helpers
             errorMessage += $"Message: {ex.Message}";
             errorMessage += Environment.NewLine;
             errorMessage += $"Details: {ex}";
+            errorMessage += Environment.NewLine;
+            errorMessage += "-----------------------------------------------------------";
+            errorMessage += Environment.NewLine;
+
+            // Get the path to the "ErrorLog" directory in wwwroot
+            string logDirectory = Path.Combine(env.WebRootPath, "ErrorLog");
+
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
+            string logFilePath = Path.Combine(logDirectory, "ErrorLogin.txt");
+
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            {
+                writer.WriteLine(errorMessage);
+            }
+        }
+
+        public static void LogFile(string path, IWebHostEnvironment env)
+        {
+            string errorMessage = $"DateTime: {DateTime.Now:dd/MM/yyyy hh:mm:ss tt}";
+            errorMessage += Environment.NewLine;
+            errorMessage += "------------------------Exception-----------------------------------";
+            errorMessage += Environment.NewLine;
+            errorMessage += $"Path: {path}";
+            errorMessage += Environment.NewLine;
+         
             errorMessage += Environment.NewLine;
             errorMessage += "-----------------------------------------------------------";
             errorMessage += Environment.NewLine;
@@ -131,6 +161,7 @@ namespace TrixyWebapp.Helpers
                 Close = (double)x.Close,
                 Date = x.Timestamp,
             }).ToList();
+            stockdata= stockdata.OrderByDescending(x => x.Date).ToList();
             StockCalculator.CalculateMovingAverages(stockdata, shortTerm, longTerm);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result!=null)
@@ -147,7 +178,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    signal = "HOLD";
+                    signal = "N/A";
                     returnresult = 0;
                 }
             }
@@ -163,8 +194,8 @@ namespace TrixyWebapp.Helpers
                 Close = (double)x.Close,
                 Date = x.Timestamp,
             }).ToList();
-           
-            StockCalculator.CalculateRSI(stockdata, rsiPeriod);
+            stockdata=stockdata.OrderByDescending(x => x.Date).ToList();
+             StockCalculator.CalculateRSI(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result!=null)
             {
@@ -180,7 +211,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    Signal = "HOLD";
+                    Signal = "N/A";
                     returnresult = 0;
                 }
             }
@@ -188,7 +219,7 @@ namespace TrixyWebapp.Helpers
             return Signal;
         }
         //BollingerBands strategy
-        public static string GenerateBuySellSignalsForBB(List<Historical_Data> stockData)
+        public static string GenerateBuySellSignalsForBB(List<Historical_Data> stockData,int rsiPeriod)
         {
             string Signal = "HOLD";
             int returnresult = 0;
@@ -196,8 +227,10 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).ToList();
-            int rsiPeriod = 14; // RSI period (default 14 days)
+            }).OrderByDescending(x => x.Date).ToList();
+          //  int rsiPeriod = 14; // RSI period (default 14 days)
+
+            stockdata=stockdata.OrderByDescending(x => x.Date).ToList() ;
             StockCalculator.CalculateBollingerBands(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result!=null)
@@ -214,7 +247,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    Signal = "HOLD";
+                    Signal = "N/A";
                     returnresult = 0;
                 }
             }
@@ -231,7 +264,7 @@ namespace TrixyWebapp.Helpers
                 Date = x.Timestamp,
             }).ToList();
 
-            List<double> closePrices = stockPrices.Select(s => s.Close).ToList();
+            List<double> closePrices = stockPrices.OrderByDescending(x => x.Date).Select(s => s.Close).ToList();
 
             // Calculate Short-term and Long-term EMAs
             List<double> shortEma = CalculateEMA(closePrices, shortEmaPeriod);
@@ -267,7 +300,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    signal = "HOLD";
+                    signal = "N/A";
                     returnresult = 0;
                 }
             }
@@ -283,9 +316,7 @@ namespace TrixyWebapp.Helpers
                 Date = x.Timestamp,
             }).ToList();
 
-        
-            period = 30; // Mean price calculation period
-            threshold = 0.1;
+            stockPrices=stockPrices.OrderByDescending(x => x.Date).ToList();
             for (int i = 0; i < stockPrices.Count; i++)
             {
                 if (i >= period - 1)
@@ -313,7 +344,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    Signal = "HOLD";
+                    Signal = "N/A";
                     returnresult = 0;
                 }
                     
@@ -330,7 +361,7 @@ namespace TrixyWebapp.Helpers
                 Close = (double)x.Close,
                 Date = x.Timestamp,
                 Volume = (double)x.Volume,
-            }).ToList();
+            }).OrderByDescending(x=>x.Date).ToList();
             var result = stockPrices.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result !=null)
             {
@@ -352,7 +383,7 @@ namespace TrixyWebapp.Helpers
                 }
                 else
                 {
-                    Signal = "HOLD";
+                    Signal = "N/A";
                     returnresult = 0;
                 }
             }
@@ -376,43 +407,53 @@ namespace TrixyWebapp.Helpers
             return ema;
         }
 
-        public static string GetCombinationsignal(AdminSettings userSettings, List<Historical_Data> stockData)
+        public static string GetCombinationsignal(AdminSettings userSettings, List<Historical_Data> stockData,List<UserStrategy> userStrategies)
         {
             var weightedstrategy = userSettings.StrategyWeighted;
             var thresold = userSettings.Threshold;
-            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, 10, 50);
             
-            var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought
-                , userSettings.RSIThresholds.Oversold);
-            var bollingerBands = GenerateBuySellSignalsForBB(stockData);
-            var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod,
-               userSettings.MACD_Settings.SignalPeriod);
-            var MeanReversion = CalculateMeanReversion(stockData, 30, 0.1);
-            var VWAP = CalculateVWAP(stockData);
-           
-            double macweight= weightedstrategy?.FirstOrDefault(x=>x.Strategy== "Moving_Average")?.Weight??0;
-            double RSIweight = weightedstrategy?.FirstOrDefault(x=>x.Strategy== "RSI")?.Weight??0;
-            double Bollinger_Bandsweight = weightedstrategy?.FirstOrDefault(x=>x.Strategy== "Bollinger_Bands")?.Weight??0;
-            double Mean_Reversionweight = weightedstrategy?.FirstOrDefault(x=>x.Strategy== "Mean_Reversion")?.Weight??0;
-            double VWAPweight = weightedstrategy?.FirstOrDefault(x=>x.Strategy== "VWAP")?.Weight??0;
-            double MACDweight = weightedstrategy?.FirstOrDefault(x=>x.Strategy== "MACD")?.Weight??0;
+            List<string> signals = new List<string>();
+            foreach (var item in userStrategies)
+            {
+                switch (item.StretagyName)
+                {
+                    case "Bollinger_Bands":
+                        var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings.RSIThresholds.RsiPeriod);
+                        signals.Add(bollingerBands);
+                        break;
+                    case "MACD":
+                        var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod,
+            userSettings.MACD_Settings.SignalPeriod);
+                        signals.Add(MACD);
+                        break;
+                    case "Mean_Reversion":
+                        var MeanReversion = CalculateMeanReversion(stockData, userSettings.MeanReversion.Period, userSettings.MeanReversion.Threshold);
+                        signals.Add(MeanReversion);
+                        break;
+                    case "Moving_Average":
+                        var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings.MovingAverage.SMA_Periods, userSettings.MovingAverage.LMA_Periods);
+                        signals.Add(MovingAverageCrossover);
 
-            List<string> signals = new List<string> { MovingAverageCrossover , RSI , bollingerBands , MACD,
-            MeanReversion,VWAP};
-            List<double> weights=new List<double> { macweight, RSIweight, Bollinger_Bandsweight,
-            MACDweight,Mean_Reversionweight,VWAPweight};
-           var finalsignal= GetCombinationStrategyDecision(signals, weights, thresold);
+                        break;
+                    case "RSI":
+                        var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought
+                 , userSettings.RSIThresholds.Oversold);
+                        signals.Add(RSI);
+                        break;
+                    case "VWAP":
+                        var VWAP = CalculateVWAP(stockData);
+                        signals.Add(VWAP);
+                        break;
+                }
+            }
+           
+            var finalsignal= GetCombinationStrategyDecision(signals, thresold);
 
             return finalsignal;
         }
 
-        public static string GetCombinationStrategyDecision(List<string> signals, List<double> weights,double thresold)
+        public static string GetCombinationStrategyDecision(List<string> signals,double thresold)
         {
-            if (signals.Count != weights.Count)
-            {
-                throw new ArgumentException("Signals and weights must have the same length.");
-            }
-        
             Dictionary<string, int> signalMapping = new Dictionary<string, int>
             {
                  { "BUY", 1 },
@@ -420,50 +461,29 @@ namespace TrixyWebapp.Helpers
                  { "HOLD", 0 }
             };
             
-            double totalWeight = Math.Round(weights.Sum(), 2);
-            #region buy and sell percentage base
-            // double buyWeight = 0, sellWeight = 0;
-            //for (int i = 0; i < signals.Count; i++)
-            //{
-            //    if (signalMapping.ContainsKey(signals[i]))
-            //    {
-            //        int signalValue = signalMapping[signals[i]];
-
-            //        if (signalValue == 1)
-            //        {
-            //            buyWeight += weights[i];
-            //        }
-            //        else if (signalValue == -1)
-            //        {
-            //            sellWeight += weights[i];
-            //        }
-            //    }
-            //}
-            //double buyPercentage = (buyWeight / totalWeight) * 100;
-            //double sellPercentage = (sellWeight / totalWeight) * 100;
-            // Decision: BUY if BUY% > 50%, else SELL
-            //  return buyPercentage > 50 ? "BUY" : "SELL";
-            #endregion
-            double weightedSum = 0;
-            for (int i = 0; i < signals.Count; i++)
+            int weightedSum = 0;
+            foreach (var signal in signals)
             {
-                if (signalMapping.ContainsKey(signals[i]))
+                if (signalMapping.ContainsKey(signal))
                 {
-                    weightedSum += signalMapping[signals[i]] * weights[i];
-                    //totalWeight += weights[i];
+                    weightedSum += signalMapping[signal];  
                 }
             }
-            double finalScore = totalWeight > 0 ? (weightedSum / totalWeight)*100 : 0;
+            int finalScore = weightedSum;
 
-            if (finalScore> thresold)
+            if (finalScore > 0)
             {
-              return  "BUY";
+                return "BUY";
             }
-            else
+            else if (finalScore < 0)
             {
                 return "SELL";
             }
-           
+            else
+            {
+                return "N/A";
+            }
+
         }
         public static void StockSentimentStrategy()
         {
@@ -494,7 +514,7 @@ namespace TrixyWebapp.Helpers
         {
             if (sentimentScore > 0.7) return "BUY";
             if (sentimentScore < 0.3) return "SELL";
-            return "HOLD";
+            return "N/A";
         }
     }
 
