@@ -58,69 +58,67 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSymbol(StockSymbol stockSymbol)
         {
-            if (ModelState.IsValid)
+            // Handle file upload
+            if (stockSymbol.IconFile != null && stockSymbol.IconFile.Length > 0)
             {
-                // Handle file upload
-                if (stockSymbol.IconFile != null && stockSymbol.IconFile.Length > 0)
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
+                if (!Directory.Exists(uploadsFolder))
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
-                    string fileName = $"{Guid.NewGuid()}_{Path.GetFileName(stockSymbol.IconFile.FileName)}";
-                    string filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await stockSymbol.IconFile.CopyToAsync(stream);
-                    }
-
-                    // Store only the relative path in the database
-                    stockSymbol.CompanyIconUrl = "/Uploads/" + fileName;
+                    Directory.CreateDirectory(uploadsFolder);
                 }
 
-                // **EDIT MODE: If ID exists, update the existing record**
-                if (stockSymbol.Id.ToString() != null && stockSymbol.Id != ObjectId.Empty && stockSymbol.Id.ToString() != "000000000000000000000000")
+                string fileName = $"{Guid.NewGuid()}_{Path.GetFileName(stockSymbol.IconFile.FileName)}";
+                string filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                   // await _userRepository.UpdateAsyncUserStocksLogo(stockSymbol.Symbol, stockSymbol.CompanyIconUrl);
-                    var existingStock = await _stockSymbolRepository.GetByIdAsync(stockSymbol.Id.ToString());
+                    await stockSymbol.IconFile.CopyToAsync(stream);
+                }
 
-                    if (existingStock != null)
+                // Store only the relative path in the database
+                stockSymbol.CompanyIconUrl = "/Uploads/" + fileName;
+            }
+
+            // **EDIT MODE: If ID exists, update the existing record**
+            if (stockSymbol.Id.ToString() != null && stockSymbol.Id != ObjectId.Empty && stockSymbol.Id.ToString() != "000000000000000000000000")
+            {
+                // await _userRepository.UpdateAsyncUserStocksLogo(stockSymbol.Symbol, stockSymbol.CompanyIconUrl);
+                var existingStock = await _stockSymbolRepository.GetByIdAsync(stockSymbol.Id.ToString());
+
+                if (existingStock != null)
+                {
+                    // If no new file is uploaded, retain the old file path
+                    if (string.IsNullOrEmpty(stockSymbol.CompanyIconUrl))
                     {
-                        // If no new file is uploaded, retain the old file path
-                        if (string.IsNullOrEmpty(stockSymbol.CompanyIconUrl))
-                        {
-                            stockSymbol.CompanyIconUrl = existingStock.CompanyIconUrl;
-                        }
+                        stockSymbol.CompanyIconUrl = existingStock.CompanyIconUrl;
+                    }
 
-                        await _stockSymbolRepository.UpdateAsync(stockSymbol.Id.ToString(), stockSymbol);
+                    await _stockSymbolRepository.UpdateAsync(stockSymbol.Id.ToString(), stockSymbol);
+                    return RedirectToAction("Index");
+                }
+            }
+            else
+            {
+                // **CREATE MODE: Insert new record**
+                var existuser = await _stockSymbol.GetStockBySymbol(stockSymbol?.Symbol ?? "");
+                if (existuser == null)
+                {
+                    var result = await _stockSymbolRepository.InsertAsync(stockSymbol);
+                    if (result == 1)
+                    {
+                        _fyersWebSocket.Connect();
                         return RedirectToAction("Index");
+                    }
+                    else
+                    {
+                        ViewBag.Errormessage = "Please try again";
+                        return View();
                     }
                 }
                 else
                 {
-                    // **CREATE MODE: Insert new record**
-                    var existuser = await _stockSymbol.GetStockBySymbol(stockSymbol?.Symbol ?? "");
-                    if (existuser == null)
-                    {
-                        var result = await _stockSymbolRepository.InsertAsync(stockSymbol);
-                        if (result == 1)
-                        {
-                            return RedirectToAction("Index");
-                        }
-                        else
-                        {
-                            ViewBag.Errormessage = "Please try again";
-                            return View();
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.Errormessage = "This user already exists.";
-                        return View();
-                    }
+                    ViewBag.Errormessage = "This user already exists.";
+                    return View();
                 }
             }
 
@@ -151,8 +149,8 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserStock(string Symbol,string StockId)
         {
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var userId = HttpContext.Session.GetString("UserId");
+            //string userId = Encoding.UTF8.GetString(userIdBytes);
             var user = await _masterRepository.GetByIdAsync(userId);
             if (!string.IsNullOrEmpty(StockId))
             {
@@ -210,6 +208,9 @@ namespace TrixyWebapp.Controllers
             {
                 symbol.Status = false;
                 await _stockSymbolRepository.UpdateAsync(symbol.Id.ToString(), symbol);
+
+                var userstock = await _userRepository.updatemanyuserstock(symbol.Symbol,symbol.Status);
+
                 return RedirectToAction("Index");
             }
             else

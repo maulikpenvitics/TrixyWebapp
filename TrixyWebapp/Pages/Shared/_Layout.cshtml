@@ -175,10 +175,14 @@
         <section class="sidebar position-relative">
             <div class="multinav">
                 <div class="multinav-scroll ps" style="height: 100%;">
+                    @{
+                        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+                    }
                     <!-- sidebar menu-->
                     <ul class="sidebar-menu" data-widget="tree">
-                        <li class="treeview active" onclick="location.href=this.querySelector('a').href;">
-                            <a href="/Home/Index">
+                        <li class="treeview @(currentController == "Home" && currentAction == "Index" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
+                            <a href="@Url.Action("Index","Home")">
                                 <i data-feather="grid"></i><span>Dashboard</span>
                             </a>
                         </li>
@@ -186,18 +190,18 @@
                         {
                             @if (User.IsInRole("Admin"))
                             {
-                                <li class="treeview" onclick="window.open(this.querySelector('a').href, '_blank');">
+                                <li class="treeview @(currentController == "User" && currentAction == "Index" ? "active" : "")" onclick="window.open(this.querySelector('a').href, '_blank');">
                                     <a href="/User/Index" target="">
                                         <i data-feather="user"></i><span>Users</span>
                                     </a>
                                 </li>
 
-                                <li class="treeview" onclick="location.href=this.querySelector('a').href;">
+                                <li class="treeview @(currentController == "StockSymbol" && currentAction == "Index" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
                                     <a href="/StockSymbol/Index">
                                         <i data-feather="grid"></i><span>Symbols</span>
                                     </a>
                                 </li>
-                                <li class="treeview" onclick="location.href=this.querySelector('a').href;">
+                                <li class="treeview @(currentController == "AdminSetting" && currentAction == "AdminSetting" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
                                     <a href="/AdminSetting/AdminSetting">
                                         <i data-feather="settings"></i><span>Admin settings</span>
                                     </a>

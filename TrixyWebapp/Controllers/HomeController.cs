@@ -46,32 +46,26 @@ namespace TrixyWebapp.Controllers
             try
             {
                 List<StockData> stockData=new List<StockData>();
-                var userIdBytes = HttpContext.Session.Get("UserId");
-                if (userIdBytes!=null)
-                {
-                    string userId = Encoding.UTF8.GetString(userIdBytes);
-                    ViewData["UserId"] = userId;
-                    var user = _user.GetById(userId);
-                    HttpContext.Session.SetString("User", JsonSerializer.Serialize(user));
-                    stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
-                    if (user?.Stocks?.Any()==true)
-                    {
-                        foreach (var item in stockData)
-                        {
-                            item.recommendation =await Recomddation(item.Symbol);
-                        }
-                    }
-                   
-                }
-                var UserRole = HttpContext.Session.Get("UserRole");
-                if (UserRole!=null)
-                {
-                    string userRole = Encoding.UTF8.GetString(UserRole);
-                    ViewData["UserRole"] = userRole;
-                }
+                //var userIdBytes = HttpContext.Session.Get("UserId");
 
-                
-            
+                var userJson = HttpContext?.Session.GetString("User");
+                var userId = HttpContext?.Session.GetString("UserId");
+                Helper.LogFile(userJson.ToString(), _env);
+                Helper.LogFile(userId.ToString(), _env);
+                ViewData["UserId"] = userId;
+                var user = _user.GetById(userId);
+
+              
+                stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                if (user?.Stocks?.Any() == true)
+                {
+                    foreach (var item in stockData)
+                    {
+                        item.recommendation = await Recomddation(item.Symbol);
+                    }
+                }
+                var user1 = _user.GetById(userId);
+                HttpContext?.Session.SetString("User", JsonSerializer.Serialize(user1));
                 return View(stockData);
             }
             catch (Exception ex)
@@ -80,7 +74,6 @@ namespace TrixyWebapp.Controllers
                 return View();
             }
 
-
         }
 
         [HttpGet]
@@ -88,8 +81,8 @@ namespace TrixyWebapp.Controllers
         {
             try
             {
-                var userIdBytes = HttpContext.Session.Get("UserId");
-                string userId = Encoding.UTF8.GetString(userIdBytes);
+                var userId = HttpContext.Session.GetString("UserId");
+                //string userId = Encoding.UTF8.GetString(userIdBytes);
                 var user = _user.GetById(userId);
                 List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
                 var formateddata = stockData.Select(x => new
@@ -99,7 +92,6 @@ namespace TrixyWebapp.Controllers
                     price = x.Price,
                 }).ToList();
                 return Json(formateddata);
-              //  return PartialView("_RealStockData", stockData);
             }
             catch (Exception ex)
             {
@@ -107,15 +99,6 @@ namespace TrixyWebapp.Controllers
                 Helper.LogFilegenerate(ex, "Login Action", _env);
             }
             return RedirectToAction("Index");
-        }
-        [HttpGet]
-        public IActionResult Stocksdata()
-        {
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = Encoding.UTF8.GetString(userIdBytes);
-            var user = _user.GetById(userId);
-            List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
-            return PartialView("_RealStockData", stockData);
         }
 
         [HttpGet]
@@ -206,8 +189,8 @@ namespace TrixyWebapp.Controllers
         public async Task<IActionResult> EnableDisableStratgey(string sym, bool isEnable)
         {
             string finalsignal = string.Empty;
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var userId = HttpContext.Session.GetString("UserId");
+            //string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings();
            
             var user = _user.GetById(userId);
@@ -226,13 +209,17 @@ namespace TrixyWebapp.Controllers
 
         public async Task<Dictionary<string ,string>> Recomddation(string sym)
         {
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = Encoding.UTF8.GetString(userIdBytes);
+            var userId = HttpContext.Session.GetString("UserId");
+           // string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings();
 
             var user = _user.GetById(userId);
             var userstregy = user?.UserStrategy?.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
+
+            //combination signal
+            var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
+            await _user.UpdateUserStocks(userId, sym, finalsignal);
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
             if (gethistoricaldata != null && gethistoricaldata.Any())
             {
@@ -287,9 +274,7 @@ namespace TrixyWebapp.Controllers
                     }
                 }
             }
-            //combination signal
-            var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
-           // await _user.UpdateAsyncUserStocks(userId, sym, true, finalsignal);
+        
             //keyValuePairs["Combine"] = finalsignal;
             return keyValuePairs;
         }

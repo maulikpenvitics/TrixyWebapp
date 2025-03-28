@@ -47,7 +47,7 @@ namespace TrixyWebapp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             try
             {
@@ -72,8 +72,8 @@ namespace TrixyWebapp.Controllers
                     Helper.LogFile(userId.ToString(),_env);
                     var claims = new List<Claim>
                     {
-                              new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // ✅ Add User ID
-                               new Claim(ClaimTypes.Name, user.Email),
+                              new Claim(ClaimTypes.NameIdentifier, userId), // ✅ Add User ID
+                               new Claim(ClaimTypes.Name, user.Firstname),
                               new Claim(ClaimTypes.Role, user.Role)
                     };
 
@@ -83,8 +83,13 @@ namespace TrixyWebapp.Controllers
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
-
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
                     //_fyersWebSocket.Connect(user?.Stocks?.ToList());
+
+                    Helper.LogFile(userId.ToString(), _env);
                     return RedirectToAction("Index", "Home");
                 }
                 else

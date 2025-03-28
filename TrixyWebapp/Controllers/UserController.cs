@@ -144,8 +144,8 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> AdminSettings()
         {
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
+            var userId = HttpContext.Session.GetString("UserId");
+           // string userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
             var adminseting= _user.GetUserSettings();
             
             return View(adminseting);
@@ -153,8 +153,8 @@ namespace TrixyWebapp.Controllers
 
         public IActionResult Setting()
         {
-            var userIdBytes = HttpContext.Session.Get("UserId");
-            string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
+            var userId = HttpContext.Session.GetString("UserId");
+            //string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
             var user = _user.GetById(userId);
             return View(user);
         }

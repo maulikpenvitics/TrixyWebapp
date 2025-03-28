@@ -91,7 +91,7 @@ namespace Repository.Repositories
             
             await _users.UpdateOneAsync(filter, update);
         }
-        public async Task UpdateAsyncUserStocks(string userId, string sym, string BuySellSignal)
+        public async Task UpdateUserStocks(string userId, string sym, string BuySellSignal)
         {
             var filter = Builders<User>.Filter.And(
                          Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
@@ -115,6 +115,30 @@ namespace Repository.Repositories
         public async Task<IEnumerable<User>> GetallUser()
         {
             return await GetAllAsync();
+        }
+        public async Task<bool> updatemanyuserstock(string sym,bool? isactive)
+        {
+            //var filter = Builders<User>.Filter.And(
+            //    Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+            var filter = Builders<User>.Filter.Eq("Stocks.Symbol", sym);
+            // Define the update to set IsActive to true in the matching Strategy object(s)
+            var update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
+
+            // Array filter to target the specific Strategy objects matching the symbol
+            var arrayFilter = new ArrayFilterDefinition<BsonDocument>[]
+            {
+        new BsonDocumentArrayFilterDefinition<BsonDocument>(
+            new BsonDocument("elem.Symbol", sym))
+            };
+
+            // Apply the update with array filters
+            var updateOptions = new UpdateOptions { ArrayFilters = arrayFilter };
+
+            // Perform the update operation on multiple documents
+            var result = await _users.UpdateManyAsync(filter, update, updateOptions);
+
+            // Return true if any documents were modified
+            return result.ModifiedCount > 0;
         }
         public User GetById(string Id)
         {

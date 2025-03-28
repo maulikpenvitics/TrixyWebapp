@@ -12,8 +12,9 @@ namespace Repository.IRepositories
         Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked,string BuySellSignal);
         Task<bool> AddUserStocks(User user);
         Task<IEnumerable<User>> GetallUser();
-        Task UpdateAsyncUserStocks(string userId, string sym, string BuySellSignal);
+        Task UpdateUserStocks(string userId, string sym, string BuySellSignal);
         User GetById(string Id);
+        Task<bool> updatemanyuserstock(string sym, bool? isactive);
         #endregion
         #region User settings method
         Task InsertUserseting(AdminSettings model);

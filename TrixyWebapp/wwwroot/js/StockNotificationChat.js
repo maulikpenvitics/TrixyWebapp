@@ -88,10 +88,10 @@ function displayStockNotifications(stocknotifactiondatas) {
             </div>
         `;
 
-        var recommendationCell = $("#recomendation_" + item.symbol);
-        if (recommendationCell.length > 0) {
-            recommendationCell.html(recommendationLabel);  // Update the table cell
-        }
+        //var recommendationCell = $("#recomendation_" + item.symbol);
+        //if (recommendationCell.length > 0) {
+        //    recommendationCell.html(recommendationLabel);  // Update the table cell
+        //}
         container.appendChild(userDiv); 
     });
    

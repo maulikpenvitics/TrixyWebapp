@@ -16,8 +16,6 @@ namespace Repository.FyersWebSocketServices
     {
         private readonly FyersWebSocketService _fyersWebSocketService;
         private readonly IServiceProvider _serviceProvider;
-        private string _lastFrequency = Cron.Daily();
-
         public JobSchedulerService(FyersWebSocketService fyersWebSocketService, IServiceProvider serviceProvider)
         {
             _fyersWebSocketService = fyersWebSocketService;
@@ -26,34 +24,32 @@ namespace Repository.FyersWebSocketServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            RecurringJob.AddOrUpdate(
+                          "delete-old-Insertnew-stock-data",
+                          () => RunStockDataJob(),
+                          Cron.Daily(9, 00)
+                      );
             while (!stoppingToken.IsCancellationRequested)
             {
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var adminSettingRepo = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
-                    var newFrequency = await adminSettingRepo.GetJobFrequencyAsync();
-                    var cron = Convert.ToInt32(newFrequency);
-                    //RecurringJob.AddOrUpdate(
-                    //       "delete-old-Insertnew-stock-data",
-                    //       () => RunStockDataJob(),
-                    //       Cron.Minutely
-                    //   );
-
-                    if (_lastFrequency != newFrequency)
-                    {
-                        RecurringJob.AddOrUpdate(
-                            "delete-old-Insertnew-stock-data",
-                            () => RunStockDataJob(),
-                            Cron.Daily
-                        );
-
-                        _lastFrequency = newFrequency;
-                    }
-                    await Task.Delay(TimeSpan.FromDays(cron), stoppingToken);
-                }
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken); // Wait for 24 hours before looping again
+            }
+            //while (!stoppingToken.IsCancellationRequested)
+            //{
+            //    using (var scope = _serviceProvider.CreateScope())
+            //    {
+            //        var adminSettingRepo = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
+            //        var newFrequency = await adminSettingRepo.GetJobFrequencyAsync();
+            //        var cron = Convert.ToInt32(newFrequency);
+            //        RecurringJob.AddOrUpdate(
+            //                "delete-old-Insertnew-stock-data",
+            //                () => RunStockDataJob(),
+            //                Cron.Daily(9, 00)
+            //            );
+            //        await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+            //    }
 
               
-            }
+            //}
         }
         [AutomaticRetry(Attempts = 3)] // Optional: Retry if the job fails
         public async Task RunStockDataJob()
@@ -64,7 +60,7 @@ namespace Repository.FyersWebSocketServices
                 var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
                 // Delete old historical data
-                await stockrepo.DeleteHistoricaldata();
+                var result = await stockrepo.DeleteHistoricaldata();
 
                 // Fetch new stock data
                 var getstocks = await getstcoks();
@@ -90,7 +86,7 @@ namespace Repository.FyersWebSocketServices
                             var signal = await getfinalsignal(getstock.Symbol,getstock.userid);
                             if (!string.IsNullOrEmpty(signal))
                             {
-                                await userrepo.UpdateAsyncUserStocks(getstock?.userid, getstock?.Symbol, signal);
+                                await userrepo.UpdateUserStocks(getstock?.userid, getstock?.Symbol, signal);
                             }
                             getstock.BuySellSignal = string.IsNullOrEmpty(signal) ? null : signal;
                         }

@@ -112,23 +112,23 @@ namespace Repository.Repositories
             return await _collection.FindAsync(filter);
         }
 
-        public async Task DeleteHistoricaldata()
+        public async Task<int> DeleteHistoricaldata()
         {
             
             var frequency = await _adminsetting
             .Find(_ => true)
            .FirstOrDefaultAsync();
-            if (frequency != null)
-            {
-                DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;  // 24 hours ago, start of that day (00:00:00)
-                DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1);  // End of the same day (23:59:59)
-                DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
-                var filter = Builders<Historical_Data>.Filter.And(
-         Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),
-         Builders<Historical_Data>.Filter.Lte(s => s.Timestamp, endOfDay)
-     );
-                await _historicaldata.DeleteManyAsync(filter);
-            }
+            
+            DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;  // 24 hours ago, start of that day (00:00:00)
+            DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1);  // End of the same day (23:59:59)
+            DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
+            var filter = Builders<Historical_Data>.Filter.And(
+     Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),
+     Builders<Historical_Data>.Filter.Lte(s => s.Timestamp, endOfDay)
+ );
+            var result = await _historicaldata.DeleteManyAsync(filter);
+
+            return (int)result.DeletedCount;
         }
         public async Task InsertNewHistoricalData(List<Historical_Data> newData)
         {

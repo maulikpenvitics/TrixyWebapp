@@ -38,4 +38,5 @@ namespace Repository.FyersWebSocketServices
         public List<string>? userStrategy {  get; set; }
         
     }
+    
 }

@@ -69,7 +69,7 @@ namespace TrixyWebapp.Helpers
                 Directory.CreateDirectory(logDirectory);
             }
 
-            string logFilePath = Path.Combine(logDirectory, "ErrorLogin.txt");
+            string logFilePath = Path.Combine(logDirectory, "UserLogin.txt");
 
             using (StreamWriter writer = new StreamWriter(logFilePath, true))
             {

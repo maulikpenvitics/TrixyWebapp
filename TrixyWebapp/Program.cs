@@ -97,7 +97,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-
+app.UseHangfireDashboard("/hangfire");
 using (var scope = app.Services.CreateScope()) // ✅ Create a scope
 {
     var webSocketService = scope.ServiceProvider.GetRequiredService<FyersWebSocketService>();
@@ -119,11 +119,13 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 app.MapControllers();
+app.UseSession();
 app.MapStaticAssets();
 //app.MapRazorPages()
 //   .WithStaticAssets();
-app.UseSession();
 app.UseStaticFiles();
+
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");

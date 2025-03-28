@@ -102,18 +102,19 @@
 														@if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification == true && asignstretagy > 0)
 														{
 															var recommendationHtml = string.Join("<br />", item.recommendation.Select(kvp => $"<strong class='tooltip-key'>{kvp.Key}:</strong> {kvp.Value}"));
-
 															if (userstock.BuySellSignal == "SELL")
 															{
 																<span class="label label-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Sell</span>
 
 
 															}
-															else
+															else if (userstock.BuySellSignal == "BUY")
 															{
 																<span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Buy</span>
 															}
-
+															else{
+																<span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">@userstock.BuySellSignal</span>
+															}
 														}
 													</td>
 													<td class="stock_notification">

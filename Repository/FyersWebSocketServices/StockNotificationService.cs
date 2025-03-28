@@ -98,7 +98,7 @@ namespace Repository.FyersWebSocketServices
                             var signal = await getfinalsignal(item.Symbol, users.UserStrategy);
                             if (!string.IsNullOrEmpty(signal))
                             {
-                                await userRepo.UpdateAsyncUserStocks(users?.Id.ToString(), item?.Symbol, signal);
+                                await userRepo.UpdateUserStocks(users?.Id.ToString(), item?.Symbol, signal);
                             }
                             stocks.Add(new Stocknotifactiondata()
                             {
