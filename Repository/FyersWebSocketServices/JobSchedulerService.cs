@@ -24,15 +24,22 @@ namespace Repository.FyersWebSocketServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            RecurringJob.AddOrUpdate(
-                          "delete-old-Insertnew-stock-data",
-                          () => RunStockDataJob(),
-                          Cron.Daily(9, 00)
-                      );
-            while (!stoppingToken.IsCancellationRequested)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                await Task.Delay(TimeSpan.FromHours(24), stoppingToken); // Wait for 24 hours before looping again
+                var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
+                var frequnecy = await admin.GetJobFrequencyAsync();
+                long time = Convert.ToInt32(frequnecy);
+                RecurringJob.AddOrUpdate(
+                        "delete-old-Insertnew-stock-data",
+                        () => RunStockDataJob(),
+                        Cron.Daily(9, 00)
+                    );
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
+                }
             }
+              
          
         }
         [AutomaticRetry(Attempts = 3)] // Optional: Retry if the job fails
@@ -55,7 +62,7 @@ namespace Repository.FyersWebSocketServices
                     {
                         var data = await _fyersWebSocketService.FetchAndStoreHistoricalStockDataAsync(
                             item,
-                            DateTime.UtcNow.Date.AddDays(-90).ToString("yyyy-MM-dd"),
+                            DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"),
                             DateTime.UtcNow.Date.ToString("yyyy-MM-dd")
                         );
                         await stockrepo.InsertNewHistoricalData(data);

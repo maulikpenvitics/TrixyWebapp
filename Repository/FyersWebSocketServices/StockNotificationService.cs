@@ -39,17 +39,25 @@ namespace Repository.FyersWebSocketServices
                     var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
                     var frequnecy =await admin.GetJobFrequencyAsync();
                     long time =Convert.ToInt32(frequnecy);
-
-                    var getstockdata =await getstcoks();
-                    var onlineUsers = StockNotificationHub.GetConnectedUsers();
-                    foreach (var item in onlineUsers)
+                    var marketStart = new TimeSpan(9, 15, 0);
+                    var marketEnd = new TimeSpan(15, 30, 0);
+                    var currentTime = DateTime.Now.TimeOfDay;
+                    if (currentTime >= marketStart && currentTime <= marketEnd)
                     {
-                        if (getstockdata != null && getstockdata.Any())
+                        var getstockdata = await getstcoks();
+                        var onlineUsers = StockNotificationHub.GetConnectedUsers();
+
+
+                        foreach (var item in onlineUsers)
                         {
-                            await _hubContext.Clients.User(item).SendAsync("ReceiveStockUpdate", getstockdata);
+                            if (getstockdata != null && getstockdata.Any())
+                            {
+                                await _hubContext.Clients.User(item).SendAsync("ReceiveStockUpdate", getstockdata);
+                            }
                         }
+
                     }
-                  
+
 
                     await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
                 }
@@ -141,10 +149,10 @@ namespace Repository.FyersWebSocketServices
             {
                 var historicaldata = scope.ServiceProvider.GetRequiredService<IRepository<Historical_Data>>(); // Resolve scoped service
                 var data = await historicaldata.GetAllAsync();
-                data= data.Where(x=>x.symbol == sym).ToList();
-                if (data!=null && data.Any())
+                var symdata= data.Where(x=>x.symbol == sym).ToList();
+                if (symdata != null && symdata.Any())
                 {
-                  result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data, strategy);
+                  result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting,symdata, strategy);
                 }
             }
             return result;

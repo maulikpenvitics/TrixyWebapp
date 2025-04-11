@@ -58,12 +58,12 @@ namespace Repository.FyersWebSocketServices
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result != null)
             {
-                if (result.RSI < oversold)
+                if (result.RSI < overbought)
                 {
                     Signal = "BUY";
                     returnresult = 1;
                 }
-                else if (result.RSI > overbought)
+                else if (result.RSI > oversold)
                 {
                     Signal = "SELL";
                     returnresult = -1;
