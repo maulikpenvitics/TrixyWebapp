@@ -1,4 +1,5 @@
-﻿namespace TrixyWebapp.ViewModels
+﻿
+namespace TrixyWebapp.ViewModels
 {
     public class StockCandleChartVM
     {

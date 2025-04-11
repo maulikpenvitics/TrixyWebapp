@@ -119,8 +119,8 @@ namespace Repository.Repositories
             .Find(_ => true)
            .FirstOrDefaultAsync();
             
-            DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;  // 24 hours ago, start of that day (00:00:00)
-            DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1);  // End of the same day (23:59:59)
+            DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;  
+            DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1); 
             DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
             var filter = Builders<Historical_Data>.Filter.And(
      Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),

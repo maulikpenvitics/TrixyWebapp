@@ -3,15 +3,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Model;
 using Microsoft.VisualBasic;
+using MongoDB.Bson.IO;
+using Newtonsoft.Json;
 using NuGet.Protocol.Core.Types;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
+using SharpCompress.Common;
 using System.Text;
 using System.Text.Json;
 using TrixyWebapp.Helpers;
 using TrixyWebapp.ViewModels;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace TrixyWebapp.Controllers
@@ -24,7 +28,7 @@ namespace TrixyWebapp.Controllers
         private readonly IUserRepository _user;
         private readonly IWebHostEnvironment _env;
         private readonly IStockSymbolRepository _stockSymbol;
-        
+
         public HomeController(FyersWebSocketService fyersWebSocket,
             IRepository<Historical_Data> userRepository,
             IRepository<Strategy> strategyRepository,
@@ -45,7 +49,7 @@ namespace TrixyWebapp.Controllers
         {
             try
             {
-                List<StockData> stockData=new List<StockData>();
+                List<StockData> stockData = new List<StockData>();
                 //var userIdBytes = HttpContext.Session.Get("UserId");
 
                 var userJson = HttpContext?.Session.GetString("User");
@@ -55,7 +59,7 @@ namespace TrixyWebapp.Controllers
                 ViewData["UserId"] = userId;
                 var user = _user.GetById(userId);
 
-              
+
                 stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
                 if (user?.Stocks?.Any() == true)
                 {
@@ -65,7 +69,7 @@ namespace TrixyWebapp.Controllers
                     }
                 }
                 var user1 = _user.GetById(userId);
-                HttpContext?.Session.SetString("User", JsonSerializer.Serialize(user1));
+                HttpContext?.Session.SetString("User", System.Text.Json.JsonSerializer.Serialize(user1));
                 return View(stockData);
             }
             catch (Exception ex)
@@ -104,33 +108,60 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> FetchData(string sym)
         {
+
+          
             var marketStart = new TimeSpan(9, 15, 0);
             var marketEnd = new TimeSpan(15, 30, 0);
 
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
 
             var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-            var oneWeekAgo = DateTime.UtcNow.AddDays(-30);
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
             var oneWeekAgoUtc = DateTime.UtcNow.AddDays(-30);
-            var oneWeekAgoIST = TimeZoneInfo.ConvertTimeFromUtc(oneWeekAgoUtc, istTimeZone);
-            var formattedData = gethistoricaldata
-                .Select(item => new
-                {
-                    TimestampIST = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, istTimeZone),
-                    item.Open,
-                    item.High,
-                    item.Low,
-                    item.Close
-                })
-                .Where(item => item.TimestampIST >= oneWeekAgoIST && item.TimestampIST.TimeOfDay >= marketStart && item.TimestampIST.TimeOfDay <= marketEnd)
-                .OrderBy(item => item.TimestampIST)
-                .Select(item => new
-                {
-                    x = item.TimestampIST.ToString("yyyy-MM-dd HH:mm"),  // Keep trading time only
-                    y = new decimal[] { item.Open, item.High, item.Low, item.Close } // OHLC
-                });
+            var onemonthAgoIST = TimeZoneInfo.ConvertTimeFromUtc(oneWeekAgoUtc, istTimeZone);
 
-            return Json(formattedData);
+            
+            var filteredData = gethistoricaldata
+       .Select(item => new
+       {
+           TimestampIST = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, istTimeZone),
+           item.Open,
+           item.High,
+           item.Low,
+           item.Close
+       })
+       .Where(item =>
+           item.TimestampIST >= onemonthAgoIST &&
+           item.TimestampIST.TimeOfDay >= marketStart &&
+           item.TimestampIST.TimeOfDay <= marketEnd)
+       .DistinctBy(item => item.TimestampIST) // remove same datetime duplicates
+       .OrderBy(item => item.TimestampIST)
+       .ToList();
+            var groupedByDate = filteredData
+      .GroupBy(item => item.TimestampIST.Date)
+      .Select(group => new
+      {
+          Date = group.Key.ToString("yyyy-MM-dd"),
+          Data = group.Select(item => new
+          {
+              x = item.TimestampIST.ToString("yyyy-MM-dd HH:mm"),
+              y = new decimal[] { item.Open, item.High, item.Low, item.Close }
+          }).ToList()
+      });
+            var last5data = await _fyersWebSocket.FetchAndHistoricalStockDataAsync(sym, oneWeekAgo.ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"), 60);
+
+            var result5daydata = last5data.GroupBy(item => item.Timestamp.Date).Select(group => new 
+            {
+                Date = group.Key.ToString("yyyy-MM-dd"),
+                Data = group.Select(item => new ChartDataPoint
+                {
+                    x = item.Timestamp.ToString("yyyy-MM-dd HH:mm"),
+                    y = new decimal[] { item.Open, item.High, item.Low, item.Close }
+                }).ToList()
+            }).ToList();
+            string jsonResult = System.Text.Json.JsonSerializer.Serialize(groupedByDate);
+
+            return Json(result5daydata);
 
         }
         [HttpGet]
@@ -140,17 +171,15 @@ namespace TrixyWebapp.Controllers
             if (stocks != null)
             {
                 var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
-                var historicaldata = gethistoricaldata.OrderByDescending(x => x.Timestamp).FirstOrDefault();
+                
+                var last5data = await _fyersWebSocket.FetchAndHistoricalStockDataAsync(sym, DateTime.UtcNow.ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"), 30);
+
                 StockCandleChartVM returndata = new StockCandleChartVM()
                 {
                     Symbol = stocks.Symbol,
                     Companylogo = stocks.CompanyIconUrl,
-                    CompanyName = stocks.CompanyName,
-                    Currentprice = historicaldata?.Open,
-                    High = historicaldata?.High,
-                    low = historicaldata?.Low,
-                    close = historicaldata?.Close,
-                    volume = historicaldata?.Volume
+                    CompanyName = stocks.CompanyName
+                    
                 };
                 return Json(returndata);
             }
@@ -192,25 +221,25 @@ namespace TrixyWebapp.Controllers
             var userId = HttpContext.Session.GetString("UserId");
             //string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings();
-           
+
             var user = _user.GetById(userId);
-            var userstregy=user?.UserStrategy?.Where(x=>x.StretagyEnableDisable==true && x.IsActive==true).ToList();
+            var userstregy = user?.UserStrategy?.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
             if (gethistoricaldata != null && gethistoricaldata.Count > 0)
             {
-              
+
                 //combination signal
-                finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata,userstregy);
+                finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
                 await _user.UpdateAsyncUserStocks(userId, sym, isEnable, finalsignal);
             }
 
             return RedirectToAction("Index");
         }
 
-        public async Task<Dictionary<string ,string>> Recomddation(string sym)
+        public async Task<Dictionary<string, string>> Recomddation(string sym)
         {
             var userId = HttpContext.Session.GetString("UserId");
-           // string userId = Encoding.UTF8.GetString(userIdBytes);
+            // string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings();
 
             var user = _user.GetById(userId);
@@ -274,7 +303,7 @@ namespace TrixyWebapp.Controllers
                     }
                 }
             }
-        
+
             //keyValuePairs["Combine"] = finalsignal;
             return keyValuePairs;
         }

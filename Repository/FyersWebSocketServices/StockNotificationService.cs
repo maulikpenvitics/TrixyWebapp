@@ -60,7 +60,6 @@ namespace Repository.FyersWebSocketServices
         {
             if (symbol != null)
             {
-                // _fyersWebSocketService.Connect(symbol);
                 List<StockData> stockData = _fyersWebSocketService.GetStockData(symbol);
                 return stockData;
             }
@@ -109,6 +108,7 @@ namespace Repository.FyersWebSocketServices
                                 Symbol = item.Symbol,
                                 userid = users?.Id.ToString(),
                                 timestamp = DateTime.Now,
+                                CompanyName=item.CompanyName,
                                 userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>()
                             });
 

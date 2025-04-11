@@ -77,6 +77,9 @@ function displayStockNotifications(stocknotifactiondatas) {
         const signalClass = item.buySellSignal === 'SELL' ? 'label-danger' : 'label-success';
         userDiv.innerHTML = `
             <div class="media-body">
+              <p class="fs-16">
+                    <strong>Company:</strong> ${item.companyName} 
+                </p>
                 <p class="fs-16">
                     <strong>Stock:</strong> ${item.symbol} 
                 </p>

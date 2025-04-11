@@ -15,17 +15,20 @@ namespace TrixyWebapp.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IRepository<User> _masterRepository;
         private readonly FyersWebSocketService _fyersWebSocket;
+        private readonly IWebStockRepository _webStockRepository;
         public StockSymbolController(IRepository<StockSymbol> stockSymbolRepository, 
             IStockSymbolRepository stockSymbol,
             IUserRepository userRepository,
             IRepository<User> masterRepository,
-            FyersWebSocketService fyersWebSocketService)
+            FyersWebSocketService fyersWebSocketService,
+            IWebStockRepository webStockRepository)
         {
             _stockSymbolRepository = stockSymbolRepository;
             _stockSymbol = stockSymbol;
             _userRepository = userRepository;
             _masterRepository = masterRepository;
             _fyersWebSocket = fyersWebSocketService;
+            _webStockRepository = webStockRepository;
         }
         public async Task<IActionResult> Index()
         {
@@ -186,10 +189,12 @@ namespace TrixyWebapp.Controllers
                                 });
                             }
                         }
-                       var updateuser= await _userRepository.AddUserStocks(user);
+                        var updateuser= await _userRepository.AddUserStocks(user);
                         if (updateuser)
                         {
-                           // _fyersWebSocket.Connect(user.Stocks.ToList());
+                           _fyersWebSocket.Connect();
+                            var symhistorydata =  await _fyersWebSocket.FetchAndHistoricalStockDataAsync(stockSymbol.Symbol, DateTime.UtcNow.AddDays(-90).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"),30);
+                            await _webStockRepository.InsertNewHistoricalData(symhistorydata);
                             ViewBag.succesmessage = "Added stock succesfully";
                             return RedirectToAction("Index", "Home");
                         }

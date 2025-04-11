@@ -87,8 +87,7 @@ namespace TrixyWebapp.Controllers
                     {
                         return Redirect(returnUrl);
                     }
-                    //_fyersWebSocket.Connect(user?.Stocks?.ToList());
-
+                   
                     Helper.LogFile(userId.ToString(), _env);
                     return RedirectToAction("Index", "Home");
                 }
@@ -175,7 +174,7 @@ namespace TrixyWebapp.Controllers
             if (ModelState.IsValid)
             {
                 string? fileName = null;
-                if (model.ProfileImage != null)
+                if (model?.ProfileImage != null)
                 {
                     string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Uploads");
                     if (!Directory.Exists(uploadDir))
@@ -200,7 +199,7 @@ namespace TrixyWebapp.Controllers
                     Firstname = model?.Firstname,
                     Lastname = model?.Lastname,
                     Email = model?.Email,
-                    ProfileImageUrl = model?.ProfileImageUrl // Save path in DB
+                    ProfileImageUrl =!string.IsNullOrEmpty(model?.ProfileImageUrl)? model?.ProfileImageUrl : existuser.ProfileImageUrl // Save path in DB
                 };
                 var result=  await _user.UpdateUserProfile(user);
                 if (result)

@@ -1,4 +1,5 @@
-﻿@model Repository.Models.StockSymbol
+﻿@using MongoDB.Bson
+@model Repository.Models.StockSymbol
 @{
     ViewData["Title"] = "CreateUser";
     Layout = "~/Pages/Shared/_Layout.cshtml";
@@ -53,7 +54,14 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <input type="submit" value="@(Model?.Id == null ? "Create" : "Update")" class="btn btn-primary mt-10" />
+                                                @if (Model?.Id == null || Model?.Id.ToString() == "000000000000000000000000" || Model?.Id == ObjectId.Empty)
+                                                {
+                                                    <input type="submit" value="Create" class="btn btn-primary mt-10" />
+                                                }
+                                                else{
+                                                    <input type="submit" value="Update" class="btn btn-primary mt-10" />
+                                                }
+                                                @* <input type="submit" value="@((Model?.Id == null && Model.Id.ToString() == "000000000000000000000000") ? "Create" : "Update")" class="btn btn-primary mt-10" /> *@
                                                 <a href="/StockSymbol/Index" class="btn btn-danger mt-10">Back to List</a>
                                             </div>
                                         </form>

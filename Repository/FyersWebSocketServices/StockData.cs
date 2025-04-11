@@ -34,6 +34,7 @@ namespace Repository.FyersWebSocketServices
         public decimal? Change { get; set; }
         public string? BuySellSignal { get; set; }
         public decimal? Priviscloseprice { get; set; }
+        public string? CompanyName { get; set; }
         public DateTime? timestamp { get; set; }
         public List<string>? userStrategy {  get; set; }
         

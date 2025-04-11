@@ -126,7 +126,7 @@
 																   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
 																   data-symbol="@item.Symbol"
 																   data-toggle="tooltip"
-																   data-original-title="Enable Notification">
+																   title="Enable Notification">
 																	<i class="ti-bell" aria-hidden="true"></i>
 																</a>
 
@@ -137,7 +137,7 @@
 																   class="waves-effect waves-circle btn btn-circle btn-danger btn-xs notification-toggle"
 																   data-symbol="@item.Symbol"
 																   data-toggle="tooltip"
-																   data-original-title="Disable Notification">
+																   title="Disable Notification">
 																	<i class="ti-bell" aria-hidden="true"></i>
 																</a>
 															}
@@ -158,6 +158,7 @@
                                 </table>
                             </div>
                         </div>
+					
                     </div>
 
                     <div class="box" id="realtime_stock_detail" style="display:none">
@@ -165,10 +166,10 @@
                             <div class="d-flex justify-content-between stock_detail_header">
                                 <h3 class="my-0">
                                     <img src="~/assets/images/company-logo/logo01.png" width="45"
-                                         alt="reliance" />&nbsp;
-                                    <span class="text-primary" id="stockname">Reliance</span>
+                                         alt="company" id="complogo"/>&nbsp;
+                                    <span class="text-primary" id="stockname"></span>
                                 </h3>
-                                <h5 class="mb-0">
+                            @*     <h5 class="mb-0">
                                     <span>Today High/Low</span><br class="d-lg-block d-none">
                                     <span>
                                         <span class="text-success" id="highprice"></span>/<span class="text-danger" id="lowprice"></span>
@@ -176,8 +177,8 @@
                                 </h5>
                                 <h5 class="mb-0">
                                     <span>Today Volume</span><br class="d-lg-block d-none">
-                                    <span class="text-info" id="volumprice"></span>
-                                </h5>
+                                    <span class="text-info" id="volumprice">M</span>
+                                </h5> *@
                                 <div class="close-btn">
                                     <button type="button"
                                             class="waves-effect waves-circle btn btn-circle btn-light btn-xs">
@@ -188,6 +189,7 @@
                         </div>
                         <div class="box-body">
                             <div id="bitcoin-stock-chart" class="mb-15"></div>
+						
                         </div>
                     </div>
 
@@ -202,19 +204,19 @@
 <!-- /.content-wrapper -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
- 
-<script>
+<script src="~/assets/js/apexcharts.js"></script> 
+
+ <script>
     $(document).ready(function () {
 		updateStockPrices();
 		$('[data-toggle="tooltip"]').tooltip({
 			html:true
 		});
-
-
+		lodchart();
 	});
 	$(".close-btn button").click(function () {
 		debugger
-					// $("#realtime_stock_detail").fadeOut();
+					 $("#realtime_stock_detail").fadeOut();
 					  $("#realtime_stock_detail").css("display", "none");
 		});
 	function updateStockPrices() {
@@ -248,6 +250,8 @@
 
 							changeElement.classList.remove("text-danger");
 							changeElement.classList.add("text-success");
+							priceElement.classList.add("label-success");
+							priceElement.classList.remove("label-danger");
 						} else {
 							changeElement.innerText = item.change + "%";
 							iconElement.classList.remove("ti-stats-up");
@@ -258,6 +262,9 @@
 
 							changeElement.classList.remove("text-success");
 							changeElement.classList.add("text-danger");
+
+							priceElement.classList.add("label-danger");
+							priceElement.classList.remove("label-success");
 						}
 					}
 				});
@@ -268,9 +275,7 @@
 		});
 	}
 	setInterval(updateStockPrices, 1000);
-	
-
-		  function getchart(sym,rowElement){
+	function getchart(sym,rowElement){
 				  debugger
 				  selectedStockSymbol = sym;
 				  $.ajax({
@@ -282,12 +287,17 @@
 					  {
 						Chartdatabind(sym);
 
-					   let stockLogo = $(rowElement).find("td a img").attr("src");
-						   $("#realtime_stock_detail h3 img").attr("src", stockLogo);
+						   debugger
+							   if (response.companylogo) {
+		$("#complogo").attr("src", response.companylogo);
+	} else {
+		// Optional: fallback to a default logo
+		$("#complogo").attr("src", "/assets/images/buy.png");
+	}
 						   $("#stockname").text(response.companyName);
-							  $("#highprice").text(response.high);
-							  $("#lowprice").text(response.low);
-							  $("#volumprice").text(response.volume);
+							  // $("#highprice").text(response.high);
+							  // $("#lowprice").text(response.low);
+							  // $("#volumprice").text(response.volume+" "+"M");
 						  $("#realtime_stock_detail").fadeIn();
 						   $("#realtime_stock_detail").css("display", "block");
 					  },
@@ -298,8 +308,7 @@
 
 
 			  };
-
-			  function Chartdatabind(sym){
+    function Chartdatabind(sym){
 					  debugger
 						  $.ajax({
 								  url: '/Home/FetchData',
@@ -319,56 +328,149 @@
 
 					  });
 			  }
-			  function renderChart(data) {
-				 var options = {
+    function renderChart(data1) {
+		const seriesData = data1.flatMap(day =>
+		day.data.map(item => ({
+			x: new Date(item.x), // Timestamp for datetime axis
+			y: item.y // [open, high, low, close]
+		}))
+	);
 
+				 var options = {
 					  series: [{
-						  data: data // OHLC data
+						  data: seriesData // OHLC data
 					  }],
 					  chart: {
 						  type: 'candlestick',
-						  height: 350
+						  height: 350,
 					  },
 		              xaxis: {
-			                type: 'date',  // Set type to datetime
-			                labels: {
-				            formatter: function (value) {
-					        const date = new Date(value);  // Convert the timestamp to Date object
-					        const options = { day: 'numeric', month: 'short' };  // e.g., "12 Feb"
-					        return date.toLocaleDateString('en-US', options);
-				         }
-			        }
-		       }
+							 type: 'category',
+							 labels: {
+				                  rotate: -45,
+				                  formatter: function (val) {
+					                      const date = new Date(val);
+					                      const options = { day: '2-digit', month: 'short' };
+					                      return date.toLocaleDateString('en-GB', options); // e.g., "11 Mar"
+				                  }
+			                 }
+		              },
+			         tooltip: {
+		                        x: {
+		                       	format: 'dd MMM yyyy HH:mm'
+		                       }
+	                 }
 				  };
-					 var chartElement = document.querySelector("#bitcoin-stock-chart");
-				  if (!chartElement) {
-					  console.error("Chart element not found");
-					  return;
-				  }
+				 const chart = new ApexCharts(document.querySelector("#bitcoin-stock-chart"), options);
+	             chart.render();
+					
+    }
 
-				  var chart = new ApexCharts(chartElement, options);
-				  chart.render();
-			  }
-			   $(document).on("click", "#tickets .stock-col", function () {
+
+
+	// function renderChart(data1) {
+	// 	   console.log(data1);
+	//    const allRawData = data1.flatMap(day => day.data);
+
+	//    const seriesData = allRawData
+	// 	   .filter(item => {
+	// 		   const date = new Date(item.x);
+	// 		   const dayOfWeek = date.getDay(); // 0 = Sun, 6 = Sat
+	// 		   return dayOfWeek !== 0 && dayOfWeek !== 6;
+	// 	   })
+	// 	   .map(item => {
+	// 		   return {
+	// 				  x: item.x, 
+	// 			   y: item.y
+	// 		   };
+	// 	   });
+
+	//    console.log(seriesData);
+	// 	const options = {
+	// 		series: [{
+	// 				  data: seriesData
+	// 		}],
+	// 		chart: {
+	// 			type: 'candlestick',
+	// 			height: 450,
+	// 			toolbar: {
+	// 				show: true,
+	// 				tools: {
+	// 					download: false,
+	// 					selection: true,
+	// 					zoom: true,
+	// 					zoomin: true,
+	// 					zoomout: true,
+	// 					pan: true,
+	// 					reset: true
+	// 				}
+	// 			},
+	// 			zoom: {
+	// 				enabled: true,
+	// 				type: 'x'
+	// 			},
+			
+	// 		},
+	// 		xaxis: {
+	// 			type: 'category',
+	// 					   labels: {
+	// 			   rotate: -45,
+	// 			   formatter: function (val) {
+	// 				   const date = new Date(val);
+	// 				   const options = { day: '2-digit', month: 'short' };
+	// 				   return date.toLocaleDateString('en-GB', options); // e.g., "11 Mar"
+	// 			   }
+	// 		   }
+	// 		},
+	// 		yaxis: {
+	// 			tooltip: {
+	// 				enabled: true
+	// 			}
+	// 		},
+	// 		tooltip: {
+	// 			x: {
+	// 				   formatter: function (val) {
+	// 				   const date = new Date(val);
+	// 				   return date.toLocaleString('en-GB', {
+	// 					   day: '2-digit',
+	// 					   month: 'short',
+	// 					   year: 'numeric',
+	// 					   hour: '2-digit',
+	// 					   minute: '2-digit',
+	// 					   hour12: false
+	// 				   });
+	// 			   }
+	// 			}
+	// 		},
+	// 		plotOptions: {
+	// 			candlestick: {
+	// 				colors: {
+	// 					upward: '#26a69a',
+	// 					downward: '#ef5350'
+	// 				},
+	// 				wick: {
+	// 					useFillColor: true
+	// 				}
+	// 			}
+	// 		}
+	// 	};
+
+	// 	const chartElement = document.querySelector("#bitcoin-stock-chart");
+	// 	if (!chartElement) {
+	// 		console.error("Chart element not found");
+	// 		return;
+	// 	}
+
+	// 	const chart = new ApexCharts(chartElement, options);
+	// 	chart.render();
+	// }
+
+
+	$(document).on("click", "#tickets tr td:first-child", function () {
 				   debugger
 					  var symbol = $(this).data("symbol");
 						 var price = $(this).data("price");
 					  selectedStockSymbol = symbol;
 					  getchart(symbol, this);
 		  });
-
-	 // function updateStockPrices() {
-
-	 //   $.ajax({
-		//    url: '/Home/RealTimeData',
-		//    type: 'GET',
-		//    dataType: 'html',
-		//    success: function (stockData) {
-		// 					$("#realstockdatatbl").html(stockData);
-		//    },
-		// 	error: function (xhr, status, error) {
-		// 		   console.error("Error fetching stock data:", error);
-		//   }
-	 //   });
-	 // };
 </script>

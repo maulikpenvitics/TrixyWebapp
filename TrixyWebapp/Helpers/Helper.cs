@@ -160,7 +160,7 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
             stockdata= stockdata.OrderByDescending(x => x.Date).ToList();
             StockCalculator.CalculateMovingAverages(stockdata, shortTerm, longTerm);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
@@ -193,7 +193,7 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
             stockdata=stockdata.OrderByDescending(x => x.Date).ToList();
              StockCalculator.CalculateRSI(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
@@ -227,7 +227,7 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).OrderByDescending(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
           //  int rsiPeriod = 14; // RSI period (default 14 days)
 
             stockdata=stockdata.OrderByDescending(x => x.Date).ToList() ;
@@ -262,7 +262,7 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
 
             List<double> closePrices = stockPrices.OrderByDescending(x => x.Date).Select(s => s.Close).ToList();
 
@@ -314,7 +314,7 @@ namespace TrixyWebapp.Helpers
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
 
             stockPrices=stockPrices.OrderByDescending(x => x.Date).ToList();
             for (int i = 0; i < stockPrices.Count; i++)
@@ -361,7 +361,7 @@ namespace TrixyWebapp.Helpers
                 Close = (double)x.Close,
                 Date = x.Timestamp,
                 Volume = (double)x.Volume,
-            }).OrderByDescending(x=>x.Date).ToList();
+            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
             var result = stockPrices.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result !=null)
             {

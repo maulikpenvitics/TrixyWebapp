@@ -38,9 +38,9 @@ var mongoClient = new MongoClient(mongoUrl);
 builder.Services.AddHangfire(config =>
 {
     config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
-                                      {
-                                          MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
-                                      });
+    {
+        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
+    });
 });
 builder.Services.AddHangfireServer();
 builder.Services.AddHostedService<JobSchedulerService>();
@@ -84,7 +84,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         option.LogoutPath = "/Account/Logout";
         option.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         option.SlidingExpiration = true;
-        //option.Cookie.HttpOnly = true;
+        option.Cookie.HttpOnly = true;
         option.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 

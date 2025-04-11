@@ -34,9 +34,8 @@ namespace Repository.FyersWebSocketServices
         private readonly HttpClient _httpClient;
         public readonly List<string?> _stocklist=new List<string?>();
         private readonly IServiceProvider _serviceProvider;
-        //private const string BaseUrl = "https://api-t1.fyers.in/data/history";
         private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbjVrY1dVQmJmbnRrMWRhTF82bEdRMGp0WDNQbk50STJZZndNLWtMZWdDNVpSQjlUWjJrWUNfdHMzbHVNSzRPTU9WRTV0eFdvWE9DRGlTN3RKaERiVW52RDNpRlFMY1BKM0tkWnlsMDVPMG1xamNkQT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJSMCIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQzMjA4MjAwLCJpYXQiOjE3NDMxNDQ3MjYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0MzE0NDcyNiwic3ViIjoiYWNjZXNzX3Rva2VuIn0.lONZilPCCaUxxbV_qp4oq96C6yS3ADsgK6oh9AUgwwQ";
+        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbi1KbzR4UU1BQm51ZEM0VGtESnc2eENkR19Fd0o3TG1pTURmUnFzQXJ6Wll6ZTZPcFZzblg4WTFINVhNSW5aWXQyUlJ0VmFfS2ZmX2g4UVFETjN3N2dzanNLZ001VlZZTWlkSi00cVJZU29ySEhfVT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0NDE3ODAwLCJpYXQiOjE3NDQzNDU2NTYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDM0NTY1Niwic3ViIjoiYWNjZXNzX3Rva2VuIn0.3tOyOS_7kvsluZK3iTTLayoja9M_lsnrsWtKbMOKVX0";
       
       
         public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient, IServiceProvider serviceProvider)
@@ -97,12 +96,12 @@ namespace Repository.FyersWebSocketServices
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
            
-            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution=240&date_format=1&range_from={rangform}&range_to={rangeto}";
+            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbjVrY1dVQmJmbnRrMWRhTF82bEdRMGp0WDNQbk50STJZZndNLWtMZWdDNVpSQjlUWjJrWUNfdHMzbHVNSzRPTU9WRTV0eFdvWE9DRGlTN3RKaERiVW52RDNpRlFMY1BKM0tkWnlsMDVPMG1xamNkQT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJSMCIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQzMjA4MjAwLCJpYXQiOjE3NDMxNDQ3MjYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0MzE0NDcyNiwic3ViIjoiYWNjZXNzX3Rva2VuIn0.lONZilPCCaUxxbV_qp4oq96C6yS3ADsgK6oh9AUgwwQ"; // Replace with actual token
+            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbjkwNnRjSlYxV0JyMGc1MmJXYzdZM04wRy1rWEV5MGF5VlR6X1c1dENDdnFuYzZ0aUtIZlA4OVoxcHlUR1VOd0Y4VDBHbnBIVDFnUG80Q2o3TFB3Q2JNN0VYYUI0dnBQUndZZm1VSTQ0NkdnSWxZbz0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0MzMxNDAwLCJpYXQiOjE3NDQyNjA3ODEsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDI2MDc4MSwic3ViIjoiYWNjZXNzX3Rva2VuIn0.PbeUMO4C1VC8z4zYJKBAMjXjkeb2_FwT6uU_y7L5nJA"; // Replace with actual token
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -113,6 +112,53 @@ namespace Repository.FyersWebSocketServices
                 var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
 
                 if (jsonResponse != null && jsonResponse.candles!=null && jsonResponse.candles.Count>0 && jsonResponse.s== "ok")
+                {
+                    foreach (var item in jsonResponse.candles)
+                    {
+                        var stockHistory = new Historical_Data();
+                        long timestamp = Convert.ToInt64(item[0]);
+                        DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
+                        stockHistory.Timestamp = dateTime;
+                        stockHistory.Open = Convert.ToDecimal(item[1]);
+                        stockHistory.High = Convert.ToDecimal(item[2]);
+                        stockHistory.Low = Convert.ToDecimal(item[3]);
+                        stockHistory.Close = Convert.ToDecimal(item[4]);
+                        stockHistory.Volume = Convert.ToDecimal(item[5]);
+                        stockHistory.from_date = rangform;
+                        stockHistory.to_date = rangeto;
+                        stockHistory.symbol = sym;
+                        stockHistory.Createddate = DateTime.UtcNow;
+                        stockHistorylist.Add(stockHistory);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine($"API Error: {response.StatusCode}");
+            }
+            return stockHistorylist;
+        }
+
+        public async Task<List<Historical_Data>> FetchAndHistoricalStockDataAsync(string sym, string rangform, string rangeto,int range)
+        {
+            List<Historical_Data> stockHistorylist = new List<Historical_Data>();
+
+            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+
+            // Add Authorization Token
+            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbi1KbzR4UU1BQm51ZEM0VGtESnc2eENkR19Fd0o3TG1pTURmUnFzQXJ6Wll6ZTZPcFZzblg4WTFINVhNSW5aWXQyUlJ0VmFfS2ZmX2g4UVFETjN3N2dzanNLZ001VlZZTWlkSi00cVJZU29ySEhfVT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0NDE3ODAwLCJpYXQiOjE3NDQzNDU2NTYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDM0NTY1Niwic3ViIjoiYWNjZXNzX3Rva2VuIn0.3tOyOS_7kvsluZK3iTTLayoja9M_lsnrsWtKbMOKVX0"; // Replace with actual token
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseString = await response.Content.ReadAsStringAsync();
+                var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
+
+                if (jsonResponse != null && jsonResponse.candles != null && jsonResponse.candles.Count > 0 && jsonResponse.s == "ok")
                 {
                     foreach (var item in jsonResponse.candles)
                     {
@@ -379,4 +425,6 @@ namespace Repository.FyersWebSocketServices
             
         }
     }
+
+    
 }

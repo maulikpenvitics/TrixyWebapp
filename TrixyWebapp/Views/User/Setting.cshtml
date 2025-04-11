@@ -13,9 +13,9 @@
                         <ul class="todo-list mt-20">
                             @if (Model?.UserStrategy != null && Model.UserStrategy.Any())
                             {
-                                var properties = Model?.UserStrategy.ToList(); // Get all properties of the Master object
+                                var properties = Model?.UserStrategy.Where(x=>x.IsActive==true).ToList(); // Get all properties of the Master object
 
-                                foreach (var prop in Model?.UserStrategy.ToList())
+                                foreach (var prop in properties.ToList())
                                 {
                                     var strategyName = prop.StretagyName;
                                     var isChecked = prop.StretagyEnableDisable;

@@ -43,6 +43,13 @@ namespace TrixyWebapp.Controllers
             if (user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
             {
                 var existuser = await _user.GetByEmail(user?.Email ?? "");
+
+               var aoivdstraetgy= existuser?.UserStrategy?.FirstOrDefault(x => x.StretagyName == "Sentiment_Analysis");
+                if (aoivdstraetgy!=null)
+                {
+                    aoivdstraetgy.IsActive = false;
+                    existuser?.UserStrategy?.Add(aoivdstraetgy);
+                }
                 user.ProfileImageUrl = existuser.ProfileImageUrl;   
                 user.UserStrategy = existuser.UserStrategy;   
                 user.Status = existuser.Status;   
@@ -64,9 +71,14 @@ namespace TrixyWebapp.Controllers
                         {
                             foreach (var item in stretagy)
                             {
+                                var isactive = true;
+                                if (item.Strategy== "Sentiment_Analysis")
+                                {
+                                    isactive = false;
+                                }
                                 strategyWeight.Add(new UserStrategy()
                                 {
-                                    IsActive = true,
+                                    IsActive = isactive,
                                     StretagyEnableDisable = false,
                                     StretagyName = item.Strategy
                                 });
@@ -145,7 +157,6 @@ namespace TrixyWebapp.Controllers
         public async Task<IActionResult> AdminSettings()
         {
             var userId = HttpContext.Session.GetString("UserId");
-           // string userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
             var adminseting= _user.GetUserSettings();
             
             return View(adminseting);
