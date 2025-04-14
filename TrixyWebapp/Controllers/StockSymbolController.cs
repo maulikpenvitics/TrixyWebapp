@@ -106,7 +106,7 @@ namespace TrixyWebapp.Controllers
                 var existuser = await _stockSymbol.GetStockBySymbol(stockSymbol?.Symbol ?? "");
                 if (existuser == null)
                 {
-                    var result = await _stockSymbolRepository.InsertAsync(stockSymbol);
+                    var result = stockSymbol!=null? await _stockSymbolRepository.InsertAsync(stockSymbol):0;
                     if (result == 1)
                     {
                         _fyersWebSocket.Connect();
@@ -154,7 +154,7 @@ namespace TrixyWebapp.Controllers
         {
             var userId = HttpContext.Session.GetString("UserId");
             //string userId = Encoding.UTF8.GetString(userIdBytes);
-            var user = await _masterRepository.GetByIdAsync(userId);
+            var user = userId!=null? await _masterRepository.GetByIdAsync(userId):new User();
             if (!string.IsNullOrEmpty(StockId))
             {
                 var stockSymbol = await _stockSymbolRepository.GetByIdAsync(StockId);
@@ -164,7 +164,7 @@ namespace TrixyWebapp.Controllers
                     {
                         if (user.Stocks == null)
                         {
-                            user.Stocks.Add(new Stocks
+                            user?.Stocks?.Add(new Stocks
                             {
                                 CompanyLogoUrl = stockSymbol.CompanyIconUrl,
                                 CompanyName = stockSymbol.CompanyName,
@@ -189,11 +189,11 @@ namespace TrixyWebapp.Controllers
                                 });
                             }
                         }
-                        var updateuser= await _userRepository.AddUserStocks(user);
+                        var updateuser= user!=null? await _userRepository.AddUserStocks(user):false;
                         if (updateuser)
                         {
                            _fyersWebSocket.Connect();
-                            var symhistorydata =  await _fyersWebSocket.FetchAndHistoricalStockDataAsync(stockSymbol.Symbol, DateTime.UtcNow.AddDays(-90).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"),30);
+                            var symhistorydata =  await _fyersWebSocket.FetchAndHistoricalStockDataAsync(stockSymbol?.Symbol??"", DateTime.UtcNow.AddDays(-90).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"),30);
                             await _webStockRepository.InsertNewHistoricalData(symhistorydata);
                             ViewBag.succesmessage = "Added stock succesfully";
                             return RedirectToAction("Index", "Home");
@@ -214,7 +214,7 @@ namespace TrixyWebapp.Controllers
                 symbol.Status = false;
                 await _stockSymbolRepository.UpdateAsync(symbol.Id.ToString(), symbol);
 
-                var userstock = await _userRepository.updatemanyuserstock(symbol.Symbol,symbol.Status);
+                var userstock = await _userRepository.updatemanyuserstock(symbol?.Symbol??"",symbol?.Status);
 
                 return RedirectToAction("Index");
             }

@@ -61,7 +61,7 @@ namespace Repository.FyersWebSocketServices
                     foreach (var item in stockssym)
                     {
                         var data = await _fyersWebSocketService.FetchAndStoreHistoricalStockDataAsync(
-                            item,
+                            sym: item??"",
                             DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"),
                             DateTime.UtcNow.Date.ToString("yyyy-MM-dd")
                         );
@@ -72,14 +72,18 @@ namespace Repository.FyersWebSocketServices
                 {
                     foreach (var getstock in getstocks)
                     {
-                        if (!string.IsNullOrEmpty(getstock?.Symbol))
+                        if ( getstock!=null && !string.IsNullOrEmpty(getstock?.Symbol))
                         {
                             var signal = await getfinalsignal(getstock.Symbol,getstock?.userid??"");
                             if (!string.IsNullOrEmpty(signal))
                             {
                                 await userrepo.UpdateUserStocks(getstock?.userid??"", getstock?.Symbol ?? "", signal);
                             }
-                            getstock.BuySellSignal = string.IsNullOrEmpty(signal) ? null : signal;
+                            if (getstock!=null)
+                            {
+                                getstock.BuySellSignal = string.IsNullOrEmpty(signal) ? null : signal;
+                            }
+                            
                         }
                     }
                 }
@@ -125,9 +129,9 @@ namespace Repository.FyersWebSocketServices
             }
         }
 
-        private async Task<List<string>> GetSymbol()
+        private async Task<List<string?>> GetSymbol()
         { 
-            List<string> symlst= new List<string>();
+            List<string?> symlst= new List<string?>();
             using (var scope = _serviceProvider.CreateScope())
             {
                 var adminstocksym = scope.ServiceProvider.GetRequiredService<IRepository<StockSymbol>>();
@@ -156,7 +160,7 @@ namespace Repository.FyersWebSocketServices
 
                 if (data != null && data.Any())
                 {
-                    result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data, userstretagy.UserStrategy);
+                    if (userstretagy?.UserStrategy != null) { result = GenrateBuysellsignal.GetCombinationsignal(Adminsetting, (List<Historical_Data>)data, userstretagy.UserStrategy); }
                 }
             }
             return result;

@@ -12,10 +12,10 @@ namespace Repository.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]
-        public string userId { get; set; }
+        public string? userId { get; set; }
 
         public bool RSI { get; set; }
         public bool Moving_Average { get; set; }

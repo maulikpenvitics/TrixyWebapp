@@ -15,7 +15,7 @@
 	{
 		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
 	}
-	int asignstretagy = user.UserStrategy.Where(x => x.IsActive == true && x.StretagyEnableDisable==true).Count();
+	int asignstretagy = (user!=null&& user.UserStrategy != null)? user.UserStrategy.Where(x => x.IsActive == true && x.StretagyEnableDisable == true).Count() : 0;
 }
 <!-- Content Wrapper. Contains page content -->
 @* <input type="hidden" id="symbol" value="@symbole" /> *@

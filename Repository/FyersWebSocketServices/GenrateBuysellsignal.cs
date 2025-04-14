@@ -15,7 +15,6 @@ namespace Repository.FyersWebSocketServices
         public static string GenerateSignalsforMovingAverageCrossover(List<Historical_Data> stockData, int shortTerm, int longTerm)
         {
             var signal = "HOLD";
-            int returnresult = 0;
             var stockdata = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -28,17 +27,17 @@ namespace Repository.FyersWebSocketServices
                 if (result.SMA > result.LMA)
                 {
                     signal = "BUY";
-                    returnresult = 1;
+                    
                 }
                 else if (result.SMA < result.LMA)
                 {
                     signal = "SELL";
-                    returnresult = -1;
+                    
                 }
                 else
                 {
                     signal = "N/A";
-                    returnresult = 0;
+                   
                 }
             }
             return signal;
@@ -47,7 +46,7 @@ namespace Repository.FyersWebSocketServices
         public static string genratesignalsforRSI(List<Historical_Data> stockData, int rsiPeriod,int overbought,int oversold)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
+         
             var stockdata = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -61,17 +60,14 @@ namespace Repository.FyersWebSocketServices
                 if (result.RSI < overbought)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.RSI > oversold)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
 
@@ -81,7 +77,7 @@ namespace Repository.FyersWebSocketServices
         public static string GenerateBuySellSignalsForBB(List<Historical_Data> stockData,int rsiPeriod)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
+            
             var stockdata = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -95,17 +91,14 @@ namespace Repository.FyersWebSocketServices
                 if (result.Close <= result.LowerBand)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.Close >= result.UpperBand)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return Signal;
@@ -114,7 +107,6 @@ namespace Repository.FyersWebSocketServices
         public static string CalculateMACD(List<Historical_Data> stockData, int shortEmaPeriod, int longEmaPeriod, int signalPeriod)
         {
             var signal = "HOLD";
-            int returnresult = 0;
             var stockPrices = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -148,17 +140,14 @@ namespace Repository.FyersWebSocketServices
                 if (result.MACD < result.TradeSignal)
                 {
                     signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.MACD > result.TradeSignal)
                 {
                     signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return signal;
@@ -166,7 +155,7 @@ namespace Repository.FyersWebSocketServices
         public static string CalculateMeanReversion(List<Historical_Data> stockData, int period, double threshold)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
+           
             var stockPrices = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -193,18 +182,15 @@ namespace Repository.FyersWebSocketServices
                 if (deviation <= -threshold)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
 
                 else if (deviation >= threshold)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
 
             }
@@ -214,7 +200,7 @@ namespace Repository.FyersWebSocketServices
         public static string CalculateVWAP(List<Historical_Data> stockData)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
+            
             var stockPrices = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
@@ -233,17 +219,14 @@ namespace Repository.FyersWebSocketServices
                 if (result.Close < result.VWAP)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.Close > result.VWAP)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return Signal;
@@ -271,38 +254,42 @@ namespace Repository.FyersWebSocketServices
             var weightedstrategy = userSettings.StrategyWeighted;
             var thresold = userSettings.Threshold;
             List<string> signals = new List<string>();
-            foreach (var item in userStrategies)
+            if (userStrategies.Any()&& userStrategies.Count>0)
             {
-                switch (item.StretagyName)
+                foreach (var item in userStrategies)
                 {
-                    case "Bollinger_Bands":
-                        var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings.RSIThresholds.RsiPeriod);
-                        signals.Add(bollingerBands);
-                        break;
-                    case "MACD":
-                        var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod,
-            userSettings.MACD_Settings.SignalPeriod);
-                        signals.Add(MACD);
-                        break;
-                    case "Mean_Reversion":
-                        var MeanReversion = CalculateMeanReversion(stockData, userSettings.MeanReversion.Period, userSettings.MeanReversion.Threshold);
-                        signals.Add(MeanReversion);
-                        break;
-                    case "Moving_Average":
-                        var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings.MovingAverage.SMA_Periods, userSettings.MovingAverage.LMA_Periods);
-                        signals.Add(MovingAverageCrossover);
-                        break;
-                    case "RSI":
-                        var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought
-                 ,userSettings.RSIThresholds.Oversold);
-                        signals.Add(RSI);
-                        break;
-                    case "VWAP":
-                        var VWAP = CalculateVWAP(stockData);
-                        signals.Add(VWAP);
-                        break;
+                    switch (item.StretagyName)
+                    {
+                        case "Bollinger_Bands":
+                            var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod??0);
+                            signals.Add(bollingerBands);
+                            break;
+                        case "MACD":
+                            var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod??0, userSettings?.MACD_Settings?.LongEmaPeriod??0,
+                userSettings?.MACD_Settings?.SignalPeriod??0);
+                            signals.Add(MACD);
+                            break;
+                        case "Mean_Reversion":
+                            var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period??0, userSettings?.MeanReversion?.Threshold??0);
+                            signals.Add(MeanReversion);
+                            break;
+                        case "Moving_Average":
+                            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods??0, userSettings?.MovingAverage?.LMA_Periods??0);
+                            signals.Add(MovingAverageCrossover);
+                            break;
+                        case "RSI":
+                            var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod??0, userSettings?.RSIThresholds?.Overbought??0
+                     , userSettings?.RSIThresholds?.Oversold??0);
+                            signals.Add(RSI);
+                            break;
+                        case "VWAP":
+                            var VWAP = CalculateVWAP(stockData);
+                            signals.Add(VWAP);
+                            break;
+                    }
                 }
             }
+          
 
             var finalsignal = GetCombinationStrategyDecision(signals, thresold);
 

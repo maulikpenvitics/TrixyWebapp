@@ -56,7 +56,7 @@ namespace TrixyWebapp.Controllers
                     return View(model);
                 }
 
-                var user = await _userRepository.AuthenticateUserAsync(model.Email, model.Password);
+                var user = await _userRepository.AuthenticateUserAsync(model?.Email??"", model?.Password ?? "");
 
                 if (user != null)
                 {
@@ -68,27 +68,27 @@ namespace TrixyWebapp.Controllers
 
                     var userJson = HttpContext?.Session.GetString("User");
                     var userId = HttpContext?.Session.GetString("UserId");
-                    Helper.LogFile(userJson.ToString(),_env);
-                    Helper.LogFile(userId.ToString(),_env);
+                    Helper.LogFile(userJson??"",_env);
+                    Helper.LogFile(userId??"",_env);
                     var claims = new List<Claim>
                     {
-                              new Claim(ClaimTypes.NameIdentifier, userId), // ✅ Add User ID
-                               new Claim(ClaimTypes.Name, user.Firstname),
-                              new Claim(ClaimTypes.Role, user.Role)
+                              new Claim(ClaimTypes.NameIdentifier, userId??""), // ✅ Add User ID
+                               new Claim(ClaimTypes.Name, user?.Firstname??""),
+                              new Claim(ClaimTypes.Role, user ?.Role ?? "")
                     };
 
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                    await HttpContext!.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
                     }
                    
-                    Helper.LogFile(userId.ToString(), _env);
+                    Helper.LogFile(userId ?? "", _env);
                     return RedirectToAction("Index", "Home");
                 }
                 else

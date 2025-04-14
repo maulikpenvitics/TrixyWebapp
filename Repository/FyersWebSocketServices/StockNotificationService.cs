@@ -95,28 +95,28 @@ namespace Repository.FyersWebSocketServices
                     var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>(); // Resolve scoped service
                     var users = await userRepository.GetByIdAsync(userId);
                     var assignedStocks = users.Stocks?.Where(x => x.StockNotification == true).ToList() ?? new List<Stocks>();
-                    List<string?> userstrategy = users?.UserStrategy?.Where(x => x.StretagyEnableDisable == true).Select(x=>x.StretagyName).ToList();
+                    List<string> userstrategy = users.UserStrategy!=null? users.UserStrategy.Where(x => x.StretagyEnableDisable==true).Select(x=>x.StretagyName??"").ToList():new List<string>();
                     if (assignedStocks != null && assignedStocks.Any())
                     {
-                        users.UserStrategy = users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
+                        users.UserStrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList():new List<UserStrategy>();
                         var stockPrices = GetLiveStockPrice(assignedStocks);
                         foreach (var item in assignedStocks)
                         {
-                            var signal = await getfinalsignal(item.Symbol, users.UserStrategy);
+                            var signal = users?.UserStrategy!=null? await getfinalsignal(item?.Symbol??"", users.UserStrategy):string.Empty;
                             if (!string.IsNullOrEmpty(signal))
                             {
-                                await userRepo.UpdateUserStocks(users?.Id.ToString(), item?.Symbol, signal);
+                                await userRepo.UpdateUserStocks(users?.Id.ToString()??"", item?.Symbol ?? "", signal);
                             }
                             stocks.Add(new Stocknotifactiondata()
                             {
                                 BuySellSignal = signal,
-                                Change = stockPrices.Where(x => x.Symbol == item.Symbol)?.FirstOrDefault()?.Change,
-                                Price = stockPrices.Where(x => x.Symbol == item.Symbol)?.FirstOrDefault()?.Price,
-                                Priviscloseprice = stockPrices.Where(x => x.Symbol == item.Symbol)?.FirstOrDefault()?.prev_close_price,
-                                Symbol = item.Symbol,
+                                Change = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Change,
+                                Price = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Price,
+                                Priviscloseprice = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.prev_close_price,
+                                Symbol = item?.Symbol,
                                 userid = users?.Id.ToString(),
                                 timestamp = DateTime.Now,
-                                CompanyName=item.CompanyName,
+                                CompanyName=item?.CompanyName,
                                 userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>()
                             });
 

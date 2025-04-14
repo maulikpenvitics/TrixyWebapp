@@ -10,6 +10,6 @@ namespace Repository.Models
     public class Strategy
     {
         public ObjectId Id { get; set; }
-        public string strategy_name { get; set; }
+        public string? strategy_name { get; set; }
     }
 }

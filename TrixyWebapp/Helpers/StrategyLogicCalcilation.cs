@@ -74,7 +74,7 @@ namespace TrixyWebapp.Helpers
     {
         public static void GetCombinationsignal(AdminSettings userSettings, List<Historical_Data> stockData)
         {
-            var weightedstrategy = userSettings.StrategyWeighted.Select(x=>x.Weight).ToList();
+            var weightedstrategy = userSettings?.StrategyWeighted?.Select(x=>x.Weight).ToList();
 
             List<double> stockPrices = stockData.Select(x => Convert.ToDouble(x.Close)).ToList();
             int smaSignal = StrategyLogicCalcilation.MovingAverageCrossover(stockPrices, 10, 50);
@@ -86,7 +86,7 @@ namespace TrixyWebapp.Helpers
 
             // Combine all signals
             List<int> signals = new List<int> { smaSignal, rsiSignal, bollingerSignal, meanReversionSignal, vwapSignal, macdSignal };
-            string finalDecision = StrategyLogicCalcilation.GetCombinationStrategyDecision(signals, weightedstrategy);
+            string finalDecision = StrategyLogicCalcilation.GetCombinationStrategyDecision(signals, weightedstrategy??new List<double>());
             Console.WriteLine($"Final Trading Decision: {finalDecision}");
         }
     }

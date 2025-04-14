@@ -34,7 +34,7 @@ namespace Repository.Models
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime? UpdatedDate { get; set; }
         public string? UpdatedBy { get; set; }
-        public string StatusText => (bool)Status ? "Active" : "Inactive";
+        public string StatusText => Status != null ? (bool)Status ? "Active" : "Inactive" : "Inactive";
         public List<UserStrategy>? UserStrategy { get; set; }
         public List<Stocks>? Stocks { get; set; }
         public User()

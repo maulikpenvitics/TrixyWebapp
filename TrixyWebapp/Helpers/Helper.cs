@@ -155,7 +155,7 @@ namespace TrixyWebapp.Helpers
         public static string GenerateSignalsforMovingAverageCrossover(List<Historical_Data> stockData, int shortTerm, int longTerm)
         {
             var signal = "HOLD";
-            int returnresult = 0;
+           
             var stockdata = stockData.Select(x => new BuySellForMAC
             {
                 Close = (double)x.Close,
@@ -169,17 +169,14 @@ namespace TrixyWebapp.Helpers
                 if (result.SMA > result.LMA)
                 {
                     signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.SMA < result.LMA)
                 {
                     signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return signal;
@@ -188,7 +185,6 @@ namespace TrixyWebapp.Helpers
         public static string genratesignalsforRSI(List<Historical_Data> stockData,int rsiPeriod,int Overbought, int Oversold)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
             var stockdata = stockData.Select(x => new BuySellForRSI
             {
                 Close = (double)x.Close,
@@ -202,17 +198,14 @@ namespace TrixyWebapp.Helpers
                 if (result.RSI < Overbought)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.RSI > Oversold)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
             
@@ -222,7 +215,6 @@ namespace TrixyWebapp.Helpers
         public static string GenerateBuySellSignalsForBB(List<Historical_Data> stockData,int rsiPeriod)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
             var stockdata = stockData.Select(x => new BuySellforBollingerBands
             {
                 Close = (double)x.Close,
@@ -238,17 +230,14 @@ namespace TrixyWebapp.Helpers
                 if (result.Close <= result.LowerBand)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.Close >= result.UpperBand)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return Signal;
@@ -257,7 +246,6 @@ namespace TrixyWebapp.Helpers
         public static string CalculateMACD(List<Historical_Data> stockData, int shortEmaPeriod, int longEmaPeriod, int signalPeriod)
         {
             var signal = "HOLD";
-            int returnresult = 0;
             var stockPrices = stockData.Select(x => new BuySellforMACD
             {
                 Close = (double)x.Close,
@@ -291,17 +279,14 @@ namespace TrixyWebapp.Helpers
                 if(result.MACD<result.TradeSignal)
                 {
                     signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.MACD > result.TradeSignal)
                 {
                     signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return signal;
@@ -309,7 +294,6 @@ namespace TrixyWebapp.Helpers
         public static string CalculateMeanReversion(List<Historical_Data> stockData, int period, double threshold)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
             var stockPrices = stockData.Select(x => new BuySellforMeanReversion
             {
                 Close = (double)x.Close,
@@ -334,18 +318,15 @@ namespace TrixyWebapp.Helpers
                 if (deviation <= -threshold)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                     
                 else if (deviation >= threshold)
                 {
                     Signal = "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
                     
             }
@@ -355,7 +336,6 @@ namespace TrixyWebapp.Helpers
         public static string CalculateVWAP(List<Historical_Data> stockData)
         {
             string Signal = "HOLD";
-            int returnresult = 0;
             var stockPrices = stockData.Select(x => new BuySellforVWAP
             {
                 Close = (double)x.Close,
@@ -374,17 +354,14 @@ namespace TrixyWebapp.Helpers
                 if (result.Close< result.VWAP)
                 {
                     Signal = "BUY";
-                    returnresult = 1;
                 }
                 else if (result.Close > result.VWAP)
                 {
                     Signal= "SELL";
-                    returnresult = -1;
                 }
                 else
                 {
                     Signal = "N/A";
-                    returnresult = 0;
                 }
             }
             return Signal;
@@ -418,26 +395,26 @@ namespace TrixyWebapp.Helpers
                 switch (item.StretagyName)
                 {
                     case "Bollinger_Bands":
-                        var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings.RSIThresholds.RsiPeriod);
+                        var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod??0);
                         signals.Add(bollingerBands);
                         break;
                     case "MACD":
-                        var MACD = CalculateMACD(stockData, userSettings.MACD_Settings.ShortEmaPeriod, userSettings.MACD_Settings.LongEmaPeriod,
-            userSettings.MACD_Settings.SignalPeriod);
+                        var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
+            userSettings?.MACD_Settings?.SignalPeriod ?? 0);
                         signals.Add(MACD);
                         break;
                     case "Mean_Reversion":
-                        var MeanReversion = CalculateMeanReversion(stockData, userSettings.MeanReversion.Period, userSettings.MeanReversion.Threshold);
+                        var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period??0, userSettings?.MeanReversion?.Threshold ?? 0);
                         signals.Add(MeanReversion);
                         break;
                     case "Moving_Average":
-                        var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings.MovingAverage.SMA_Periods, userSettings.MovingAverage.LMA_Periods);
+                        var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods??0);
                         signals.Add(MovingAverageCrossover);
 
                         break;
                     case "RSI":
-                        var RSI = genratesignalsforRSI(stockData, userSettings.RSIThresholds.RsiPeriod, userSettings.RSIThresholds.Overbought
-                 , userSettings.RSIThresholds.Oversold);
+                        var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
+                 , userSettings?.RSIThresholds?.Oversold??0);
                         signals.Add(RSI);
                         break;
                     case "VWAP":

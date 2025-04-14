@@ -10,8 +10,8 @@
     var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
     var Username = HttpContextAccessor.HttpContext?.Session.GetString("UserName");
     var imageurl = HttpContextAccessor.HttpContext?.Session.GetString("imageurl");
-    var userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
-    User user = new User();
+    var userJson = HttpContextAccessor.HttpContext?.Session.GetString("User");
+    User? user = new User();
     if (!string.IsNullOrEmpty(userJson))
     {
         user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
@@ -132,7 +132,7 @@
                                 @if (!string.IsNullOrEmpty(user?.ProfileImageUrl))
                                 {
 
-                                    <img src="@Context.GetFullUrl(user?.ProfileImageUrl)" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
+                                    <img src="@Context.GetFullUrl(user?.ProfileImageUrl??"")" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
                                 }
                                 else
                                 {
@@ -186,7 +186,7 @@
                                 <i data-feather="grid"></i><span>Dashboard</span>
                             </a>
                         </li>
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User?.Identity?.IsAuthenticated??false)
                         {
                             @if (User.IsInRole("Admin"))
                             {

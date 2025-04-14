@@ -1,21 +1,11 @@
-﻿using FyersCSharpSDK;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Elfie.Model;
-using Microsoft.VisualBasic;
-using MongoDB.Bson.IO;
-using Newtonsoft.Json;
-using NuGet.Protocol.Core.Types;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
-using Repository.Repositories;
-using SharpCompress.Common;
 using System.Text;
-using System.Text.Json;
 using TrixyWebapp.Helpers;
 using TrixyWebapp.ViewModels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace TrixyWebapp.Controllers
@@ -50,14 +40,14 @@ namespace TrixyWebapp.Controllers
             try
             {
                 List<StockData> stockData = new List<StockData>();
-                //var userIdBytes = HttpContext.Session.Get("UserId");
+
 
                 var userJson = HttpContext?.Session.GetString("User");
                 var userId = HttpContext?.Session.GetString("UserId");
-                Helper.LogFile(userJson.ToString(), _env);
-                Helper.LogFile(userId.ToString(), _env);
+                Helper.LogFile(userJson ?? "", _env);
+                Helper.LogFile(userId ?? "", _env);
                 ViewData["UserId"] = userId;
-                var user = _user.GetById(userId);
+                var user = userId != null ? _user.GetById(userId) : new User();
 
 
                 stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
@@ -65,10 +55,10 @@ namespace TrixyWebapp.Controllers
                 {
                     foreach (var item in stockData)
                     {
-                        item.recommendation = await Recomddation(item.Symbol);
+                        item.recommendation = await Recomddation(item?.Symbol ?? "");
                     }
                 }
-                var user1 = _user.GetById(userId);
+                var user1 = userId != null ? _user.GetById(userId) : new User();
                 HttpContext?.Session.SetString("User", System.Text.Json.JsonSerializer.Serialize(user1));
                 return View(stockData);
             }
@@ -87,7 +77,7 @@ namespace TrixyWebapp.Controllers
             {
                 var userId = HttpContext.Session.GetString("UserId");
                 //string userId = Encoding.UTF8.GetString(userIdBytes);
-                var user = _user.GetById(userId);
+                var user = userId != null ? _user.GetById(userId) : new User();
                 List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
                 var formateddata = stockData.Select(x => new
                 {
@@ -109,7 +99,7 @@ namespace TrixyWebapp.Controllers
         public async Task<IActionResult> FetchData(string sym)
         {
 
-          
+
             var marketStart = new TimeSpan(9, 15, 0);
             var marketEnd = new TimeSpan(15, 30, 0);
 
@@ -120,7 +110,7 @@ namespace TrixyWebapp.Controllers
             var oneWeekAgoUtc = DateTime.UtcNow.AddDays(-30);
             var onemonthAgoIST = TimeZoneInfo.ConvertTimeFromUtc(oneWeekAgoUtc, istTimeZone);
 
-            
+
             var filteredData = gethistoricaldata
        .Select(item => new
        {
@@ -150,7 +140,7 @@ namespace TrixyWebapp.Controllers
       });
             var last5data = await _fyersWebSocket.FetchAndHistoricalStockDataAsync(sym, oneWeekAgo.ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"), 60);
 
-            var result5daydata = last5data.GroupBy(item => item.Timestamp.Date).Select(group => new 
+            var result5daydata = last5data.GroupBy(item => item.Timestamp.Date).Select(group => new
             {
                 Date = group.Key.ToString("yyyy-MM-dd"),
                 Data = group.Select(item => new ChartDataPoint
@@ -171,7 +161,7 @@ namespace TrixyWebapp.Controllers
             if (stocks != null)
             {
                 var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
-                
+
                 var last5data = await _fyersWebSocket.FetchAndHistoricalStockDataAsync(sym, DateTime.UtcNow.ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"), 30);
 
                 StockCandleChartVM returndata = new StockCandleChartVM()
@@ -179,7 +169,7 @@ namespace TrixyWebapp.Controllers
                     Symbol = stocks.Symbol,
                     Companylogo = stocks.CompanyIconUrl,
                     CompanyName = stocks.CompanyName
-                    
+
                 };
                 return Json(returndata);
             }
@@ -218,19 +208,24 @@ namespace TrixyWebapp.Controllers
         public async Task<IActionResult> EnableDisableStratgey(string sym, bool isEnable)
         {
             string finalsignal = string.Empty;
-            var userId = HttpContext.Session.GetString("UserId");
-            //string userId = Encoding.UTF8.GetString(userIdBytes);
+            string? userId = HttpContext.Session.GetString("UserId");
+
             var weightedsignal = await _user.GetUserSettings();
 
-            var user = _user.GetById(userId);
+            var user = userId != null ? _user.GetById(userId) : new User();
             var userstregy = user?.UserStrategy?.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
             if (gethistoricaldata != null && gethistoricaldata.Count > 0)
             {
 
                 //combination signal
-                finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
-                await _user.UpdateAsyncUserStocks(userId, sym, isEnable, finalsignal);
+
+                if (userId != null && userstregy?.Any() == true)
+                {
+                    finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
+                    await _user.UpdateAsyncUserStocks(userId, sym, isEnable, finalsignal);
+                }
+
             }
 
             return RedirectToAction("Index");
@@ -242,66 +237,74 @@ namespace TrixyWebapp.Controllers
             // string userId = Encoding.UTF8.GetString(userIdBytes);
             var weightedsignal = await _user.GetUserSettings();
 
-            var user = _user.GetById(userId);
+            var user = userId != null ? _user.GetById(userId) : new Repository.Models.User();
             var userstregy = user?.UserStrategy?.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
             var gethistoricaldata = await _stockRepository.GetStockDataBySymbolAsync(sym);
 
             //combination signal
-            var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
-            await _user.UpdateUserStocks(userId, sym, finalsignal);
+            if (userId != null && userstregy?.Any() == true)
+            {
+                var finalsignal = SignalGenerator.GetCombinationsignal(weightedsignal, gethistoricaldata, userstregy);
+                await _user.UpdateUserStocks(userId, sym, finalsignal);
+            }
+
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
             if (gethistoricaldata != null && gethistoricaldata.Any())
             {
-                foreach (var item in userstregy)
+                if (userstregy?.Any() == true)
                 {
-                    switch (item.StretagyName)
+                    foreach (var item in userstregy)
                     {
-                        case "Bollinger_Bands":
-                            #region Bollinger Bands Strategy
-                            var BBSresult = SignalGenerator.GenerateBuySellSignalsForBB(gethistoricaldata, weightedsignal.RSIThresholds.RsiPeriod);
-                            keyValuePairs["Bollinger_Bands"] = BBSresult;
-                            #endregion
+                        switch (item.StretagyName)
+                        {
+                            case "Bollinger_Bands":
+                                #region Bollinger Bands Strategy
+                                var BBSresult = SignalGenerator.GenerateBuySellSignalsForBB(gethistoricaldata, weightedsignal?.RSIThresholds?.RsiPeriod ?? 0);
+                                keyValuePairs["Bollinger_Bands"] = BBSresult;
+                                #endregion
 
-                            break;
-                        case "MACD":
-                            #region MACD (Moving Average Convergence Divergence) Strategy
-                            var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, weightedsignal.MACD_Settings.ShortEmaPeriod, weightedsignal.MACD_Settings.LongEmaPeriod, weightedsignal.MACD_Settings.SignalPeriod);
-                            keyValuePairs["MACD"] = MACD;
+                                break;
+                            case "MACD":
+                                #region MACD (Moving Average Convergence Divergence) Strategy
+                                var MACD = SignalGenerator.CalculateMACD(gethistoricaldata, weightedsignal?.MACD_Settings?.ShortEmaPeriod ?? 0, weightedsignal?.MACD_Settings?.LongEmaPeriod ?? 0, weightedsignal?.MACD_Settings?.SignalPeriod ?? 0);
+                                keyValuePairs["MACD"] = MACD;
 
-                            #endregion
-                            break;
-                        case "Mean_Reversion":
-                            #region Mean Reversion Strategy
-                            var MRSresult = SignalGenerator.CalculateMeanReversion(gethistoricaldata, weightedsignal.MeanReversion.Period, weightedsignal.MeanReversion.Threshold);
-                            keyValuePairs["Mean_Reversion"] = MRSresult;
+                                #endregion
+                                break;
+                            case "Mean_Reversion":
+                                #region Mean Reversion Strategy
+                                var MRSresult = SignalGenerator.CalculateMeanReversion(gethistoricaldata, weightedsignal?.MeanReversion?.Period ?? 0, weightedsignal?.MeanReversion?.Threshold ?? 0);
+                                keyValuePairs["Mean_Reversion"] = MRSresult;
 
-                            #endregion
-                            break;
-                        case "Moving_Average":
-                            #region Moving Average Crossover Strategy
-                            var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: weightedsignal.MovingAverage.SMA_Periods,
-                                longTerm: weightedsignal.MovingAverage.LMA_Periods);
-                            keyValuePairs["Moving_Average"] = result;
-                            #endregion
+                                #endregion
+                                break;
+                            case "Moving_Average":
+                                #region Moving Average Crossover Strategy
+                                var result = SignalGenerator.GenerateSignalsforMovingAverageCrossover(gethistoricaldata, shortTerm: weightedsignal?.MovingAverage?.SMA_Periods ?? 0,
+                                    longTerm: weightedsignal?.MovingAverage?.LMA_Periods ?? 0);
+                                keyValuePairs["Moving_Average"] = result;
+                                #endregion
 
-                            break;
-                        case "RSI":
-                            #region Relative Strength Index (RSI)
-                            var RSIresult = SignalGenerator.genratesignalsforRSI(gethistoricaldata, weightedsignal.RSIThresholds.RsiPeriod,
-                                weightedsignal.RSIThresholds.Overbought, weightedsignal.RSIThresholds.Oversold);
-                            keyValuePairs["RSI"] = RSIresult;
-                            #endregion
+                                break;
+                            case "RSI":
+                                #region Relative Strength Index (RSI)
+                                var RSIresult = SignalGenerator.genratesignalsforRSI(gethistoricaldata, weightedsignal?.RSIThresholds?.RsiPeriod ?? 0,
+                                    weightedsignal?.RSIThresholds?.Overbought ?? 0, weightedsignal?.RSIThresholds?.Oversold ?? 0);
+                                keyValuePairs["RSI"] = RSIresult;
+                                #endregion
 
-                            break;
-                        case "VWAP":
-                            #region Volume-Weighted Average Price (VWAP) Strategy
-                            var VWAP = SignalGenerator.CalculateVWAP(gethistoricaldata);
-                            keyValuePairs["VWAP"] = VWAP;
-                            #endregion
+                                break;
+                            case "VWAP":
+                                #region Volume-Weighted Average Price (VWAP) Strategy
+                                var VWAP = SignalGenerator.CalculateVWAP(gethistoricaldata);
+                                keyValuePairs["VWAP"] = VWAP;
+                                #endregion
 
-                            break;
+                                break;
+                        }
                     }
                 }
+
             }
 
             //keyValuePairs["Combine"] = finalsignal;

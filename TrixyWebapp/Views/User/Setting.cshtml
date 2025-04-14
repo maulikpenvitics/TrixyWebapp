@@ -14,21 +14,24 @@
                             @if (Model?.UserStrategy != null && Model.UserStrategy.Any())
                             {
                                 var properties = Model?.UserStrategy.Where(x=>x.IsActive==true).ToList(); // Get all properties of the Master object
-
-                                foreach (var prop in properties.ToList())
+                                if (properties != null && properties.Any())
                                 {
-                                    var strategyName = prop.StretagyName;
-                                    var isChecked = prop.StretagyEnableDisable;
+                                    foreach (var prop in properties.ToList())
+                                    {
+                                        var strategyName = prop.StretagyName;
+                                        var isChecked = prop.StretagyEnableDisable;
 
-                                    <li class="py-15 px-5 by-1">
-                                        <input type="checkbox" id="basic_checkbox_@strategyName"
-                                               class="filled-in strategy-checkbox"
-                                               data-strategy="@strategyName"
-                                        @(isChecked ? "checked=\"checked\"" : "")>
-                                        <label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
-                                        <span>@strategyName</span>
-                                    </li>
+                                        <li class="py-15 px-5 by-1">
+                                            <input type="checkbox" id="basic_checkbox_@strategyName"
+                                                   class="filled-in strategy-checkbox"
+                                                   data-strategy="@strategyName"
+                                            @(isChecked ? "checked=\"checked\"" : "")>
+                                            <label for="basic_checkbox_@strategyName" class="mb-0 h-15"></label>
+                                            <span>@strategyName</span>
+                                        </li>
+                                    }
                                 }
+                                
                             }
                             else
                             {

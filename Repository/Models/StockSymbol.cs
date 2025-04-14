@@ -38,10 +38,10 @@ namespace Repository.Models
 
         public string? UpdatedBy { get; set; }
 
-        public string StatusText => (bool)Status ? "Active" : "Inactive";
+        public string StatusText => Status!=null?(bool)Status ? "Active" : "Inactive": "Inactive";
 
         [BsonIgnore] // This will prevent MongoDB from storing the file object
-        public IFormFile IconFile { get; set; }
+        public IFormFile? IconFile { get; set; }
 
 
         public StockSymbol()

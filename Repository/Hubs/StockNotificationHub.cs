@@ -36,7 +36,7 @@ namespace Repository.Hubs
 
             return base.OnConnectedAsync();
         }
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -62,7 +62,8 @@ namespace Repository.Hubs
         }
         public static string GetLoggedInUserId()
         {
-            return _activeUsers.Keys.FirstOrDefault();
+            var activevuser =_activeUsers.Keys.FirstOrDefault();
+            return activevuser!=null?activevuser:string.Empty;
         }
         public static List<string> GetConnectedUsers()
         {

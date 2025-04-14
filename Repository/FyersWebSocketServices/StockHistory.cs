@@ -23,6 +23,6 @@ namespace Repository.FyersWebSocketServices
         public List<List<double>>? candles { get; set; }
         public int code { get; set; }
         public string? message { get; set; }
-        public string s { get; set; }
+        public string? s { get; set; }
     }
 }

@@ -38,11 +38,11 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> AdminSetting(string FullModelJson)
         {
-            AdminSettings model;
+            AdminSettings? model;
             try
             {
                 model = JsonConvert.DeserializeObject<AdminSettings>(FullModelJson);
-                await _adminSettingsRepository.UpdateAsync(model.Id.ToString(), model);
+                await _adminSettingsRepository.UpdateAsync(model?.Id ?? "".ToString(), model??new AdminSettings());
                 ViewBag.SuccessMessage = "Admin settings saved successfully!";
             }
             catch

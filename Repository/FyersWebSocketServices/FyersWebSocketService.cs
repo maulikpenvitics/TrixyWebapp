@@ -35,7 +35,7 @@ namespace Repository.FyersWebSocketServices
         public readonly List<string?> _stocklist=new List<string?>();
         private readonly IServiceProvider _serviceProvider;
         private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbi1KbzR4UU1BQm51ZEM0VGtESnc2eENkR19Fd0o3TG1pTURmUnFzQXJ6Wll6ZTZPcFZzblg4WTFINVhNSW5aWXQyUlJ0VmFfS2ZmX2g4UVFETjN3N2dzanNLZ001VlZZTWlkSi00cVJZU29ySEhfVT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0NDE3ODAwLCJpYXQiOjE3NDQzNDU2NTYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDM0NTY1Niwic3ViIjoiYWNjZXNzX3Rva2VuIn0.3tOyOS_7kvsluZK3iTTLayoja9M_lsnrsWtKbMOKVX0";
+        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbl9KelBfRG1CaGNNTDdjbFVJOUFHVzZMa3c0azhuZEw4a2o1VWpqcWt6N1JjYW5XWnVsUHl4aFlCajR6RlVXRG5CX0J3TEp1TlBMWWRzR0xIOXlmSDhBYWJCM3VYbC1ncUhiMDI3UXdIWG5Tamd0WT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0Njc3MDAwLCJpYXQiOjE3NDQ2MDg0NjMsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDYwODQ2Mywic3ViIjoiYWNjZXNzX3Rva2VuIn0.TTbswZwszl2_cmbs8Rq84sBW5qFzrMyIsS53id2KLb4";
       
       
         public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient, IServiceProvider serviceProvider)
@@ -101,7 +101,7 @@ namespace Repository.FyersWebSocketServices
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbi1RYUJnX0lPNzJ6N1VaM1MtSjdDOHozc25KY05sbGlVVHJfUmpXMERlckVWRnJFdjJsaHVLbzFLZi1xLVdiQVcyakhxNmxLS1ZYVmkzYkg4cnRQTmtMVzF0Y21vWkZ1WGJ5QUJtd3AzamZiN01Jbz0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0NDE3ODAwLCJpYXQiOjE3NDQzNzMzNzcsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDM3MzM3Nywic3ViIjoiYWNjZXNzX3Rva2VuIn0.grNqS0CkeVBcOtWw5Pj9hiR_pegnlJt4oUMbmeSlXLc"; // Replace with actual token
+            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbl9KelBfRG1CaGNNTDdjbFVJOUFHVzZMa3c0azhuZEw4a2o1VWpqcWt6N1JjYW5XWnVsUHl4aFlCajR6RlVXRG5CX0J3TEp1TlBMWWRzR0xIOXlmSDhBYWJCM3VYbC1ncUhiMDI3UXdIWG5Tamd0WT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0Njc3MDAwLCJpYXQiOjE3NDQ2MDg0NjMsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDYwODQ2Mywic3ViIjoiYWNjZXNzX3Rva2VuIn0.TTbswZwszl2_cmbs8Rq84sBW5qFzrMyIsS53id2KLb4"; // Replace with actual token
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -256,16 +256,15 @@ namespace Repository.FyersWebSocketServices
     }
     public class Methods : FyersSocketDelegate
     {
-        private readonly IHubContext<StockHub> _hubContext;
         private readonly FyersWebSocketService _service;
-        private FyersSocket client;
+        private  FyersSocket? client ;
       
         public Methods(FyersWebSocketService service)
         {
             _service = service;
         }
 
-        public void DataWebSocket(List<string> stock)
+        public void DataWebSocket(List<string?> stock)
         {
             try
             {
@@ -382,7 +381,7 @@ namespace Repository.FyersWebSocketServices
            
         }
 
-        public async void OnScrips(JObject scrips)
+        public  void OnScrips(JObject scrips)
         {
             try
             {

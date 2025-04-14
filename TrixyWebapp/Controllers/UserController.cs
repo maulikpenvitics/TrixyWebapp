@@ -40,7 +40,7 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
-            if (user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
+            if (user!=null && user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
             {
                 var existuser = await _user.GetByEmail(user?.Email ?? "");
 
@@ -50,10 +50,10 @@ namespace TrixyWebapp.Controllers
                     aoivdstraetgy.IsActive = false;
                     existuser?.UserStrategy?.Add(aoivdstraetgy);
                 }
-                user.ProfileImageUrl = existuser.ProfileImageUrl;   
-                user.UserStrategy = existuser.UserStrategy;   
-                user.Status = existuser.Status;   
-                user.Stocks = existuser.Stocks;   
+                user!.ProfileImageUrl = existuser?.ProfileImageUrl;   
+                user.UserStrategy = existuser?.UserStrategy;   
+                user.Status = existuser?.Status;   
+                user.Stocks = existuser?.Stocks;   
                 await _userRepository.UpdateAsync(user.Id.ToString(), user);
                 return RedirectToAction("Index");
             }
@@ -87,7 +87,7 @@ namespace TrixyWebapp.Controllers
                         }
                        
                     }
-                    user.Stocks = new List<Stocks>();
+                    user!.Stocks = new List<Stocks>();
                     user.UserStrategy = strategyWeight;
                     var result = await _userRepository.InsertAsync(user);
                     if (result == 1)
@@ -154,7 +154,7 @@ namespace TrixyWebapp.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> AdminSettings()
+        public IActionResult AdminSettings()
         {
             var userId = HttpContext.Session.GetString("UserId");
             var adminseting= _user.GetUserSettings();
@@ -166,7 +166,7 @@ namespace TrixyWebapp.Controllers
         {
             var userId = HttpContext.Session.GetString("UserId");
             //string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
-            var user = _user.GetById(userId);
+            var user = userId!=null? _user.GetById(userId):new Repository.Models.User();
             return View(user);
         }
     }
