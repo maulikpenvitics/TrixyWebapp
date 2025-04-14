@@ -1,4 +1,5 @@
-﻿using Repository.Models;
+﻿using Repository.Enum;
+using Repository.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,7 +104,21 @@ namespace Repository.FyersWebSocketServices
             }
             return Signal;
         }
-
+        /// <summary>
+        /// Calculates the MACD (Moving Average Convergence Divergence) signal for stock prices.
+        /// MACD helps identify potential buy or sell opportunities by comparing two EMAs and a signal line.
+        /// </summary>
+        /// <param name="stockData">A list of historical stock data including Close prices and Timestamps.</param>
+        /// <param name="shortEmaPeriod">The period for the short-term Exponential Moving Average (EMA).</param>
+        /// <param name="longEmaPeriod">The period for the long-term Exponential Moving Average (EMA).</param>
+        /// <param name="signalPeriod">The period for the Signal Line (EMA of the MACD Line).</param>
+        /// <returns>
+        /// A string signal:
+        /// "BUY" if MACD crosses below the Signal Line,
+        /// "SELL" if MACD crosses above the Signal Line,
+        /// "N/A" if both values are equal,
+        /// or "HOLD" if no data is available.
+        /// </returns>
         public static string CalculateMACD(List<Historical_Data> stockData, int shortEmaPeriod, int longEmaPeriod, int signalPeriod)
         {
             var signal = "HOLD";
@@ -152,6 +167,21 @@ namespace Repository.FyersWebSocketServices
             }
             return signal;
         }
+
+        /// <summary>
+        /// Calculates the Mean Reversion signal for stock prices based on the deviation from the mean price.
+        /// Mean Reversion assumes that prices will tend to return to an average level over time.
+        /// </summary>
+        /// <param name="stockData">A list of historical stock data including Close prices and Timestamps.</param>
+        /// <param name="period">The number of periods used to calculate the mean price. (Note: Overridden to 30 in this method.)</param>
+        /// <param name="threshold">The acceptable deviation from the mean price to trigger a trade signal. (Note: Overridden to 0.1 in this method.)</param>
+        /// <returns>
+        /// A string signal:
+        /// "BUY" if the price is below the mean by more than the threshold,
+        /// "SELL" if the price is above the mean by more than the threshold,
+        /// "N/A" if the price is within the threshold range,
+        /// or "HOLD" if not enough data is available.
+        /// </returns>
         public static string CalculateMeanReversion(List<Historical_Data> stockData, int period, double threshold)
         {
             string Signal = "HOLD";
@@ -196,7 +226,18 @@ namespace Repository.FyersWebSocketServices
             }
             return Signal;
         }
-
+        /// <summary>
+        /// Calculates the Volume Weighted Average Price (VWAP) and generates a basic trading signal.
+        /// VWAP gives the average price a stock has traded at throughout the day, based on both volume and price.
+        /// </summary>
+        /// <param name="stockData">A list of historical stock data including Close prices, Timestamps, and Volumes.</param>
+        /// <returns>
+        /// A string signal: 
+        /// "BUY" if the current price is below VWAP, 
+        /// "SELL" if the current price is above VWAP, 
+        /// "N/A" if the price equals VWAP, 
+        /// or "HOLD" if data is insufficient.
+        /// </returns>
         public static string CalculateVWAP(List<Historical_Data> stockData)
         {
             string Signal = "HOLD";
@@ -231,7 +272,13 @@ namespace Repository.FyersWebSocketServices
             }
             return Signal;
         }
-
+        /// <summary>
+        /// Calculates the Exponential Moving Average (EMA) for a given list of prices over a specified period.
+        /// EMA gives more weight to recent prices, making it more responsive to new information compared to SMA.
+        /// </summary>
+        /// <param name="prices">A list of stock prices.</param>
+        /// <param name="period">The number of periods to use for the EMA calculation.</param>
+        /// <returns>A list of EMA values corresponding to the input price list.</returns>
         public static List<double> CalculateEMA(List<double> prices, int period)
         {
             List<double> ema = new List<double>();
@@ -258,35 +305,39 @@ namespace Repository.FyersWebSocketServices
             {
                 foreach (var item in userStrategies)
                 {
-                    switch (item.StretagyName)
+                    if (System.Enum.TryParse<StrategyType>(item.StretagyName, out var strategy))
                     {
-                        case "Bollinger_Bands":
-                            var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod??0);
-                            signals.Add(bollingerBands);
-                            break;
-                        case "MACD":
-                            var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod??0, userSettings?.MACD_Settings?.LongEmaPeriod??0,
-                userSettings?.MACD_Settings?.SignalPeriod??0);
-                            signals.Add(MACD);
-                            break;
-                        case "Mean_Reversion":
-                            var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period??0, userSettings?.MeanReversion?.Threshold??0);
-                            signals.Add(MeanReversion);
-                            break;
-                        case "Moving_Average":
-                            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods??0, userSettings?.MovingAverage?.LMA_Periods??0);
-                            signals.Add(MovingAverageCrossover);
-                            break;
-                        case "RSI":
-                            var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod??0, userSettings?.RSIThresholds?.Overbought??0
-                     , userSettings?.RSIThresholds?.Oversold??0);
-                            signals.Add(RSI);
-                            break;
-                        case "VWAP":
-                            var VWAP = CalculateVWAP(stockData);
-                            signals.Add(VWAP);
-                            break;
+                        switch (strategy)
+                        {
+                            case StrategyType.Bollinger_Bands:// "Bollinger_Bands":
+                                var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0);
+                                signals.Add(bollingerBands);
+                                break;
+                            case StrategyType.MACD:// "MACD":
+                                var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
+                    userSettings?.MACD_Settings?.SignalPeriod ?? 0);
+                                signals.Add(MACD);
+                                break;
+                            case StrategyType.Mean_Reversion:// "Mean_Reversion":
+                                var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period ?? 0, userSettings?.MeanReversion?.Threshold ?? 0);
+                                signals.Add(MeanReversion);
+                                break;
+                            case StrategyType.Moving_Average:// "Moving_Average":
+                                var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods ?? 0);
+                                signals.Add(MovingAverageCrossover);
+                                break;
+                            case StrategyType.RSI:// "RSI":
+                                var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
+                         , userSettings?.RSIThresholds?.Oversold ?? 0);
+                                signals.Add(RSI);
+                                break;
+                            case StrategyType.VWAP:// "VWAP":
+                                var VWAP = CalculateVWAP(stockData);
+                                signals.Add(VWAP);
+                                break;
+                        }
                     }
+                        
                 }
             }
           
@@ -332,6 +383,13 @@ namespace Repository.FyersWebSocketServices
     }
     public static class StockCalculator
     {
+        /// <summary>
+        /// Calculates the Short-Term and Long-Term Moving Averages (SMA and LMA) 
+        /// for the provided stock price list based on the specified window sizes.
+        /// </summary>
+        /// <param name="stockPrices">A list of stock price data containing Close prices.</param>
+        /// <param name="shortWindow">The period for calculating the Short Moving Average (SMA).</param>
+        /// <param name="longWindow">The period for calculating the Long Moving Average (LMA).</param>
         public static void CalculateMovingAverages(List<BuySellRecomdeation> stockPrices, int shortWindow, int longWindow)
         {
             for (int i = 0; i < stockPrices.Count; i++)
@@ -343,7 +401,12 @@ namespace Repository.FyersWebSocketServices
                     stockPrices[i].LMA = (double)stockPrices.Skip(i - longWindow + 1).Take(longWindow).Average(s => s.Close);
             }
         }
-
+        /// <summary>
+        /// Calculates the Relative Strength Index (RSI) for a list of stock prices over a specified period.
+        /// RSI is a momentum oscillator that measures the speed and change of price movements.
+        /// </summary>
+        /// <param name="stockPrices">A list of stock price data containing Close prices.</param>
+        /// <param name="period">The period over which RSI is calculated (commonly 14).</param>
         public static void CalculateRSI(List<BuySellRecomdeation> stockPrices, int period)
         {
             double avgGain = 0, avgLoss = 0;
@@ -378,7 +441,13 @@ namespace Repository.FyersWebSocketServices
                 }
             }
         }
-
+        /// <summary>
+        /// Calculates the Bollinger Bands for a given list of stock prices over a specified period.
+        /// Bollinger Bands consist of a middle band (simple moving average), an upper band, and a lower band 
+        /// based on standard deviation from the middle band.
+        /// </summary>
+        /// <param name="stockPrices">A list of stock price data containing Close prices.</param>
+        /// <param name="period">The number of periods to use for calculating the moving average and standard deviation.</param>
         public static void CalculateBollingerBands(List<BuySellRecomdeation> stockPrices, int period)
         {
             for (int i = 0; i < stockPrices.Count; i++)

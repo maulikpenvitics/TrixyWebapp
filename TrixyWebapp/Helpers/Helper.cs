@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.ML;
 using Microsoft.ML.Data;
+using Repository.Enum;
 using Repository.FyersWebSocketServices;
 using Repository.Models;
 using System.Linq;
@@ -392,36 +393,40 @@ namespace TrixyWebapp.Helpers
             List<string> signals = new List<string>();
             foreach (var item in userStrategies)
             {
-                switch (item.StretagyName)
+                if (Enum.TryParse<StrategyType>(item.StretagyName, out var strategy))
                 {
-                    case "Bollinger_Bands":
-                        var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod??0);
-                        signals.Add(bollingerBands);
-                        break;
-                    case "MACD":
-                        var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
-            userSettings?.MACD_Settings?.SignalPeriod ?? 0);
-                        signals.Add(MACD);
-                        break;
-                    case "Mean_Reversion":
-                        var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period??0, userSettings?.MeanReversion?.Threshold ?? 0);
-                        signals.Add(MeanReversion);
-                        break;
-                    case "Moving_Average":
-                        var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods??0);
-                        signals.Add(MovingAverageCrossover);
+                    switch (strategy)
+                    {
+                        case StrategyType.Bollinger_Bands://  "Bollinger_Bands":
+                            var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0);
+                            signals.Add(bollingerBands);
+                            break;
+                        case StrategyType.MACD: //"MACD"
+                            var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
+                userSettings?.MACD_Settings?.SignalPeriod ?? 0);
+                            signals.Add(MACD);
+                            break;
+                        case StrategyType.Mean_Reversion://"Mean_Reversion"
+                            var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period ?? 0, userSettings?.MeanReversion?.Threshold ?? 0);
+                            signals.Add(MeanReversion);
+                            break;
+                        case StrategyType.Moving_Average:// "Moving_Average":
+                            var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods ?? 0);
+                            signals.Add(MovingAverageCrossover);
 
-                        break;
-                    case "RSI":
-                        var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
-                 , userSettings?.RSIThresholds?.Oversold??0);
-                        signals.Add(RSI);
-                        break;
-                    case "VWAP":
-                        var VWAP = CalculateVWAP(stockData);
-                        signals.Add(VWAP);
-                        break;
+                            break;
+                        case StrategyType.RSI:// "RSI":
+                            var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
+                     , userSettings?.RSIThresholds?.Oversold ?? 0);
+                            signals.Add(RSI);
+                            break;
+                        case StrategyType.VWAP:// "VWAP":
+                            var VWAP = CalculateVWAP(stockData);
+                            signals.Add(VWAP);
+                            break;
+                    }
                 }
+                 
             }
            
             var finalsignal= GetCombinationStrategyDecision(signals, thresold);
