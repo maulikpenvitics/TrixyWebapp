@@ -47,7 +47,7 @@ namespace TrixyWebapp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             try
             {
@@ -83,11 +83,8 @@ namespace TrixyWebapp.Controllers
 
                     await HttpContext!.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), authProperties);
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    {
-                        return Redirect(returnUrl);
-                    }
                    
+                    await _fyersWebSocket.Connect();
                     Helper.LogFile(userId ?? "", _env);
                     return RedirectToAction("Index", "Home");
                 }

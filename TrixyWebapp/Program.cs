@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Repository.DbModels;
 using Repository.FyersWebSocketServices;
+using Repository.FyersWebSocketServices.Jobs;
 using Repository.Hubs;
 using Repository.IRepositories;
 using Repository.Repositories;
@@ -43,6 +44,7 @@ builder.Services.AddHangfire(config =>
     });
 });
 builder.Services.AddHangfireServer();
+
 builder.Services.AddHostedService<JobSchedulerService>();
 builder.Services.AddHostedService<StockNotificationService>();
 // Configure Session
@@ -64,7 +66,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 
-
+builder.Services.Configure<FyersStockSettings>(builder.Configuration.GetSection("FyersStockSettings"));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddSingleton<FyersWebSocketService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -85,7 +87,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         option.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         option.SlidingExpiration = true;
         option.Cookie.HttpOnly = true;
-        option.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        option.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        option.Cookie.SameSite = SameSiteMode.Lax;
     });
 
 builder.Services.AddAuthorization();
@@ -97,7 +100,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-app.UseHangfireDashboard("/hangfire");
 using (var scope = app.Services.CreateScope()) // ✅ Create a scope
 {
     var webSocketService = scope.ServiceProvider.GetRequiredService<FyersWebSocketService>();
@@ -115,16 +117,16 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseAuthentication();
-app.UseCors("AllowAll");
-
 app.UseAuthorization();
-app.MapControllers();
+app.UseCors("AllowAll");
 app.UseSession();
+app.UseStaticFiles();
 app.MapStaticAssets();
 //app.MapRazorPages()
 //   .WithStaticAssets();
-app.UseStaticFiles();
 
+
+app.UseHangfireDashboard("/hangfire");
 
 app.MapControllerRoute(
     name: "default",
@@ -133,4 +135,5 @@ app.MapControllerRoute(
 app.MapHub<StockHub>("/stockHub");
 app.MapHub<StockNotificationHub>("/stockNotificationHub");
 
+app.MapControllers();
 app.Run();

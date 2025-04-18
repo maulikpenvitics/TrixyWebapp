@@ -79,6 +79,7 @@ namespace TrixyWebapp.Controllers
                 //string userId = Encoding.UTF8.GetString(userIdBytes);
                 var user = userId != null ? _user.GetById(userId) : new User();
                 List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                
                 var formateddata = stockData.Select(x => new
                 {
                     symbol = x.Symbol,

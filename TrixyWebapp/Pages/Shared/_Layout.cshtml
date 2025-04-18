@@ -32,7 +32,7 @@
 
     <!-- Vendors Style-->
     <link rel="stylesheet" href="https://specie-admin-template.multipurposethemes.com/main/css/vendors_css.css">
-   @*  <link href="~/assets/css/vendors_css.css" rel="stylesheet" />
+    @*  <link href="~/assets/css/vendors_css.css" rel="stylesheet" />
  *@
     <!-- Style-->
     <link rel="stylesheet" href="~/assets/css/style.css">
@@ -132,12 +132,12 @@
                                 @if (!string.IsNullOrEmpty(user?.ProfileImageUrl))
                                 {
 
-                                    <img src="@Context.GetFullUrl(user?.ProfileImageUrl??"")" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
+                                        <img src="@Context.GetFullUrl(user?.ProfileImageUrl??"")" width="100" class="avatar rounded-10 bg-primary-light h-45 w-45" alt="">
                                 }
                                 else
                                 {
-                                    <img src="~/assets/images/avatar-1.png"
-                                         class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
+                                        <img src="~/assets/images/avatar-1.png"
+                                             class="avatar rounded-10 bg-primary-light h-45 w-45" alt="" />
                                 }
 
                             </div>
@@ -186,7 +186,7 @@
                                 <i data-feather="grid"></i><span>Dashboard</span>
                             </a>
                         </li>
-                        @if (User?.Identity?.IsAuthenticated??false)
+                        @*                         @if (User?.Identity?.IsAuthenticated??false)
                         {
                             @if (User.IsInRole("Admin"))
                             {
@@ -209,7 +209,26 @@
                             }
 
                         }
-                      
+ *@                     
+                        @if (userRole == "Admin")
+                        {
+                                  <li class="treeview @(currentController == "User" && currentAction == "Index" ? "active" : "")" onclick="window.open(this.querySelector('a').href, '_blank');">
+                                            <a href="/User/Index">
+                                                <i data-feather="user"></i><span>Users</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="treeview @(currentController == "StockSymbol" && currentAction == "Index" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
+                                            <a href="/StockSymbol/Index">
+                                                <i data-feather="grid"></i><span>Symbols</span>
+                                            </a>
+                                        </li>
+                                        <li class="treeview @(currentController == "AdminSetting" && currentAction == "AdminSetting" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
+                                            <a href="/AdminSetting/AdminSetting">
+                                                <i data-feather="settings"></i><span>Admin settings</span>
+                                            </a>
+                                        </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -242,7 +261,7 @@
             <!-- Home tab content -->
             <div class="tab-pane active" id="control-sidebar-home-tab">
                 <div class="media-list media-list-hover mt-20" id="notificationContainer">
-                   
+
                 </div>
             </div>
             <!-- /.tab-pane -->
@@ -261,7 +280,7 @@
     <script src="https://specie-admin-template.multipurposethemes.com/assets/icons/feather-icons/feather.min.js"></script>
 
     <!-- Specie Admin App -->
-   
+
     <script src="~/js/dashboard/data-table.js"></script>
     <script src="~/js/dashboard/template.js"></script>
     <!--Autocomplete-->
@@ -279,7 +298,7 @@
     <script>
         var userId = "@userId";
         $(document).ready(function () {
-           
+
         function logout() {
             debugger
 
@@ -291,7 +310,7 @@
          $("#searchStock").autocomplete({
              autoFocus: true,
             source: function (request, response) {
-               
+
                 $.ajax({
                     url: "/StockSymbol/GetStockList", // Replace with your API URL
                     type: "GET",
@@ -333,9 +352,9 @@
         });
     </script>
 
-  
-   
-	
+
+
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

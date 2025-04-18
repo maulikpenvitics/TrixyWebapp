@@ -25,6 +25,7 @@ namespace Repository.Models
         public MACDSettings? MACD_Settings { get; set; }
         public MeanReversion? MeanReversion { get; set; }
         public List<StrategyWeight>? StrategyWeighted { get; set; }
+        public UserAuthtoken UserAuthtoken { get; set; }
     }
     public class StrategyWeight
     {
@@ -57,4 +58,13 @@ namespace Repository.Models
         public int Period { get; set; }
         public double Threshold { get; set; }
     }
+
+    public class UserAuthtoken
+    {
+        public string? access_token { get; set; }
+        public string? refresh_token { get; set; }
+        public string? code { get; set; }
+        public string? Pin { get; set; }
+    }
+
 }

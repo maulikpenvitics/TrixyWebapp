@@ -1,0 +1,340 @@
+[{
+  "_id": {
+    "$oid": "67ef7890c77ade05ec8388ea"
+  },
+  "Symbol": "NSE:ITC-EQ",
+  "CompanyName": "ITC-LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T06:13:36.134Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T06:13:36.134Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc15ae1229785082ae560"
+  },
+  "Symbol": "NSE:ICICIBANK-EQ",
+  "CompanyName": "ICICIBANK",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:24:10.813Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:24:10.813Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc2a1e1229785082ae561"
+  },
+  "Symbol": "NSE:IDFCFIRSTB-EQ",
+  "CompanyName": "IDFC FIRST BANK LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:29:37.285Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:29:37.285Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc30be1229785082ae562"
+  },
+  "Symbol": "NSE:INFY-EQ",
+  "CompanyName": "INFOSYS LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:31:22.999Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:31:22.999Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc75be1229785082ae563"
+  },
+  "Symbol": "NSE:TCS-EQ",
+  "CompanyName": "TATA CONSULTANCY SERV LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:49:47.177Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:49:47.177Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc792e1229785082ae564"
+  },
+  "Symbol": "NSE:VEDL-EQ",
+  "CompanyName": "VEDANTA LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:51:05.187Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:51:05.187Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc7dfe1229785082ae565"
+  },
+  "Symbol": "NSE:HINDUNILVR-EQ",
+  "CompanyName": "HINDUSTAN UNILEVER LTD.",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:51:59.463Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:51:59.463Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc811e1229785082ae566"
+  },
+  "Symbol": "NSE:ABFRL-EQ",
+  "CompanyName": "ADITYA BIRLA FASHION & RT",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:52:49.946Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:52:49.946Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc889e1229785082ae567"
+  },
+  "Symbol": "NSE:BAJFINANCE-EQ",
+  "CompanyName": "BAJAJ FINANCE LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:54:49.884Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:54:49.884Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc8c3e1229785082ae568"
+  },
+  "Symbol": "NSE:RELIANCE-EQ",
+  "CompanyName": "RELIANCE INDUSTRIES LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:55:47.931Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:55:47.931Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc8fbe1229785082ae569"
+  },
+  "Symbol": "NSE:RCOM-EQ",
+  "CompanyName": "RELIANCE COMMUNICATIONS L",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:56:43.415Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:56:43.415Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc966e1229785082ae56a"
+  },
+  "Symbol": "NSE:SBIN-EQ",
+  "CompanyName": "STATE BANK OF INDIA",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:58:30.792Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:58:30.792Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efc9aee1229785082ae56b"
+  },
+  "Symbol": "NSE:BHARTIARTL-EQ",
+  "CompanyName": "BHARTI AIRTEL LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T11:59:42.324Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T11:59:42.324Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efca04e1229785082ae56c"
+  },
+  "Symbol": "NSE:LT-EQ",
+  "CompanyName": "LARSEN & TOUBRO LTD.",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T12:01:08.730Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T12:01:08.730Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efca52e1229785082ae56d"
+  },
+  "Symbol": "NSE:KOTAKBANK-EQ",
+  "CompanyName": "KOTAK MAHINDRA BANK LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T12:02:26.600Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T12:02:26.600Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efca99e1229785082ae56e"
+  },
+  "Symbol": "NSE:ADANIENT-EQ",
+  "CompanyName": "ADANI ENTERPRISES LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T12:03:37.752Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T12:03:37.752Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efcacde1229785082ae56f"
+  },
+  "Symbol": "NSE:SUNPHARMA-EQ",
+  "CompanyName": "SUN PHARMACEUTICAL IND L",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T12:04:29.945Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T12:04:29.945Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67efcb0ee1229785082ae570"
+  },
+  "Symbol": "NSE:DRREDDY-EQ",
+  "CompanyName": "DR. REDDY S LABORATORIES",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-04T12:05:34.368Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-04T12:05:34.368Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67f8a8bacd56214baca951f2"
+  },
+  "Symbol": "NSE:LICI-EQ",
+  "CompanyName": "LIFE INSURA CORP OF INDIA",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-11T05:29:30.833Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-11T05:29:30.833Z"
+  },
+  "UpdatedBy": null
+},
+{
+  "_id": {
+    "$oid": "67f8aab2717a951776740176"
+  },
+  "Symbol": "NSE:TATAMOTORS-EQ",
+  "CompanyName": "TATA MOTORS LTD",
+  "CompanyIconUrl": null,
+  "Status": true,
+  "CreatedDate": {
+    "$date": "2025-04-11T05:39:02.359Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-11T05:39:02.359Z"
+  },
+  "UpdatedBy": null
+}]

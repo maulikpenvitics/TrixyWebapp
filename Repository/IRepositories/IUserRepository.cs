@@ -21,6 +21,8 @@ namespace Repository.IRepositories
         Task<AdminSettings> GetUserSettings();
         Task UpdateUserSettings(string userId, AdminSettings settings);
         Task DeleteUserSettings(string userId);
+        Task<UserAuthtoken> UpdateAdminAuthtoken(string accesstoken);
+        Task<UserAuthtoken> UpdateAdminbothAuthtoken(string accesstoken, string refreshtoken);
         #endregion
     }
 }

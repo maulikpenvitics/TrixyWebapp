@@ -1,57 +1,462 @@
 [{
   "_id": {
-    "$oid": "67bdb003365d5ff03d958322"
+    "$oid": "67bef9c5bc1d49323084998f"
   },
-  "Firstname": "Manav",
-  "Lastname": "Ch",
-  "Email": "manavc.envitics@gmail.com",
-  "Password": "/Envitics@123/",
-  "Role": "Admin",
-  "Status": true,
-  "CreatedDate": {
-    "$date": "2025-02-26T07:41:00.005Z"
-  },
-  "CreatedBy": null,
-  "UpdatedDate": {
-    "$date": "2025-02-26T07:41:00.005Z"
-  },
-  "UpdatedBy": null
-},
-{
-  "_id": {
-    "$oid": "67bdb4b887254cbd4d15b0a6"
-  },
-  "Firstname": "Dbabhi",
-  "Lastname": "varsha",
+  "Firstname": "Demo test",
+  "Lastname": "testcheck",
   "Email": "varshad.envitics@gmail.com",
-  "Password": "Envitics@123",
+  "Password": "test@123",
   "Role": "Admin",
   "Status": true,
   "CreatedDate": {
-    "$date": "2025-02-25T12:16:54.037Z"
+    "$date": "2025-02-26T11:22:20.512Z"
   },
   "CreatedBy": null,
   "UpdatedDate": {
-    "$date": "2025-02-25T12:16:54.037Z"
+    "$date": "2025-03-27T13:53:35.180Z"
   },
-  "UpdatedBy": null
+  "UpdatedBy": null,
+  "ProfileImageUrl": "/Uploads/026f6476-7226-41f2-8fdd-c5e8cd85716f.png",
+  "UserStrategy": [
+    {
+      "StretagyName": "Bollinger_Bands",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "MACD",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Mean_Reversion",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Moving_Average",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "RSI",
+      "StretagyEnableDisable": true,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Sentiment_Analysis",
+      "StretagyEnableDisable": false,
+      "IsActive": false
+    },
+    {
+      "StretagyName": "VWAP",
+      "StretagyEnableDisable": true,
+      "IsActive": true
+    }
+  ],
+  "Stocks": [
+    {
+      "Symbol": "NSE:ITC-EQ",
+      "StockNotification": true,
+      "CompanyName": "ITC-LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:RCOM-EQ",
+      "StockNotification": false,
+      "CompanyName": "RELIANCE COMMUNICATIONS L",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": null
+    },
+    {
+      "Symbol": "NSE:DRREDDY-EQ",
+      "StockNotification": false,
+      "CompanyName": "DR. REDDY S LABORATORIES",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:ICICIBANK-EQ",
+      "StockNotification": true,
+      "CompanyName": "ICICIBANK",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:INFY-EQ",
+      "StockNotification": false,
+      "CompanyName": "INFOSYS LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:VEDL-EQ",
+      "StockNotification": false,
+      "CompanyName": "VEDANTA LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:HINDUNILVR-EQ",
+      "StockNotification": true,
+      "CompanyName": "HINDUSTAN UNILEVER LTD.",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:ABFRL-EQ",
+      "StockNotification": false,
+      "CompanyName": "ADITYA BIRLA FASHION & RT",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:BAJFINANCE-EQ",
+      "StockNotification": false,
+      "CompanyName": "BAJAJ FINANCE LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:RELIANCE-EQ",
+      "StockNotification": false,
+      "CompanyName": "RELIANCE INDUSTRIES LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:SBIN-EQ",
+      "StockNotification": false,
+      "CompanyName": "STATE BANK OF INDIA",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:LT-EQ",
+      "StockNotification": false,
+      "CompanyName": "LARSEN & TOUBRO LTD.",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:SUNPHARMA-EQ",
+      "StockNotification": false,
+      "CompanyName": "SUN PHARMACEUTICAL IND L",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:ADANIENT-EQ",
+      "StockNotification": false,
+      "CompanyName": "ADANI ENTERPRISES LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:KOTAKBANK-EQ",
+      "StockNotification": false,
+      "CompanyName": "KOTAK MAHINDRA BANK LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:LICI-EQ",
+      "StockNotification": false,
+      "CompanyName": "LIFE INSURA CORP OF INDIA",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    },
+    {
+      "Symbol": "NSE:TATAMOTORS-EQ",
+      "StockNotification": false,
+      "CompanyName": "TATA MOTORS LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    }
+  ]
 },
 {
   "_id": {
-    "$oid": "67beb5a428617325567baf8e"
+    "$oid": "67e557f15d4aef9dba954d81"
+  },
+  "Firstname": "trixydemo",
+  "Lastname": "test",
+  "Email": "demo.envitics@gmail.com",
+  "Password": "test@123",
+  "Role": "User",
+  "Status": true,
+  "ProfileImageUrl": null,
+  "CreatedDate": {
+    "$date": "2025-03-27T13:51:45.145Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-03-27T13:51:45.145Z"
+  },
+  "UpdatedBy": null,
+  "UserStrategy": [
+    {
+      "StretagyName": "Moving_Average",
+      "StretagyEnableDisable": true,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "RSI",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Bollinger_Bands",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Mean_Reversion",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "VWAP",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "MACD",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Sentiment_Analysis",
+      "StretagyEnableDisable": false,
+      "IsActive": false
+    }
+  ],
+  "Stocks": [
+    {
+      "Symbol": "NSE:BAJFINANCE-EQ",
+      "StockNotification": false,
+      "CompanyName": "bajajfinance",
+      "CompanyLogoUrl": "/Uploads/ee214a3a-bc15-48e8-8b2a-b9a67207bd5d_logo07.png",
+      "IsActive": true,
+      "BuySellSignal": "N/A"
+    },
+    {
+      "Symbol": "NSE:IDFCFIRSTB-EQ",
+      "StockNotification": true,
+      "CompanyName": "IDFCFIRSTB",
+      "CompanyLogoUrl": "/Uploads/17e27367-c230-4a6f-aefe-f35b8e81b37d_logo05.png",
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f8a0c0cd56214baca951ef"
   },
   "Firstname": "test",
   "Lastname": "test",
-  "Email": "test.envitics@gmail.com",
-  "Password": "Envitics@123",
+  "Email": "testd.envitics@gmail.com",
+  "Password": "test@123",
   "Role": "User",
   "Status": true,
+  "ProfileImageUrl": null,
   "CreatedDate": {
-    "$date": "2025-02-26T06:29:44.133Z"
+    "$date": "2025-04-11T04:55:28.026Z"
   },
   "CreatedBy": null,
   "UpdatedDate": {
-    "$date": "2025-02-26T06:29:44.133Z"
+    "$date": "2025-04-11T04:55:28.026Z"
   },
-  "UpdatedBy": null
+  "UpdatedBy": null,
+  "UserStrategy": [
+    {
+      "StretagyName": "Moving_Average",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "RSI",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Bollinger_Bands",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Mean_Reversion",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "VWAP",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "MACD",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Sentiment_Analysis",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    }
+  ],
+  "Stocks": [
+    {
+      "Symbol": "NSE:TATAMOTORS-EQ",
+      "StockNotification": false,
+      "CompanyName": "TATA MOTORS LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "N/A"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "67f8a273cd56214baca951f0"
+  },
+  "Firstname": "test12",
+  "Lastname": "test12",
+  "Email": "testd21.envitics@gmail.com",
+  "Password": "test@123",
+  "Role": "User",
+  "Status": true,
+  "ProfileImageUrl": null,
+  "CreatedDate": {
+    "$date": "2025-04-11T04:59:16.589Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-11T04:59:16.589Z"
+  },
+  "UpdatedBy": null,
+  "UserStrategy": [
+    {
+      "StretagyName": "Moving_Average",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "RSI",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Bollinger_Bands",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Mean_Reversion",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "VWAP",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "MACD",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Sentiment_Analysis",
+      "StretagyEnableDisable": false,
+      "IsActive": false
+    }
+  ],
+  "Stocks": []
+},
+{
+  "_id": {
+    "$oid": "67f8a29fcd56214baca951f1"
+  },
+  "Firstname": "test",
+  "Lastname": "test",
+  "Email": "test23d.envitics@gmail.com",
+  "Password": "test@123",
+  "Role": "User",
+  "Status": true,
+  "ProfileImageUrl": null,
+  "CreatedDate": {
+    "$date": "2025-04-11T05:03:25.858Z"
+  },
+  "CreatedBy": null,
+  "UpdatedDate": {
+    "$date": "2025-04-11T05:03:25.858Z"
+  },
+  "UpdatedBy": null,
+  "UserStrategy": [
+    {
+      "StretagyName": "Moving_Average",
+      "StretagyEnableDisable": true,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "RSI",
+      "StretagyEnableDisable": true,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Bollinger_Bands",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Mean_Reversion",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "VWAP",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "MACD",
+      "StretagyEnableDisable": false,
+      "IsActive": true
+    },
+    {
+      "StretagyName": "Sentiment_Analysis",
+      "StretagyEnableDisable": false,
+      "IsActive": false
+    }
+  ],
+  "Stocks": [
+    {
+      "Symbol": "NSE:ITC-EQ",
+      "StockNotification": true,
+      "CompanyName": "ITC-LTD",
+      "CompanyLogoUrl": null,
+      "IsActive": true,
+      "BuySellSignal": "BUY"
+    }
+  ]
 }]

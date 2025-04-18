@@ -309,22 +309,23 @@ namespace Repository.FyersWebSocketServices
                     {
                         switch (strategy)
                         {
-                            case StrategyType.Bollinger_Bands:// "Bollinger_Bands":
+                            case StrategyType.Bollinger_Bands://  "Bollinger_Bands":
                                 var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0);
                                 signals.Add(bollingerBands);
                                 break;
-                            case StrategyType.MACD:// "MACD":
+                            case StrategyType.MACD: //"MACD"
                                 var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
                     userSettings?.MACD_Settings?.SignalPeriod ?? 0);
                                 signals.Add(MACD);
                                 break;
-                            case StrategyType.Mean_Reversion:// "Mean_Reversion":
+                            case StrategyType.Mean_Reversion://"Mean_Reversion"
                                 var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period ?? 0, userSettings?.MeanReversion?.Threshold ?? 0);
                                 signals.Add(MeanReversion);
                                 break;
                             case StrategyType.Moving_Average:// "Moving_Average":
                                 var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods ?? 0);
                                 signals.Add(MovingAverageCrossover);
+
                                 break;
                             case StrategyType.RSI:// "RSI":
                                 var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
@@ -337,7 +338,7 @@ namespace Repository.FyersWebSocketServices
                                 break;
                         }
                     }
-                        
+
                 }
             }
           
@@ -349,14 +350,14 @@ namespace Repository.FyersWebSocketServices
 
         public static string GetCombinationStrategyDecision(List<string> signals, double thresold)
         {
-           
+
             Dictionary<string, int> signalMapping = new Dictionary<string, int>
             {
                  { "BUY", 1 },
                  { "SELL", -1 },
-                 { "N/A", 0 }
+                 { "HOLD", 0 }
             };
-            
+
             int weightedSum = 0;
             foreach (var signal in signals)
             {
@@ -367,18 +368,18 @@ namespace Repository.FyersWebSocketServices
             }
             int finalScore = weightedSum;
 
-            if (finalScore >0)
+            if (finalScore > 0)
             {
                 return "BUY";
             }
-            else if (finalScore<0)
+            else if (finalScore < 0)
             {
                 return "SELL";
             }
-            else {
+            else
+            {
                 return "N/A";
             }
-
         }
     }
     public static class StockCalculator

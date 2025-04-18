@@ -29,7 +29,7 @@ $(function () {
 		'lengthChange': true,
 		'lengthMenu': [200, 250, 300, 350, 400],
 	  'searching'   : false,
-	  'ordering'    : true,
+	  'ordering'    : false,
 	  'info'        : true,
 	  'autoWidth'   : false,
 	});

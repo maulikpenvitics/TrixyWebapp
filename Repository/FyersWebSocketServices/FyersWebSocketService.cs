@@ -2,8 +2,11 @@
 using HyperSyncLib;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using Repository.FyersWebSocketServices;
+using Repository.FyersWebSocketServices.Jobs;
 using Repository.Hubs;
 using Repository.IRepositories;
 using Repository.Models;
@@ -13,7 +16,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
 using System.Net.WebSockets;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Claims;
@@ -34,15 +40,16 @@ namespace Repository.FyersWebSocketServices
         private readonly HttpClient _httpClient;
         public readonly List<string?> _stocklist=new List<string?>();
         private readonly IServiceProvider _serviceProvider;
-        private const string ClientId = "NGX016JVE9-100";
-        private const string AccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbl8zSXpicERTLXgzTkNFSV9GZE9NUkJNSkVaZkhHa3ZFQ1g3ckltRlFVSy1NWG5mU0x4VUxqcXJHTmx1c3FWekQxQUN6blJJNk5pR2ZOelZHZFVVTmlmMThjVVpQNTZsbkdMcGZLYTZuWHQxMlBFbz0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0ODQ5ODAwLCJpYXQiOjE3NDQ3OTQxNjMsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDc5NDE2Mywic3ViIjoiYWNjZXNzX3Rva2VuIn0.ObXoLd2----UpwlyB3R5RefPjrkIDRB7Z3by5WPT3fI";
-      
-      
-        public FyersWebSocketService(IHubContext<StockHub> hubContext, HttpClient httpClient, IServiceProvider serviceProvider)
+        private readonly FyersStockSettings _settings;
+
+        public FyersWebSocketService(IHubContext<StockHub> hubContext,
+            HttpClient httpClient, IServiceProvider serviceProvider,
+            IOptions<FyersStockSettings> settings)
         {
             _hubContext = hubContext;
             _httpClient = httpClient;
             _serviceProvider = serviceProvider;
+            _settings = settings.Value;
         }
         public void LogFilegenerate(Exception? ex, string path)
         {
@@ -78,6 +85,36 @@ namespace Repository.FyersWebSocketServices
                 writer.WriteLine(errorMessage);
             }
         }
+
+        public void dataFilegenerate(string data, string path)
+        {
+            string errorMessage = $"DateTime: {DateTime.Now:dd/MM/yyyy hh:mm:ss tt}";
+            errorMessage += Environment.NewLine;
+            errorMessage += "------------------------Exception-----------------------------------";
+            errorMessage += Environment.NewLine;
+            errorMessage += $"Path: {path}";
+            errorMessage += Environment.NewLine;
+            errorMessage += data;
+
+            errorMessage += Environment.NewLine;
+            errorMessage += "-----------------------------------------------------------";
+            errorMessage += Environment.NewLine;
+
+            // Get the path to the "ErrorLog" directory in wwwroot
+            string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ErrorLog");
+
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
+            string logFilePath = Path.Combine(logDirectory, "WebSoketdata.txt");
+
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            {
+                writer.WriteLine(errorMessage);
+            }
+        }
         public List<StockData> GetStockData(List<Stocks>? stocks)
         {
             if (stocks != null)
@@ -85,6 +122,7 @@ namespace Repository.FyersWebSocketServices
                 var list = stocks.Select(x => x.Symbol).ToList();
                 _stocklist.AddRange(list);
                 _stocklist.ToList();
+                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(_stocklist),"FyersWebSoketService.cs");
             }
 
             lock (_lock)
@@ -96,12 +134,16 @@ namespace Repository.FyersWebSocketServices
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
            
-            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
+            string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbl8zSXpicERTLXgzTkNFSV9GZE9NUkJNSkVaZkhHa3ZFQ1g3ckltRlFVSy1NWG5mU0x4VUxqcXJHTmx1c3FWekQxQUN6blJJNk5pR2ZOelZHZFVVTmlmMThjVVpQNTZsbkdMcGZLYTZuWHQxMlBFbz0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0ODQ5ODAwLCJpYXQiOjE3NDQ3OTQxNjMsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDc5NDE2Mywic3ViIjoiYWNjZXNzX3Rva2VuIn0.ObXoLd2----UpwlyB3R5RefPjrkIDRB7Z3by5WPT3fI"; 
+            if (!await ValidateToken(_settings.AccessToken))
+            {
+                Updatetokenindb();
+            }
+            string token = $"{_settings.ClientId}:{_settings.AccessToken}";
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -143,12 +185,16 @@ namespace Repository.FyersWebSocketServices
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
 
-            string apiUrl = $"https://api-t1.fyers.in/data/history?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
+            string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
 
             // Add Authorization Token
-            string token = "NGX016JVE9-100:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCbi1KbzR4UU1BQm51ZEM0VGtESnc2eENkR19Fd0o3TG1pTURmUnFzQXJ6Wll6ZTZPcFZzblg4WTFINVhNSW5aWXQyUlJ0VmFfS2ZmX2g4UVFETjN3N2dzanNLZ001VlZZTWlkSi00cVJZU29ySEhfVT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ0NDE3ODAwLCJpYXQiOjE3NDQzNDU2NTYsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NDM0NTY1Niwic3ViIjoiYWNjZXNzX3Rva2VuIn0.3tOyOS_7kvsluZK3iTTLayoja9M_lsnrsWtKbMOKVX0"; // Replace with actual token
+            if (!await ValidateToken(_settings.AccessToken))
+            {
+                Updatetokenindb();
+            }
+            string token = $"{_settings.ClientId}:{_settings.AccessToken}";
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             using var response = await _httpClient.SendAsync(request);
@@ -185,6 +231,125 @@ namespace Repository.FyersWebSocketServices
             }
             return stockHistorylist;
         }
+
+        public async Task<TokenResponse> GetRefreshToken(string refreshtoken,string clinetpin)
+        {
+            TokenResponse TokenResponse= new TokenResponse();
+            try
+            {
+                var client = new HttpClient();
+                var url = _settings.Refrshtokenapi;
+                string appHashId = _settings?.Apphasid??"";
+                var payload = new
+                {
+                    grant_type =_settings?.Refgrant_type ?? "",
+                    appIdHash = appHashId,
+                    refresh_token = refreshtoken,
+                    pin = clinetpin
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(url, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<TokenResponse>(responseContent);
+                TokenResponse = result??new TokenResponse();
+            }
+            catch (Exception ex)
+            {
+                LogFilegenerate(ex, "GetRefreshToken");
+            }
+            return TokenResponse;
+
+        }
+
+        public async Task<JObject> genrateRefreshtoken(string authcode)
+        {
+            Auth auth = new Auth();
+            var authresponse =await auth.generateAccesandrefreshToken(_settings.ClientId,_settings.secretKey,_settings.redirectURI,authcode,_settings.Apphasid);
+            return authresponse;
+        }
+        public async void Updatetokenindb()
+        {
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                var adminsetting = await userrepo.GetUserSettings();
+                var authdata = adminsetting.UserAuthtoken;
+                var generatetoken = GetRefreshToken(_settings.refreshtoken, _settings.clinetpin);
+                var getrefreshtoken = await GetRefreshToken(authdata?.refresh_token ?? "", authdata?.Pin ?? "");
+                if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
+                {
+                    var updatetoken = await userrepo.UpdateAdminAuthtoken(getrefreshtoken?.access_token ?? "");
+                    if (updatetoken != null)
+                    {
+                        _settings!.AccessToken = updatetoken.access_token;
+                        _settings!.refreshtoken = updatetoken.refresh_token;
+                        _settings!.clinetpin = authdata.Pin;
+
+                        Console.WriteLine("Refresh token successfully");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Please try agin");
+                    }
+                }
+            }
+        }
+        public async Task<bool> ValidateToken(string token)
+        {
+            bool result = false;
+            try
+            {
+                Auth auth1  = new Auth();
+                FyersClass fyersModel = FyersClass.Instance;
+                fyersModel.ClientId = _settings.ClientId;
+                fyersModel.AccessToken = token;
+                Tuple<ProfileModel, JObject> responseTuple = await fyersModel.GetProfile();
+                
+               
+                if (responseTuple.Item1!=null)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
+                //string authtoken = $"{_settings.ClientId}:{token}";
+                //using var request = new HttpRequestMessage(HttpMethod.Get, _settings.ValidateApi);
+            
+
+                //request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authtoken);
+                // // request.Headers.Add("Authorization", $"{encodedAuthToken}");
+
+                //var response = await _httpClient.SendAsync(request);
+                //var content = await response.Content.ReadAsStringAsync();
+                //string tokenresult = string.Empty;
+                //if (response.IsSuccessStatusCode)
+                //{
+                //    tokenresult = await response.Content.ReadAsStringAsync();
+                //    result = true;
+                //    Console.WriteLine("Token is valid. Profile Data: " + tokenresult);
+                //}
+                //else
+                //{
+                //    tokenresult = await response.Content.ReadAsStringAsync();
+                //    result = false;
+                //    Console.WriteLine("Invalid or expired token. Status: " + response.StatusCode);
+                //}
+
+
+            }
+            catch (Exception ex)
+            {
+                LogFilegenerate(ex, "ValidateToken");
+            }
+            return result;
+        }
+
         public void UpdateStockData(JToken scripsToken)
         {
             lock (_lock)
@@ -218,14 +383,38 @@ namespace Repository.FyersWebSocketServices
             _hubContext.Clients.All.SendAsync("ReceiveStockData", _stockDataList);
         }
 
-        public void Connect()
+        public async Task Connect()
         {
             try
             {
+                
+
                 List<string?> symlist = new List<string?>();
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var stockssym = scope.ServiceProvider.GetRequiredService<IStockSymbolRepository>();
+                    var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var adminsetting = await userrepo.GetUserSettings();
+                    var authdata = adminsetting.UserAuthtoken;
+                    var validtoken =await ValidateToken(authdata?.access_token??"");
+                    if (!validtoken)
+                    {
+                        var getrefreshtoken = await GetRefreshToken(authdata?.refresh_token ?? "", authdata?.Pin ?? "");
+                        if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
+                        {
+                            var updatetoken = await userrepo.UpdateAdminAuthtoken(getrefreshtoken?.access_token ?? "");
+                            if (updatetoken !=null)
+                            {
+                                _settings!.AccessToken= updatetoken.access_token;
+                                Console.WriteLine("Refresh token successfully");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Please try agin");
+                            }
+                        }
+
+                    }
                     var sym = stockssym.Getallsym();
                     if (sym.Any() && sym != null)
                     {
@@ -234,9 +423,11 @@ namespace Repository.FyersWebSocketServices
                 }
                
                 FyersClass fyersModel = FyersClass.Instance;
-                fyersModel.ClientId = ClientId;
-                fyersModel.AccessToken = AccessToken;
-              
+                fyersModel.ClientId = _settings!.ClientId; //ClientId;
+                fyersModel.AccessToken = _settings!.AccessToken;// AccessToken;
+                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(fyersModel.AccessToken), "FyersWebSoketService.cs");
+                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(fyersModel.ClientId), "FyersWebSoketService.cs");
+               
                 Methods t = new Methods(this); // Pass the HubContext
                  t.DataWebSocket(symlist);
             }
@@ -424,6 +615,23 @@ namespace Repository.FyersWebSocketServices
             
         }
     }
+    public class Auth
+    {
+        public void generateAuthCode(string clientID, string secretKey, string redirectURI)
+        {
+            FyersClass fyersModel = FyersClass.Instance;
+            fyersModel.GetGenerateCode(clientID, secretKey, redirectURI);
+        }
 
-    
+        public async Task<JObject> generateAccesandrefreshToken(string clientID, string secretKey, string redirectURI, string auth_code,string aphasid)
+        {
+            FyersClass fyersModel = FyersClass.Instance;
+            var AuthTokenJobject = await fyersModel.GenerateToken(secretKey, redirectURI, auth_code, aphasid);
+            Console.WriteLine(AuthTokenJobject);
+            return AuthTokenJobject;
+          
+        }
+       
+    }
+
 }

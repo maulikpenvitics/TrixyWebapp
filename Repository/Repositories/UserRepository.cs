@@ -170,9 +170,49 @@ namespace Repository.Repositories
         {
             await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
         }
+
+        public  async Task<UserAuthtoken> UpdateAdminAuthtoken(string accesstoken)
+        {
+            if (!string.IsNullOrEmpty(accesstoken))
+            {
+                var filter = Builders<AdminSettings>.Filter.Empty;
+               
+                var update = Builders<AdminSettings>.Update.Set(x => x.UserAuthtoken.access_token, accesstoken);
+
+                var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
+                if(updatedata.ModifiedCount > 0)
+                {
+                    var admin= await GetUserSettings();
+                    return admin.UserAuthtoken;
+                }
+            }
+            return new UserAuthtoken();
+
+        }
+
+        public async Task<UserAuthtoken> UpdateAdminbothAuthtoken(string accesstoken,string refreshtoken)
+        {
+            if (!string.IsNullOrEmpty(accesstoken))
+            {
+                var filter = Builders<AdminSettings>.Filter.Empty;
+
+                var update = Builders<AdminSettings>.Update
+                    .Set(x => x.UserAuthtoken.access_token, accesstoken)
+                    .Set(x => x.UserAuthtoken.refresh_token, refreshtoken);
+
+                var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
+                if (updatedata.ModifiedCount > 0)
+                {
+                    var admin = await GetUserSettings();
+                    return admin.UserAuthtoken;
+                }
+            }
+            return new UserAuthtoken();
+
+        }
         #endregion
 
-    
+
 
     }
 }

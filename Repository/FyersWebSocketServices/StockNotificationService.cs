@@ -42,9 +42,7 @@ namespace Repository.FyersWebSocketServices
                     var marketStart = new TimeSpan(9, 15, 0);
                     var marketEnd = new TimeSpan(15, 30, 0);
                     var currentTime = DateTime.Now.TimeOfDay;
-                    if (currentTime >= marketStart && currentTime <= marketEnd)
-                    {
-                        var getstockdata = await getstcoks();
+                    var getstockdata = await getstcoks();
                         var onlineUsers = StockNotificationHub.GetConnectedUsers();
 
 
@@ -55,9 +53,6 @@ namespace Repository.FyersWebSocketServices
                                 await _hubContext.Clients.User(item).SendAsync("ReceiveStockUpdate", getstockdata);
                             }
                         }
-
-                    }
-
 
                     await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
                 }
@@ -148,6 +143,7 @@ namespace Repository.FyersWebSocketServices
             using (var scope = _serviceProvider.CreateScope())
             {
                 var historicaldata = scope.ServiceProvider.GetRequiredService<IRepository<Historical_Data>>(); // Resolve scoped service
+              
                 var data = await historicaldata.GetAllAsync();
                 var symdata= data.Where(x=>x.symbol == sym).ToList();
                 if (symdata != null && symdata.Any())

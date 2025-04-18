@@ -26,11 +26,20 @@ namespace Repository.Repositories
 
         public async Task<T> AuthenticateUserAsync(string email, string password)
         {
-          return  await _collection.Find(Builders<T>.Filter.And(
-                Builders<T>.Filter.Eq("Email", email),
-                Builders<T>.Filter.Eq("Password", password),
-                Builders<T>.Filter.Eq("Status", true)
-            )).FirstOrDefaultAsync();
+            try
+            {
+                return await _collection.Find(Builders<T>.Filter.And(
+               Builders<T>.Filter.Eq("Email", email),
+               Builders<T>.Filter.Eq("Password", password),
+               Builders<T>.Filter.Eq("Status", true)
+              )).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+         
         }
 
         public async Task<T> getUserByEmail(string email)

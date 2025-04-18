@@ -1,0 +1,32 @@
+[{
+  "_id": {
+    "$oid": "67bd888baba73b06982d40d5"
+  },
+  "userId": {
+    "$oid": "67bef9c5bc1d49323084998f"
+  },
+  "Bollinger_Bands": true,
+  "Combine_Strategy": true,
+  "MACD": true,
+  "Mean_Reversion": false,
+  "Moving_Average": false,
+  "RSI": false,
+  "Sentiment_Analysis": false,
+  "VWAP": false
+},
+{
+  "_id": {
+    "$oid": "67bd8acdaba73b06982d40de"
+  },
+  "userId": {
+    "$oid": "67bef9c5bc1d49323084998f"
+  },
+  "Bollinger_Bands": false,
+  "Combine_Strategy": false,
+  "MACD": false,
+  "Mean_Reversion": false,
+  "Moving_Average": false,
+  "RSI": false,
+  "Sentiment_Analysis": true,
+  "VWAP": true
+}]
