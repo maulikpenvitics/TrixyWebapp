@@ -5,10 +5,12 @@ using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
 using System.Text;
+using TrixyWebapp.Filters;
 
 namespace TrixyWebapp.Controllers
 {
     [Authorize(Roles = "Admin")]
+    [SessionCheck]
     public class AdminSettingController : Controller
     {
         private readonly IRepository<AdminSettings> _adminSettingsRepository;

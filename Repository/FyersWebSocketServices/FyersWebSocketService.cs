@@ -117,16 +117,8 @@ namespace Repository.FyersWebSocketServices
                 writer.WriteLine(errorMessage);
             }
         }
-        public List<StockData> GetStockData(List<Stocks>? stocks)
+        public List<StockData> GetStockData()
         {
-            if (stocks != null)
-            {
-                var list = stocks.Select(x => x.Symbol).ToList();
-                _stocklist.AddRange(list);
-                _stocklist.ToList();
-          
-            }
-
             lock (_lock)
             {
                 return _stockDataList.Where(x=> _stocklist.Contains(x.Symbol)).ToList();

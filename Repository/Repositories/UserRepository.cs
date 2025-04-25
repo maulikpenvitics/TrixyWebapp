@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Repository.DbModels;
+using Repository.FyersWebSocketServices.Jobs;
 using Repository.IRepositories;
 using Repository.Models;
 using System;
@@ -118,13 +119,12 @@ namespace Repository.Repositories
         }
         public async Task<bool> updatemanyuserstock(string sym,bool? isactive)
         {
-            //var filter = Builders<User>.Filter.And(
-            //    Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+           
             var filter = Builders<User>.Filter.Eq("Stocks.Symbol", sym);
-            // Define the update to set IsActive to true in the matching Strategy object(s)
+           
             var update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
 
-            // Array filter to target the specific Strategy objects matching the symbol
+        
             var arrayFilter = new ArrayFilterDefinition<BsonDocument>[]
             {
         new BsonDocumentArrayFilterDefinition<BsonDocument>(
@@ -147,6 +147,29 @@ namespace Repository.Repositories
                 throw new ArgumentException("Invalid ObjectId format", nameof(Id));
             }
             return _users.Find(Builders<User>.Filter.Eq("_id", objectId)).FirstOrDefault();
+        }
+
+        public async Task<bool> removeuserstock(string sym)
+        {
+            try
+            {
+                var filter = Builders<User>.Filter.And(
+                         Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+                var update = Builders<User>.Update.Set("Stocks.$.IsActive", false);
+                  
+                var result = await _users.UpdateOneAsync(filter, update);
+                return result.ModifiedCount > 0;
+
+                //var filter = Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym);
+                //var update = Builders<User>.Update.PullFilter(u => u.Stocks, s => s.Symbol == sym);
+
+                //var result = await _users.UpdateOneAsync(filter, update);
+                //return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         #region Adminswttings
@@ -210,6 +233,7 @@ namespace Repository.Repositories
             return new UserAuthtoken();
 
         }
+       
         #endregion
 
 

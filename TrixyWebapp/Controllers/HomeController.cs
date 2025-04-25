@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FyersCSharpSDK;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
 using System.Text;
+using TrixyWebapp.Filters;
 using TrixyWebapp.Helpers;
 using TrixyWebapp.ViewModels;
 
@@ -11,6 +13,7 @@ using TrixyWebapp.ViewModels;
 namespace TrixyWebapp.Controllers
 {
     [Authorize]
+    [SessionCheck]
     public class HomeController : Controller
     {
         private readonly FyersWebSocketService _fyersWebSocket;
@@ -41,16 +44,16 @@ namespace TrixyWebapp.Controllers
             {
                 List<StockData> stockData = new List<StockData>();
 
-
-                var userJson = HttpContext?.Session.GetString("User");
                 var userId = HttpContext?.Session.GetString("UserId");
+                var userJson = HttpContext?.Session.GetString("User");
+
                 Helper.LogFile(userJson ?? "", _env);
                 Helper.LogFile(userId ?? "", _env);
                 ViewData["UserId"] = userId;
                 var user = userId != null ? _user.GetById(userId) : new User();
-
-
-                stockData = _fyersWebSocket.GetliveStockData(user?.Stocks?.ToList());
+                var stocklst = user?.Stocks?.Where(x => x.IsActive == true).Select(x => x.Symbol).ToList();
+                stockData = _fyersWebSocket.GetStockData();
+                stockData = stockData.Where(x => stocklst.Contains(x.Symbol)).ToList();
                 if (user?.Stocks?.Any() == true)
                 {
                     foreach (var item in stockData)
@@ -78,8 +81,10 @@ namespace TrixyWebapp.Controllers
                 var userId = HttpContext.Session.GetString("UserId");
                 //string userId = Encoding.UTF8.GetString(userIdBytes);
                 var user = userId != null ? _user.GetById(userId) : new User();
-                List<StockData> stockData = _fyersWebSocket.GetliveStockData(user?.Stocks?.ToList());
-                
+                user.Stocks = user?.Stocks?.Where(x => x.IsActive == true).ToList();
+                List<string?> stocklst = user?.Stocks?.Select(x => x.Symbol).ToList()??new List<string?>();
+                List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                stockData = stockData.Where(x => stocklst.Contains(x.Symbol)).ToList();
                 var formateddata = stockData.Select(x => new
                 {
                     symbol = x.Symbol,
@@ -90,7 +95,6 @@ namespace TrixyWebapp.Controllers
             }
             catch (Exception ex)
             {
-
                 Helper.LogFilegenerate(ex, "Login Action", _env);
             }
             return RedirectToAction("Index");
@@ -310,6 +314,21 @@ namespace TrixyWebapp.Controllers
 
             //keyValuePairs["Combine"] = finalsignal;
             return keyValuePairs;
+        }
+        
+        public async Task<IActionResult> Removestockfromuser(string sym)
+        {
+            try
+            {
+                var result = await _user.removeuserstock(sym);
+                return RedirectToAction("Index","Home");
+
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Index");
+            }
+           
         }
     }
 }

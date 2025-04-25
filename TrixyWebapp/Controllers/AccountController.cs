@@ -15,6 +15,7 @@ using TrixyWebapp.Helpers;
 using System.Text.Json;
 using Repository.FyersWebSocketServices;
 using NuGet.ProjectModel;
+using TrixyWebapp.Filters;
 
 
 namespace TrixyWebapp.Controllers
@@ -110,6 +111,8 @@ namespace TrixyWebapp.Controllers
            
             return RedirectToAction("Login", "Account");
         }
+
+        
         [HttpGet]
         public async Task<IActionResult> ChangePassword(string Id)
         {
@@ -125,6 +128,7 @@ namespace TrixyWebapp.Controllers
         
         }
 
+        
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
         {
@@ -150,6 +154,8 @@ namespace TrixyWebapp.Controllers
             }
           
         }
+
+      
         [HttpGet]
         public async Task<IActionResult> UserProfile(string Id)
         {
@@ -163,7 +169,7 @@ namespace TrixyWebapp.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> UserProfile(CreateUserViewModel model)
         {

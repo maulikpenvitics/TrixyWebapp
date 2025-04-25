@@ -6,24 +6,24 @@
 
 @model List<Repository.FyersWebSocketServices.StockData>
 @{
-	Layout = "~/Pages/Shared/_Layout.cshtml";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 @{
-	var userJson = HttpContextAccessor.HttpContext?.Session.GetString("User");
-	User? user = new User();
-	if (!string.IsNullOrEmpty(userJson))
-	{
-		user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
-	}
-	int asignstretagy = (user!=null&& user.UserStrategy != null)? user.UserStrategy.Where(x => x.IsActive == true && x.StretagyEnableDisable == true).Count() : 0;
+    var userJson = HttpContextAccessor.HttpContext?.Session.GetString("User");
+    User? user = new User();
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        user = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
+    }
+    int asignstretagy = (user != null && user.UserStrategy != null) ? user.UserStrategy.Where(x => x.IsActive == true && x.StretagyEnableDisable == true).Count() : 0;
 }
 <!-- Content Wrapper. Contains page content -->
 @* <input type="hidden" id="symbol" value="@symbole" /> *@
 <style>
-	.tooltip-key {
-		font-weight: bold;
-		color: black;
-	}
+    .tooltip-key {
+        font-weight: bold;
+        color: black;
+    }
 </style>
 <div class="content-wrapper">
     <div class="container-full">
@@ -44,121 +44,126 @@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-									<tbody id="realstockdatatbl">
-										@if (Model != null && Model.Count > 0)
-										{
-											@foreach (var item in Model)
-											{
-												<tr id="stock-@item.Symbol" class="stock-row">
-													<td class="stock-col" data-symbol="@item.Symbol" data-price="@item.Price">
-														@{
-															var userstock = user?.Stocks?.Where(testc => testc.Symbol == item.Symbol).FirstOrDefault();
-														}
-														<a href="#realtime_stock_detail">
-															@if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
-															{
-																<img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl??"")" width="30"
-																	 alt="reliance" />
+                                    <tbody id="realstockdatatbl">
+                                        @if (Model != null && Model.Count > 0)
+                                        {
+                                            @foreach (var item in Model)
+                                            {
+                                                <tr id="stock-@item.Symbol" class="stock-row">
+                                                    <td class="stock-col" data-symbol="@item.Symbol" data-price="@item.Price">
+                                                        @{
+                                                            var userstock = user?.Stocks?.Where(testc => testc.Symbol == item.Symbol).FirstOrDefault();
+                                                        }
+                                                        <a href="#realtime_stock_detail">
+                                                            @if (!string.IsNullOrEmpty(userstock?.CompanyLogoUrl))
+                                                            {
+                                                                <img src="@Context.GetFullUrl(userstock?.CompanyLogoUrl??"")" width="30"
+                                                                     alt="reliance" />
 
-															}
-															else
-															{
-																<img src="~/assets/images/buy.png" width="30"/>
-															}
-															&nbsp;
+                                                            }
+                                                            else
+                                                            {
+                                                                <img src="~/assets/images/buy.png" width="30" />
+                                                            }
+                                                            &nbsp;
 
-															@userstock?.CompanyName
-														</a>
-													</td>
-													<td class="stock-price">
-														@if (item.Change > 0)
-														{
-															<lable class="label label-success text-black">@item.Price</lable>
-														}
-														else
-														{
-															<lable class="label label-danger text-black">@item.Price</lable>
-														}
-														
-													</td>
-													<td class="changepr">
+                                                            @userstock?.CompanyName
+                                                        </a>
+                                                    </td>
+                                                    <td class="stock-price">
+                                                        @if (item.Change > 0)
+                                                        {
+                                                            <lable class="label label-success text-black">@item.Price</lable>
+                                                        }
+                                                        else
+                                                        {
+                                                            <lable class="label label-danger text-black">@item.Price</lable>
+                                                        }
 
-														@if (item.Change > 0)
-														{
-															<span class="badge badge-pill badge-success">
-																<i class="ti-stats-up" aria-hidden="true"></i>
-															</span>
-															<lable class="text-success"><b>@item.Change%</b></lable>
-														}
-														else
-														{
-															<span class="badge badge-pill  badge-danger">
-																<i class="ti-stats-down" aria-hidden="true"></i>
-															</span>
-															<lable class="text-danger"><b>@item.Change%</b></lable>
-														}
-													</td>
-													<td id="recomendation_@item.Symbol">
-														@if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification == true && asignstretagy > 0)
-														{
-															var recommendationHtml = string.Join("<br />", item.recommendation.Select(kvp => $"<strong class='tooltip-key'>{kvp.Key}:</strong> {kvp.Value}"));
-															if (userstock.BuySellSignal == "SELL")
-															{
-																<span class="label label-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Sell</span>
+                                                    </td>
+                                                    <td class="changepr">
+
+                                                        @if (item.Change > 0)
+                                                        {
+                                                            <span class="badge badge-pill badge-success">
+                                                                <i class="ti-stats-up" aria-hidden="true"></i>
+                                                            </span>
+                                                            <lable class="text-success"><b>@item.Change%</b></lable>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge badge-pill  badge-danger">
+                                                                <i class="ti-stats-down" aria-hidden="true"></i>
+                                                            </span>
+                                                            <lable class="text-danger"><b>@item.Change%</b></lable>
+                                                        }
+                                                    </td>
+                                                    <td id="recomendation_@item.Symbol">
+                                                        @if (!string.IsNullOrEmpty(userstock?.BuySellSignal) && userstock?.StockNotification == true && asignstretagy > 0)
+                                                        {
+                                                            var recommendationHtml = string.Join("<br />", item.recommendation.Select(kvp => $"<strong class='tooltip-key'>{kvp.Key}:</strong> {kvp.Value}"));
+                                                            if (userstock.BuySellSignal == "SELL")
+                                                            {
+                                                                <span class="label label-danger" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Sell</span>
 
 
-															}
-															else if (userstock.BuySellSignal == "BUY")
-															{
-																<span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Buy</span>
-															}
-															else{
-																<span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">@userstock.BuySellSignal</span>
-															}
-														}
-													</td>
-													<td class="stock_notification">
-														@if (asignstretagy > 0)
-														{
-															@if (userstock?.StockNotification != null && userstock?.StockNotification == false)
-															{
-																<a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=true})"
-																   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
-																   data-symbol="@item.Symbol"
-																   data-toggle="tooltip"
-																   title="Enable Notification">
-																	<i class="ti-bell" aria-hidden="true"></i>
-																</a>
+                                                            }
+                                                            else if (userstock.BuySellSignal == "BUY")
+                                                            {
+                                                                <span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">Buy</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="label label-success" data-toggle="tooltip" data-placement="top" data-html="true" title="@Html.Raw(recommendationHtml)">@userstock.BuySellSignal</span>
+                                                            }
+                                                        }
+                                                    </td>
+                                                    <td class="stock_notification">
+                                                        @if (asignstretagy > 0)
+                                                        {
+                                                            @if (userstock?.StockNotification != null && userstock?.StockNotification == false)
+                                                            {
+                                                                <a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=true})"
+                                                                   class="waves-effect waves-circle btn btn-circle btn-info btn-xs notification-toggle"
+                                                                   data-symbol="@item.Symbol"
+                                                                   data-toggle="tooltip"
+                                                                   title="Enable Notification">
+                                                                    <i class="ti-bell" aria-hidden="true"></i>
+                                                                </a>
 
-															}
-															else
-															{
-																<a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=false})"
-																   class="waves-effect waves-circle btn btn-circle btn-danger btn-xs notification-toggle"
-																   data-symbol="@item.Symbol"
-																   data-toggle="tooltip"
-																   title="Disable Notification">
-																	<i class="ti-bell" aria-hidden="true"></i>
-																</a>
-															}
+                                                            }
+                                                            else
+                                                            {
+                                                                <a href="@Url.Action("EnableDisableStratgey","Home",new {sym=item.Symbol,isEnable=false})"
+                                                                   class="waves-effect waves-circle btn btn-circle btn-danger btn-xs notification-toggle"
+                                                                   data-symbol="@item.Symbol"
+                                                                   data-toggle="tooltip"
+                                                                   title="Disable Notification">
+                                                                    <i class="ti-bell" aria-hidden="true"></i>
+                                                                </a>
+                                                            }
 
-														}
-														
-													</td>
-												</tr>
-											}
-										}
-										else
-										{
-											<tr>
-												<td colspan="5">No dataa found</td>
-											</tr>
-										}
+                                                        }
+                                                        <a href="@Url.Action("Removestockfromuser","Home",new {sym=item.Symbol})" class="waves-effect waves-circle btn btn-circle btn-info  btn-xs"
+                                                           data-toggle="tooltip"
+                                                           title="Remove Stock">
+                                                            <i data-feather="trash" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="5">No dataa found</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-					
+
                     </div>
 
                     <div class="box" id="realtime_stock_detail" style="display:none">
@@ -166,10 +171,10 @@
                             <div class="d-flex justify-content-between stock_detail_header">
                                 <h3 class="my-0">
                                     <img src="~/assets/images/company-logo/logo01.png" width="45"
-                                         alt="company" id="complogo"/>&nbsp;
+                                         alt="company" id="complogo" />&nbsp;
                                     <span class="text-primary" id="stockname"></span>
                                 </h3>
-                            @*     <h5 class="mb-0">
+                                @*     <h5 class="mb-0">
                                     <span>Today High/Low</span><br class="d-lg-block d-none">
                                     <span>
                                         <span class="text-success" id="highprice"></span>/<span class="text-danger" id="lowprice"></span>
@@ -189,7 +194,7 @@
                         </div>
                         <div class="box-body">
                             <div id="bitcoin-stock-chart" class="mb-15"></div>
-						
+
                         </div>
                     </div>
 
@@ -204,171 +209,196 @@
 <!-- /.content-wrapper -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script src="~/assets/js/apexcharts.js"></script> 
+<script src="~/assets/js/apexcharts.js"></script>
 
- <script>
+<script>
     $(document).ready(function () {
-		updateStockPrices();
-		$('[data-toggle="tooltip"]').tooltip({
-			html:true
-		});
-	});
-	$(".close-btn button").click(function () {
-		$("#realtime_stock_detail").fadeOut();
-	    $("#realtime_stock_detail").css("display", "none");
-		});
-	function updateStockPrices() 
-	{
-		$.ajax({
-			url: '/Home/RealTimeData',
-			type: 'GET',
-			dataType: 'json',
-			success: function (stockData) {
-				stockData.forEach(function (item) {
+        updateStockPrices();
+        $('[data-toggle="tooltip"]').tooltip({
+            html:true
+        });
+    });
+    $(".close-btn button").click(function () {
+        $("#realtime_stock_detail").fadeOut();
+        $("#realtime_stock_detail").css("display", "none");
+        });
+    function updateStockPrices()
+    {
+        $.ajax({
+            url: '/Home/RealTimeData',
+            type: 'GET',
+            dataType: 'json',
+            success: function (stockData) {
+                stockData.forEach(function (item) {
 
-					let row = document.getElementById("stock-" + item.symbol);
+                    let row = document.getElementById("stock-" + item.symbol);
 
-					if (row) {
-							let priceElement = row.querySelector(".stock-price lable");
-	                        if (priceElement) {
-	                         	priceElement.innerText = item.price;
-	                         }
-						row.setAttribute("data-price", item.price);
+                    if (row) {
+                            let priceElement = row.querySelector(".stock-price lable");
+                            if (priceElement) {
+                                priceElement.innerText = item.price;
+                             }
+                        row.setAttribute("data-price", item.price);
 
-						// Update the change column and apply class based on value
-						let changeElement = row.querySelector(".changepr lable"); // Fixed "label" typo
-						let iconElement = row.querySelector(".changepr .badge i");
+                        // Update the change column and apply class based on value
+                        let changeElement = row.querySelector(".changepr lable"); // Fixed "label" typo
+                        let iconElement = row.querySelector(".changepr .badge i");
 
-						if (item.change > 0) {
-							changeElement.innerText = item.change + "%";
-							iconElement.classList.remove("ti-stats-down");
-							iconElement.classList.add("ti-stats-up");
+                        if (item.change > 0) {
+                            changeElement.innerText = item.change + "%";
+                            iconElement.classList.remove("ti-stats-down");
+                            iconElement.classList.add("ti-stats-up");
 
-							row.querySelector(".changepr .badge").classList.remove("badge-danger");
-							row.querySelector(".changepr .badge").classList.add("badge-success");
+                            row.querySelector(".changepr .badge").classList.remove("badge-danger");
+                            row.querySelector(".changepr .badge").classList.add("badge-success");
 
-							changeElement.classList.remove("text-danger");
-							changeElement.classList.add("text-success");
-							priceElement.classList.add("label-success");
-							priceElement.classList.remove("label-danger");
-						} else {
-							changeElement.innerText = item.change + "%";
-							iconElement.classList.remove("ti-stats-up");
-							iconElement.classList.add("ti-stats-down");
+                            changeElement.classList.remove("text-danger");
+                            changeElement.classList.add("text-success");
+                            priceElement.classList.add("label-success");
+                            priceElement.classList.remove("label-danger");
+                        } else {
+                            changeElement.innerText = item.change + "%";
+                            iconElement.classList.remove("ti-stats-up");
+                            iconElement.classList.add("ti-stats-down");
 
-							row.querySelector(".changepr .badge").classList.remove("badge-success");
-							row.querySelector(".changepr .badge").classList.add("badge-danger");
+                            row.querySelector(".changepr .badge").classList.remove("badge-success");
+                            row.querySelector(".changepr .badge").classList.add("badge-danger");
 
-							changeElement.classList.remove("text-success");
-							changeElement.classList.add("text-danger");
+                            changeElement.classList.remove("text-success");
+                            changeElement.classList.add("text-danger");
 
-							priceElement.classList.add("label-danger");
-							priceElement.classList.remove("label-success");
-						}
-					}
-				});
-			},
-			error: function (xhr, status, error) {
-				console.error("Error fetching stock data:", error);
-			}
-	});
-	}
-	setInterval(updateStockPrices, 1000);
-	function getchart(sym,rowElement)
-	{
-      $.ajax({
-					  url:'GetChartDetails',
-					  type:'GET',
-					  data:{sym:sym,},
-					  dataType:'json',
-					  success:function(response)
-					  {
-						Chartdatabind(sym);
-
-							   if (response.companylogo)
-							   {
-		                        $("#complogo").attr("src", response.companylogo);
-	                           } 
-								else 
-								{
-		                          $("#complogo").attr("src", "/assets/images/buy.png");
-	                            }
-						   $("#stockname").text(response.companyName);
-							  // $("#highprice").text(response.high);
-							  // $("#lowprice").text(response.low);
-							  // $("#volumprice").text(response.volume+" "+"M");
-						  $("#realtime_stock_detail").fadeIn();
-						   $("#realtime_stock_detail").css("display", "block");
-					  },
-					  error:function(error){
-							console.error("Error get chartdata:", error);
-					  }
-				  });
-
-
-	  }
-    function Chartdatabind(sym){
-					  debugger
-						  $.ajax({
-								  url: '/Home/FetchData',
-								  type:'GET',
-								  data:{sym:sym},
-								  dataType:'json',
-							  success:function(response){
-								  if(response.length>0){
-									  debugger
-									  renderChart(response);
-								  }
-
-							  },
-							  error:function(error){
-										 console.error("Error binding chart data:", error);
-							  }
-
-					  });
-			  }
-    function renderChart(data1) {
-		const seriesData = data1.flatMap(day =>
-		day.data.map(item => ({
-			x: new Date(item.x), // Timestamp for datetime axis
-			y: item.y // [open, high, low, close]
-		}))
-	);
-
-				 var options = {
-					  series: [{
-						  data: seriesData // OHLC data
-					  }],
-					  chart: {
-						  type: 'candlestick',
-						  height: 350,
-					  },
-		              xaxis: {
-							 type: 'category',
-							 labels: {
-				                  rotate: -45,
-				                  formatter: function (val) {
-					                      const date = new Date(val);
-					                      const options = { day: '2-digit', month: 'short' };
-					                      return date.toLocaleDateString('en-GB', options); // e.g., "11 Mar"
-				                  }
-			                 }
-		              },
-			         tooltip: {
-		                        x: {
-		                       	format: 'dd MMM yyyy HH:mm'
-		                       }
-	                 }
-				  };
-				 const chart = new ApexCharts(document.querySelector("#bitcoin-stock-chart"), options);
-	             chart.render();
-					
+                            priceElement.classList.add("label-danger");
+                            priceElement.classList.remove("label-success");
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching stock data:", error);
+            }
+    });
     }
-	$(document).on("click", "#tickets tr td:first-child", function () {
-				  
-		var symbol = $(this).data("symbol");
-		var price = $(this).data("price");
-		 
-		getchart(symbol, this);
-		  });
+    setInterval(updateStockPrices, 1000);
+    function getchart(sym,rowElement)
+    {
+      $.ajax({
+                      url:'GetChartDetails',
+                      type:'GET',
+                      data:{sym:sym,},
+                      dataType:'json',
+                      success:function(response)
+                      {
+                        Chartdatabind(sym);
+
+                               if (response.companylogo)
+                               {
+                                $("#complogo").attr("src", response.companylogo);
+                               }
+                                else
+                                {
+                                  $("#complogo").attr("src", "/assets/images/buy.png");
+                                }
+                           $("#stockname").text(response.companyName);
+                              // $("#highprice").text(response.high);
+                              // $("#lowprice").text(response.low);
+                              // $("#volumprice").text(response.volume+" "+"M");
+                          $("#realtime_stock_detail").fadeIn();
+                           $("#realtime_stock_detail").css("display", "block");
+                      },
+                      error:function(error){
+                            console.error("Error get chartdata:", error);
+                      }
+                  });
+
+
+      }
+    function Chartdatabind(sym){
+                      debugger
+                          $.ajax({
+                                  url: '/Home/FetchData',
+                                  type:'GET',
+                                  data:{sym:sym},
+                                  dataType:'json',
+                              success:function(response){
+                                  if(response.length>0){
+                                      debugger
+                                      renderChart(response);
+                                  }
+
+                              },
+                              error:function(error){
+                                         console.error("Error binding chart data:", error);
+                              }
+
+                      });
+              }
+    function renderChart(data1) {
+        const seriesData = data1.flatMap(day =>
+        day.data.map(item => ({
+            x: new Date(item.x), // Timestamp for datetime axis
+            y: item.y // [open, high, low, close]
+        }))
+    );
+
+                 var options = {
+                      series: [{
+                          data: seriesData // OHLC data
+                      }],
+                      chart: {
+                          type: 'candlestick',
+                          height: 350,
+                      },
+                      xaxis: {
+                             type: 'category',
+                             labels: {
+                                  rotate: -45,
+                                  formatter: function (val) {
+                                          const date = new Date(val);
+                                          const options = { day: '2-digit', month: 'short' };
+                                          return date.toLocaleDateString('en-GB', options); // e.g., "11 Mar"
+                                  }
+                             }
+                      },
+                     tooltip: {
+                                x: {
+                                format: 'dd MMM yyyy HH:mm'
+                               }
+                     }
+                  };
+                 const chart = new ApexCharts(document.querySelector("#bitcoin-stock-chart"), options);
+                 chart.render();
+
+    }
+    $(document).on("click", "#tickets tr td:first-child", function () {
+
+        var symbol = $(this).data("symbol");
+        var price = $(this).data("price");
+
+        getchart(symbol, this);
+          });
 </script>
+
+@* <script>
+    $(document).on("click", ".remove-stock", function (e) {
+        debugger
+    e.preventDefault();
+    const symbol = $(this).data("symbol");
+  
+    $.ajax({
+        type: "POST",
+        url: "/Home/Removestockfromuser",
+        data: { sym: symbol },
+        success: function (response) {
+            if (response) {
+                window.location.href = "/Home/Index";
+            } else {
+                alert("Failed to remove stock.");
+            }
+        },
+        error: function () {
+            alert("Error occurred.");
+        }
+    });
+});
+
+</script> *@

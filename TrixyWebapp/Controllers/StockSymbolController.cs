@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Repository.FyersWebSocketServices;
 using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
 using System.Text;
+using TrixyWebapp.Filters;
 
 namespace TrixyWebapp.Controllers
 {
+    [Authorize]
+    [SessionCheck]
     public class StockSymbolController : Controller
     {
         private readonly IRepository<StockSymbol> _stockSymbolRepository;
@@ -187,6 +191,14 @@ namespace TrixyWebapp.Controllers
                                     BuySellSignal = null,
                                     Symbol = stockSymbol.Symbol,
                                 });
+                            }
+                            else
+                            {
+                                var existsym = user.Stocks.Where(x => x.Symbol == stockSymbol.Symbol).FirstOrDefault();
+                                if (existsym != null) 
+                                { 
+                                  existsym.IsActive = true;
+                                }
                             }
                         }
                         var updateuser= user!=null? await _userRepository.AddUserStocks(user):false;

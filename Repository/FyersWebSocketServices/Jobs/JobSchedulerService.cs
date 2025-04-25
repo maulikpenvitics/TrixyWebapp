@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Repository.FyersWebSocketServices.Jobs
 {
@@ -80,77 +81,98 @@ namespace Repository.FyersWebSocketServices.Jobs
         [AutomaticRetry(Attempts = 3)] // Optional: Retry if the job fails
         public async Task RunStockDataJob()
         {
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var stockrepo = scope.ServiceProvider.GetRequiredService<IWebStockRepository>();
-                var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-
-                // Delete old historical data
-                var result = await stockrepo.DeleteHistoricaldata();
-
-                // Fetch new stock data
-                var getstocks = await getStocks();
-                var stockssym = await GetSymbol();
-                if (stockssym != null && stockssym.Any())
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    foreach (var item in stockssym)
+                    var stockrepo = scope.ServiceProvider.GetRequiredService<IWebStockRepository>();
+                    var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+                    // Delete old historical data
+                    var result = await stockrepo.DeleteHistoricaldata();
+
+                    // Fetch new stock data
+                    var getstocks = await getStocks();
+                    var stockssym = await GetSymbol();
+                    if (stockssym != null && stockssym.Any())
                     {
-                        var data = await _fyersWebSocketService.FetchAndStoreHistoricalStockDataAsync(
-                            sym: item ?? "",
-                            DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"),
-                            DateTime.UtcNow.Date.ToString("yyyy-MM-dd")
-                        );
-                        await stockrepo.InsertNewHistoricalData(data);
-                    }
-                }
-                if (getstocks?.Any() == true)
-                {
-                    foreach (var getstock in getstocks)
-                    {
-                        if (getstock != null && !string.IsNullOrEmpty(getstock?.Symbol))
+                        List<Historical_Data> historical_Datas = new List<Historical_Data>();
+                        foreach (var item in stockssym)
                         {
-                            var signal = await getfinalsignal(getstock.Symbol, getstock?.userid ?? "");
-                            if (!string.IsNullOrEmpty(signal))
-                            {
-                                await userrepo.UpdateUserStocks(getstock?.userid ?? "", getstock?.Symbol ?? "", signal);
-                            }
-                            if (getstock != null)
-                            {
-                                getstock.BuySellSignal = string.IsNullOrEmpty(signal) ? null : signal;
-                            }
+                            var data = await _fyersWebSocketService.FetchAndStoreHistoricalStockDataAsync(
+                                sym: item ?? "",
+                                DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"),
+                                DateTime.UtcNow.Date.ToString("yyyy-MM-dd")
+                            );
+                            historical_Datas.AddRange(data);
 
+                        }
+                        await stockrepo.InsertNewHistoricalData(historical_Datas);
+                    }
+                    if (getstocks?.Any() == true)
+                    {
+                        foreach (var getstock in getstocks)
+                        {
+                            if (getstock != null && !string.IsNullOrEmpty(getstock?.Symbol))
+                            {
+                                var signal = await getfinalsignal(getstock.Symbol, getstock?.userid ?? "");
+                                if (!string.IsNullOrEmpty(signal))
+                                {
+                                    await userrepo.UpdateUserStocks(getstock?.userid ?? "", getstock?.Symbol ?? "", signal);
+                                }
+                                if (getstock != null)
+                                {
+                                    getstock.BuySellSignal = string.IsNullOrEmpty(signal) ? null : signal;
+                                }
+
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            } 
+        
         }
         private async Task<List<Stocknotifactiondata>> getStocks()
         {
             List<Stocknotifactiondata> stocks = new List<Stocknotifactiondata>();
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>(); // Resolve scoped service
-                var users = await userRepository.GetallUser();
-                var adminsym = await GetSymbol();
-                foreach (var user in users)
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    //var assignedStocks = user.Stocks?.Where(x => x.StockNotification == true).ToList() ?? new List<Stocks>();
-                    var assignedStocks = user.Stocks?.Where(x => adminsym.Contains(x?.Symbol ?? "") && x?.StockNotification == true).FirstOrDefault();
-                    if (assignedStocks != null)
+                    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>(); // Resolve scoped service
+                    var users = await userRepository.GetallUser();
+                    var adminsym = await GetSymbol();
+                    foreach (var user in users)
                     {
-                        stocks.Add(new Stocknotifactiondata()
+                        //var assignedStocks = user.Stocks?.Where(x => x.StockNotification == true).ToList() ?? new List<Stocks>();
+                        var assignedStocks = user.Stocks?.Where(x => adminsym.Contains(x?.Symbol ?? "") && x?.StockNotification == true).FirstOrDefault();
+                        if (assignedStocks != null)
                         {
-                            BuySellSignal = assignedStocks.BuySellSignal,
-                            Change = 0,
-                            Price = 0,
-                            Priviscloseprice = 0,
-                            Symbol = assignedStocks.Symbol,
-                            userid = user.Id.ToString(),
-                        });
+                            stocks.Add(new Stocknotifactiondata()
+                            {
+                                BuySellSignal = assignedStocks.BuySellSignal,
+                                Change = 0,
+                                Price = 0,
+                                Priviscloseprice = 0,
+                                Symbol = assignedStocks.Symbol,
+                                userid = user.Id.ToString(),
+                            });
+                        }
                     }
+                    return stocks;
                 }
-                return stocks;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return stocks;
+              
+            }
+            
         }
 
         private async Task<AdminSettings> GetAdminsetting()

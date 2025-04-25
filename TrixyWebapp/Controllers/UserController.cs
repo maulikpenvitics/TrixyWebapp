@@ -4,11 +4,13 @@ using MongoDB.Bson;
 using Repository.IRepositories;
 using Repository.Models;
 using System.Text;
+using TrixyWebapp.Filters;
 
 
 namespace TrixyWebapp.Controllers
 {
     [Authorize]
+    [SessionCheck]
     public class UserController : Controller
     {
         private readonly IRepository<User> _userRepository;
