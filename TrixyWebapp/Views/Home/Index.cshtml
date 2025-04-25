@@ -214,11 +214,11 @@
 		});
 	});
 	$(".close-btn button").click(function () {
-		debugger
-					 $("#realtime_stock_detail").fadeOut();
-					  $("#realtime_stock_detail").css("display", "none");
+		$("#realtime_stock_detail").fadeOut();
+	    $("#realtime_stock_detail").css("display", "none");
 		});
-	function updateStockPrices() {
+	function updateStockPrices() 
+	{
 		$.ajax({
 			url: '/Home/RealTimeData',
 			type: 'GET',
@@ -271,13 +271,12 @@
 			error: function (xhr, status, error) {
 				console.error("Error fetching stock data:", error);
 			}
-		});
+	});
 	}
 	setInterval(updateStockPrices, 1000);
-	function getchart(sym,rowElement){
-				  debugger
-				  selectedStockSymbol = sym;
-				  $.ajax({
+	function getchart(sym,rowElement)
+	{
+      $.ajax({
 					  url:'GetChartDetails',
 					  type:'GET',
 					  data:{sym:sym,},
@@ -286,13 +285,14 @@
 					  {
 						Chartdatabind(sym);
 
-						   debugger
-							   if (response.companylogo) {
-		$("#complogo").attr("src", response.companylogo);
-	} else {
-		// Optional: fallback to a default logo
-		$("#complogo").attr("src", "/assets/images/buy.png");
-	}
+							   if (response.companylogo)
+							   {
+		                        $("#complogo").attr("src", response.companylogo);
+	                           } 
+								else 
+								{
+		                          $("#complogo").attr("src", "/assets/images/buy.png");
+	                            }
 						   $("#stockname").text(response.companyName);
 							  // $("#highprice").text(response.high);
 							  // $("#lowprice").text(response.low);
@@ -301,12 +301,12 @@
 						   $("#realtime_stock_detail").css("display", "block");
 					  },
 					  error:function(error){
-							console.error("Error fetching stock data:", error);
+							console.error("Error get chartdata:", error);
 					  }
 				  });
 
 
-			  };
+	  }
     function Chartdatabind(sym){
 					  debugger
 						  $.ajax({
@@ -322,7 +322,7 @@
 
 							  },
 							  error:function(error){
-										 console.error("Error fetching stock data:", error);
+										 console.error("Error binding chart data:", error);
 							  }
 
 					  });
@@ -365,10 +365,10 @@
 					
     }
 	$(document).on("click", "#tickets tr td:first-child", function () {
-				   debugger
-					  var symbol = $(this).data("symbol");
-						 var price = $(this).data("price");
-					  selectedStockSymbol = symbol;
-					  getchart(symbol, this);
+				  
+		var symbol = $(this).data("symbol");
+		var price = $(this).data("price");
+		 
+		getchart(symbol, this);
 		  });
 </script>

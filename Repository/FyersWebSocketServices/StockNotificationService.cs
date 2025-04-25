@@ -97,14 +97,14 @@ namespace Repository.FyersWebSocketServices
                         var stockPrices = GetLiveStockPrice(assignedStocks);
                         foreach (var item in assignedStocks)
                         {
-                            var signal = users?.UserStrategy!=null? await getfinalsignal(item?.Symbol??"", users.UserStrategy):string.Empty;
-                            if (!string.IsNullOrEmpty(signal))
-                            {
-                                await userRepo.UpdateUserStocks(users?.Id.ToString()??"", item?.Symbol ?? "", signal);
-                            }
+                           // var signal = users?.UserStrategy!=null? await getfinalsignal(item?.Symbol??"", users.UserStrategy):string.Empty;
+                            //if (!string.IsNullOrEmpty(signal))
+                            //{
+                            //    await userRepo.UpdateUserStocks(users?.Id.ToString()??"", item?.Symbol ?? "", signal);
+                            //}
                             stocks.Add(new Stocknotifactiondata()
                             {
-                                BuySellSignal = signal,
+                                BuySellSignal = item.BuySellSignal,
                                 Change = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Change,
                                 Price = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Price,
                                 Priviscloseprice = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.prev_close_price,

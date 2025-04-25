@@ -1,4 +1,5 @@
-﻿using Repository.Enum;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Repository.Enum;
 using Repository.Models;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Repository.FyersWebSocketServices
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).ToList();
             StockCalculator.CalculateMovingAverages(stockdata, shortTerm, longTerm);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result != null)
@@ -52,7 +53,7 @@ namespace Repository.FyersWebSocketServices
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }) .DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
+            }) .DistinctBy(item => item.Date).ToList();
             
             StockCalculator.CalculateRSI(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
@@ -83,7 +84,7 @@ namespace Repository.FyersWebSocketServices
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).ToList();
             //int rsiPeriod = 14; // RSI period (default 14 days)
             StockCalculator.CalculateBollingerBands(stockdata, rsiPeriod);
             var result = stockdata.OrderByDescending(x => x.Date).FirstOrDefault();
@@ -126,7 +127,7 @@ namespace Repository.FyersWebSocketServices
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).ToList();
 
             List<double> closePrices = stockPrices.Select(s => s.Close).ToList();
 
@@ -190,7 +191,7 @@ namespace Repository.FyersWebSocketServices
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
-            }).DistinctBy(item => item.Date).OrderBy(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).ToList();
             stockPrices = stockPrices.OrderByDescending(x => x.Date).ToList();
 
             period = 30; // Mean price calculation period
@@ -247,7 +248,7 @@ namespace Repository.FyersWebSocketServices
                 Close = (double)x.Close,
                 Date = x.Timestamp,
                 Volume = (double)x.Volume,
-            }).DistinctBy(item => item.Date).OrderByDescending(x => x.Date).ToList();
+            }).DistinctBy(item => item.Date).ToList();
             var result = stockPrices.OrderByDescending(x => x.Date).FirstOrDefault();
             if (result != null)
             {
@@ -301,6 +302,9 @@ namespace Repository.FyersWebSocketServices
             var weightedstrategy = userSettings.StrategyWeighted;
             var thresold = userSettings.Threshold;
             List<string> signals = new List<string>();
+
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+            userStrategies = userStrategies.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList();
             if (userStrategies.Any()&& userStrategies.Count>0)
             {
                 foreach (var item in userStrategies)
@@ -312,38 +316,43 @@ namespace Repository.FyersWebSocketServices
                             case StrategyType.Bollinger_Bands://  "Bollinger_Bands":
                                 var bollingerBands = GenerateBuySellSignalsForBB(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0);
                                 signals.Add(bollingerBands);
+                                keyValuePairs["Bollinger_Bands"] = bollingerBands;
                                 break;
                             case StrategyType.MACD: //"MACD"
                                 var MACD = CalculateMACD(stockData, userSettings?.MACD_Settings?.ShortEmaPeriod ?? 0, userSettings?.MACD_Settings?.LongEmaPeriod ?? 0,
                     userSettings?.MACD_Settings?.SignalPeriod ?? 0);
                                 signals.Add(MACD);
+                                keyValuePairs["MACD"] = MACD;
                                 break;
                             case StrategyType.Mean_Reversion://"Mean_Reversion"
                                 var MeanReversion = CalculateMeanReversion(stockData, userSettings?.MeanReversion?.Period ?? 0, userSettings?.MeanReversion?.Threshold ?? 0);
                                 signals.Add(MeanReversion);
+                                keyValuePairs["Mean_Reversion"] = MeanReversion;
                                 break;
                             case StrategyType.Moving_Average:// "Moving_Average":
                                 var MovingAverageCrossover = GenerateSignalsforMovingAverageCrossover(stockData, userSettings?.MovingAverage?.SMA_Periods ?? 0, userSettings?.MovingAverage?.LMA_Periods ?? 0);
                                 signals.Add(MovingAverageCrossover);
-
+                                keyValuePairs["Moving_Average"] = MovingAverageCrossover;
                                 break;
                             case StrategyType.RSI:// "RSI":
                                 var RSI = genratesignalsforRSI(stockData, userSettings?.RSIThresholds?.RsiPeriod ?? 0, userSettings?.RSIThresholds?.Overbought ?? 0
                          , userSettings?.RSIThresholds?.Oversold ?? 0);
                                 signals.Add(RSI);
+                                keyValuePairs["RSI"] = RSI;
                                 break;
                             case StrategyType.VWAP:// "VWAP":
                                 var VWAP = CalculateVWAP(stockData);
                                 signals.Add(VWAP);
+                                keyValuePairs["VWAP"] = VWAP;
                                 break;
                         }
                     }
 
                 }
             }
-          
+              var final= keyValuePairs;
 
-            var finalsignal = GetCombinationStrategyDecision(signals, thresold);
+              var finalsignal = GetCombinationStrategyDecision(signals, thresold);
 
             return finalsignal;
         }

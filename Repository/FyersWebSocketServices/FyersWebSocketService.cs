@@ -2,6 +2,7 @@
 using HyperSyncLib;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
@@ -41,7 +42,7 @@ namespace Repository.FyersWebSocketServices
         public readonly List<string?> _stocklist=new List<string?>();
         private readonly IServiceProvider _serviceProvider;
         private readonly FyersStockSettings _settings;
-
+      
         public FyersWebSocketService(IHubContext<StockHub> hubContext,
             HttpClient httpClient, IServiceProvider serviceProvider,
             IOptions<FyersStockSettings> settings)
@@ -50,6 +51,7 @@ namespace Repository.FyersWebSocketServices
             _httpClient = httpClient;
             _serviceProvider = serviceProvider;
             _settings = settings.Value;
+            
         }
         public void LogFilegenerate(Exception? ex, string path)
         {
@@ -122,12 +124,27 @@ namespace Repository.FyersWebSocketServices
                 var list = stocks.Select(x => x.Symbol).ToList();
                 _stocklist.AddRange(list);
                 _stocklist.ToList();
-                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(_stocklist),"FyersWebSoketService.cs");
+          
             }
 
             lock (_lock)
             {
                 return _stockDataList.Where(x=> _stocklist.Contains(x.Symbol)).ToList();
+            }
+        }
+        public List<StockData> GetliveStockData(List<Stocks>? stocks)
+        {
+            if (stocks != null)
+            {
+                var list = stocks.Select(x => x.Symbol).ToList();
+                _stocklist.AddRange(list);
+                _stocklist.ToList();
+             
+            }
+
+            lock (_lock)
+            {
+                return _stockDataList.Where(x => _stocklist.Contains(x.Symbol)).ToList();
             }
         }
         public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync(string sym,string rangform,string rangeto)
@@ -137,7 +154,7 @@ namespace Repository.FyersWebSocketServices
             string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-
+            _settings.AccessToken=await GetAccestokenFromadminsetings();
             // Add Authorization Token
             if (!await ValidateToken(_settings.AccessToken))
             {
@@ -188,7 +205,7 @@ namespace Repository.FyersWebSocketServices
             string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-
+            _settings.AccessToken = await GetAccestokenFromadminsetings();
             // Add Authorization Token
             if (!await ValidateToken(_settings.AccessToken))
             {
@@ -298,6 +315,27 @@ namespace Repository.FyersWebSocketServices
                 }
             }
         }
+
+        public async Task<string> GetAccestokenFromadminsetings()
+        {
+            string accesstoken=string.Empty;
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var adminsetting = await userrepo.GetUserSettings();
+                    var authdata = adminsetting.UserAuthtoken;
+                    accesstoken=authdata?.access_token??string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogFilegenerate(ex, "FyersWebSocketService/GetAccestokenFromadminsetings");
+                return string.Empty;
+            }
+            return accesstoken;
+        }
         public async Task<bool> ValidateToken(string token)
         {
             bool result = false;
@@ -396,6 +434,7 @@ namespace Repository.FyersWebSocketServices
                     var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
                     var adminsetting = await userrepo.GetUserSettings();
                     var authdata = adminsetting.UserAuthtoken;
+
                     var validtoken =await ValidateToken(authdata?.access_token??"");
                     if (!validtoken)
                     {
@@ -415,6 +454,10 @@ namespace Repository.FyersWebSocketServices
                         }
 
                     }
+                    else
+                    {
+                        _settings!.AccessToken = authdata?.access_token ?? "";
+                    }
                     var sym = stockssym.Getallsym();
                     if (sym.Any() && sym != null)
                     {
@@ -425,8 +468,6 @@ namespace Repository.FyersWebSocketServices
                 FyersClass fyersModel = FyersClass.Instance;
                 fyersModel.ClientId = _settings!.ClientId; //ClientId;
                 fyersModel.AccessToken = _settings!.AccessToken;// AccessToken;
-                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(fyersModel.AccessToken), "FyersWebSoketService.cs");
-                dataFilegenerate(System.Text.Json.JsonSerializer.Serialize(fyersModel.ClientId), "FyersWebSoketService.cs");
                
                 Methods t = new Methods(this); // Pass the HubContext
                  t.DataWebSocket(symlist);

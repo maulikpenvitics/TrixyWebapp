@@ -2,6 +2,7 @@
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Repository.IRepositories;
 using Repository.Models;
@@ -19,38 +20,62 @@ namespace Repository.FyersWebSocketServices.Jobs
         private readonly FyersWebSocketService _fyersWebSocketService;
         private readonly IServiceProvider _serviceProvider;
         private readonly FyersStockSettings _settings;
-        public JobSchedulerService(FyersWebSocketService fyersWebSocketService, IServiceProvider serviceProvider, IOptions<FyersStockSettings> settings)
+        ILogger<JobSchedulerService> _logger;
+        public JobSchedulerService(FyersWebSocketService fyersWebSocketService, IServiceProvider serviceProvider, 
+            IOptions<FyersStockSettings> settings, ILogger<JobSchedulerService> logger)
         {
             _fyersWebSocketService = fyersWebSocketService;
             _serviceProvider = serviceProvider;
             _settings = settings.Value;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
-                var frequnecy = await admin.GetJobFrequencyAsync();
-                long time = Convert.ToInt32(frequnecy);
                 RecurringJob.AddOrUpdate(
-                        "delete-old-Insertnew-stock-data",
-                        () => RunStockDataJob(),
-                        Cron.Daily(9, 00)
-                    );
+             "refresh-token-generate",
+              () => Refreshtokengenerate(),
+                 "0 0 */13 * *"  // every 13 days
+          );
 
-                RecurringJob.AddOrUpdate(
-                    "refresh-token-generate",
-                     () => Refreshtokengenerate(),
-                        "0 0 */13 * *"  // every 13 days
-                 );
+                //RecurringJob.AddOrUpdate(
+                //             "delete-old-Insertnew-stock-data",
+                //             () => RunStockDataJob(),
+                //             Cron.Daily(9, 00)
+                //         );
                 while (!stoppingToken.IsCancellationRequested)
                 {
+                    long time = 0;
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
+                        var frequency = await admin.GetJobFrequencyAsync();
+                        time = Convert.ToInt32(frequency);
+                        try
+                        {
+                            await RunStockDataJob();
+                        }
+                        catch (Exception innerEx)
+                        {
+                            _logger.LogError(innerEx, "Error during job execution loop.");
+                            
+                        }
+                    }
+
                     await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error in ExecuteAsync");
+            }
+          
+         
 
-
+           
+     
         }
         [AutomaticRetry(Attempts = 3)] // Optional: Retry if the job fails
         public async Task RunStockDataJob()
@@ -64,7 +89,7 @@ namespace Repository.FyersWebSocketServices.Jobs
                 var result = await stockrepo.DeleteHistoricaldata();
 
                 // Fetch new stock data
-                var getstocks = await getstcoks();
+                var getstocks = await getStocks();
                 var stockssym = await GetSymbol();
                 if (stockssym != null && stockssym.Any())
                 {
@@ -99,7 +124,7 @@ namespace Repository.FyersWebSocketServices.Jobs
                 }
             }
         }
-        private async Task<List<Stocknotifactiondata>> getstcoks()
+        private async Task<List<Stocknotifactiondata>> getStocks()
         {
             List<Stocknotifactiondata> stocks = new List<Stocknotifactiondata>();
             using (var scope = _serviceProvider.CreateScope())

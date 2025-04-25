@@ -50,7 +50,7 @@ namespace TrixyWebapp.Controllers
                 var user = userId != null ? _user.GetById(userId) : new User();
 
 
-                stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                stockData = _fyersWebSocket.GetliveStockData(user?.Stocks?.ToList());
                 if (user?.Stocks?.Any() == true)
                 {
                     foreach (var item in stockData)
@@ -78,7 +78,7 @@ namespace TrixyWebapp.Controllers
                 var userId = HttpContext.Session.GetString("UserId");
                 //string userId = Encoding.UTF8.GetString(userIdBytes);
                 var user = userId != null ? _user.GetById(userId) : new User();
-                List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                List<StockData> stockData = _fyersWebSocket.GetliveStockData(user?.Stocks?.ToList());
                 
                 var formateddata = stockData.Select(x => new
                 {

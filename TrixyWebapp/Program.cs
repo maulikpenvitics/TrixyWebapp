@@ -40,7 +40,8 @@ builder.Services.AddHangfire(config =>
 {
     config.UseMongoStorage(mongoClient, databaseName, new MongoStorageOptions
     {
-        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() }
+        MigrationOptions = new MongoMigrationOptions { MigrationStrategy = new MigrateMongoMigrationStrategy() },
+          CheckQueuedJobsStrategy =  CheckQueuedJobsStrategy.TailNotificationsCollection
     });
 });
 builder.Services.AddHangfireServer();
@@ -84,7 +85,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         option.LoginPath = "/Account/Login";
         option.LogoutPath = "/Account/Logout";
-        option.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+        option.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         option.SlidingExpiration = true;
         option.Cookie.HttpOnly = true;
         option.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;

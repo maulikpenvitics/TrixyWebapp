@@ -39,7 +39,7 @@ namespace Repository.FyersWebSocketServices.Jobs
                 if (authdata != null) 
                 {
                     var validatetoken =await _fyersWebSocketService.ValidateToken(authdata?.access_token??"");
-                    if (validatetoken)
+                    if (!validatetoken)
                     {
                         var getrefreshtoken = await _fyersWebSocketService.GetRefreshToken(authdata?.refresh_token??"", authdata?.Pin??"");
                         if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
