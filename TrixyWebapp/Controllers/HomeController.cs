@@ -83,7 +83,7 @@ namespace TrixyWebapp.Controllers
                 var user = userId != null ? _user.GetById(userId) : new User();
                 user.Stocks = user?.Stocks?.Where(x => x.IsActive == true).ToList();
                 List<string?> stocklst = user?.Stocks?.Select(x => x.Symbol).ToList()??new List<string?>();
-                List<StockData> stockData = _fyersWebSocket.GetStockData(user?.Stocks?.ToList());
+                List<StockData> stockData = _fyersWebSocket.GetStockData();
                 stockData = stockData.Where(x => stocklst.Contains(x.Symbol)).ToList();
                 var formateddata = stockData.Select(x => new
                 {
