@@ -121,7 +121,7 @@ namespace Repository.FyersWebSocketServices
         {
             lock (_lock)
             {
-                return _stockDataList.Where(x=> _stocklist.Contains(x.Symbol)).ToList();
+                return _stockDataList.ToList();
             }
         }
         public List<StockData> GetliveStockData(List<Stocks>? stocks)

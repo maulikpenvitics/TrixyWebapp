@@ -198,6 +198,7 @@ namespace TrixyWebapp.Controllers
                                 if (existsym != null) 
                                 { 
                                   existsym.IsActive = true;
+                                  existsym.StockNotification = false;
                                 }
                             }
                         }
