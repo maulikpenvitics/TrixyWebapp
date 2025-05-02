@@ -15,10 +15,12 @@ namespace TrixyWebapp.Controllers
     {
         private readonly IRepository<User> _userRepository;
         private readonly IUserRepository _user;
-        public UserController(IRepository<User> userRepository , IUserRepository user)
+        private readonly IErrorHandlingRepository _errorhandling;
+        public UserController(IRepository<User> userRepository , IUserRepository user, IErrorHandlingRepository errorhandling)
         {
             _userRepository = userRepository;
             _user = user;
+            _errorhandling = errorhandling;
         }
         public async Task<IActionResult> Index()
         {
@@ -29,88 +31,100 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateUser(string? Id)
         {
-            if (!string.IsNullOrEmpty(Id))
+            try
             {
-                var user = await _userRepository.GetByIdAsync(Id);
-                if (user != null)
+                if (!string.IsNullOrEmpty(Id))
                 {
-                    return View(user); // Pass existing user data for editing
+                    var user = await _userRepository.GetByIdAsync(Id);
+                    if (user != null)
+                    {
+                        return View(user); // Pass existing user data for editing
+                    }
                 }
+                return View(new User());
             }
-            return View(new User());
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "UserController/CreateUser");
+                return View(new User());
+            }
+         
         }
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
-            if (user!=null && user.Id.ToString() != null && user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000")
+            try
             {
+                var adminsetting = await _user.GetUserSettings();
                 var existuser = await _user.GetByEmail(user?.Email ?? "");
-
-               var aoivdstraetgy= existuser?.UserStrategy?.FirstOrDefault(x => x.StretagyName == "Sentiment_Analysis");
-                if (aoivdstraetgy!=null)
+                if (user==null)
                 {
-                    aoivdstraetgy.IsActive = false;
-                    existuser?.UserStrategy?.Add(aoivdstraetgy);
+                    ViewBag.Errormessage = "Invalid user data.";
+                    return View("Index");
                 }
-                user!.ProfileImageUrl = existuser?.ProfileImageUrl;   
-                user.UserStrategy = existuser?.UserStrategy;   
-                user.Status = existuser?.Status;   
-                user.Stocks = existuser?.Stocks;   
-                await _userRepository.UpdateAsync(user.Id.ToString(), user);
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                var existuser = await _user.GetByEmail(user?.Email ?? "");
-                if (existuser == null)
-                {
-                    List<UserStrategy> strategyWeight = new List<UserStrategy>();
-                    var adminsetting =await _user.GetUserSettings();
-                    if (adminsetting != null)
-                    {
-                      var stretagy= adminsetting?.StrategyWeighted?.Where(x => x.IsActive == true).ToList();
-                        if (stretagy!=null && stretagy.Any())
-                        {
-                            foreach (var item in stretagy)
-                            {
-                                var isactive = true;
-                                if (item.Strategy== "Sentiment_Analysis")
-                                {
-                                    isactive = false;
-                                }
-                                strategyWeight.Add(new UserStrategy()
-                                {
-                                    IsActive = isactive,
-                                    StretagyEnableDisable = false,
-                                    StretagyName = item.Strategy
-                                });
+                bool isUpdate = user.Id != ObjectId.Empty && user.Id.ToString() != "000000000000000000000000";
 
-                            }
-                        }
-                       
-                    }
-                    user!.Stocks = new List<Stocks>();
-                    user.UserStrategy = strategyWeight;
-                    var result = await _userRepository.InsertAsync(user);
-                    if (result == 1)
+                if (isUpdate && existuser != null)
+                {
+                    var sentimentStrategy = existuser?.UserStrategy?.FirstOrDefault(x => x.StretagyName == "Sentiment_Analysis");
+                    if (sentimentStrategy != null)
                     {
-                        return RedirectToAction("Index");
+                        sentimentStrategy.IsActive = false;
+                        existuser?.UserStrategy?.Add(sentimentStrategy);
                     }
-                    else
+                    if (existuser?.UserStrategy==null && !existuser!.UserStrategy.Any())
                     {
-                        ViewBag.Errormessage = "Please try agin";
-                        return View();
+                        existuser.UserStrategy = GenerateStrategies(adminsetting);
                     }
+                    user!.ProfileImageUrl = existuser?.ProfileImageUrl;
+                    user.UserStrategy = existuser!.UserStrategy;
+                    user.Status = true;
+                    user.Stocks = existuser?.Stocks??new List<Stocks>();
+                    await _userRepository.UpdateAsync(user.Id.ToString(), user);
+
+                    TempData["message"] = "User updated successfully";
+                    return RedirectToAction("Index");
                 }
                 else
                 {
-                    ViewBag.Errormessage = "This user already exists.";
-                    return View();
+                   
+                    if (existuser == null)
+                    {
+                        if (adminsetting != null)
+                        {
+                            user.UserStrategy = GenerateStrategies(adminsetting);
+                        }
+                        user!.Stocks = new List<Stocks>();
+                        var result = await _userRepository.InsertAsync(user);
+                        if (result == 1)
+                        {
+                            ViewBag.message = "User created succesfully";
+                            return RedirectToAction("Index");
+                        }
+                        else
+                        {
+                            ViewBag.Errormessage = "Please try agin";
+                            return View();
+                        }
+                    }
+                    else
+                    {
+                        ViewBag.Errormessage = "This user already exists.";
+                        return View();
+                    }
                 }
-            }
 
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "UserController/CreateUser");
+                ViewBag.Errormessage = "Please try agin";
+                return View();
+                
+            }
+           
         }
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> DeleteUser(string Id)
         {
             var user= await _userRepository.GetByIdAsync(Id);
@@ -129,20 +143,59 @@ namespace TrixyWebapp.Controllers
 
 
         [HttpGet]
-        public IActionResult AdminSettings()
+        public async Task<IActionResult> AdminSettings()
         {
-            var userId = HttpContext.Session.GetString("UserId");
-            var adminseting= _user.GetUserSettings();
-            
-            return View(adminseting);
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                var adminseting = _user.GetUserSettings();
+
+                return View(adminseting);
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "UserController/AdminSettings");
+                return View(new AdminSettings());
+            }
+           
         }
 
-        public IActionResult Setting()
+        public async Task<IActionResult> Setting()
         {
-            var userId = HttpContext.Session.GetString("UserId");
-            //string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
-            var user = userId!=null? _user.GetById(userId):new Repository.Models.User();
-            return View(user);
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                //string? userId = userIdBytes != null ? Encoding.UTF8.GetString(userIdBytes) : null;
+                var user = userId != null ? _user.GetById(userId) : new Repository.Models.User();
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "UserController/Setting");
+                return View(new User());
+            }
+        
+        }
+
+        private List<UserStrategy> GenerateStrategies(AdminSettings? adminSetting)
+        {
+            var strategies = new List<UserStrategy>();
+            var activeStrategies = adminSetting?.StrategyWeighted?.Where(x => x.IsActive == true).ToList();
+
+            if (activeStrategies != null)
+            {
+                foreach (var item in activeStrategies)
+                {
+                    strategies.Add(new UserStrategy
+                    {
+                        StretagyName = item.Strategy,
+                        IsActive = item.Strategy != "Sentiment_Analysis",
+                        StretagyEnableDisable = false
+                    });
+                }
+            }
+
+            return strategies;
         }
     }
 }

@@ -33,7 +33,26 @@ $(function () {
 	  'info'        : true,
 	  'autoWidth'   : false,
 	});
-	
+
+	$('#stocksym').DataTable({
+		'paging': true,
+		'lengthChange': true,
+		'lengthMenu': [10, 20, 30, 40, 50],
+		'searching': true,
+		'ordering': true,
+		'info': true,
+		'autoWidth': true,
+	});
+	$('#user').DataTable({
+		'paging': true,
+		'lengthChange': true,
+		'lengthMenu': [10, 20, 30, 40, 50],
+		'searching': true,
+		'ordering': true,
+		'info': true,
+		'autoWidth': true,
+	});
+
 	//$('#productorder').DataTable({
 	//  'paging'      : true,
 	//  'lengthChange': true,

@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using Repository.FyersWebSocketServices.Jobs;
 using Repository.Hubs;
 using Repository.IRepositories;
 using Repository.Models;
@@ -20,29 +22,33 @@ namespace Repository.FyersWebSocketServices
         private readonly IHubContext<StockNotificationHub> _hubContext;
         private readonly FyersWebSocketService _fyersWebSocketService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<StockNotificationService> _logger;
         public StockNotificationService(IHubContext<StockNotificationHub> hubContext,
             FyersWebSocketService fyersWebSocketService,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider, ILogger<StockNotificationService> logger)
         {
             _hubContext = hubContext;
             _fyersWebSocketService = fyersWebSocketService;
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-
-                using (var scope = _serviceProvider.CreateScope())
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
-                    var frequnecy =await admin.GetJobFrequencyAsync();
-                    long time =Convert.ToInt32(frequnecy);
-                    var marketStart = new TimeSpan(9, 15, 0);
-                    var marketEnd = new TimeSpan(15, 30, 0);
-                    var currentTime = DateTime.Now.TimeOfDay;
-                    var getstockdata = await getstcoks();
+
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var admin = scope.ServiceProvider.GetRequiredService<IAdminSettingRepository>();
+                        var frequnecy = await admin.GetJobFrequencyAsync();
+                        long time = Convert.ToInt32(frequnecy);
+                        var marketStart = new TimeSpan(9, 15, 0);
+                        var marketEnd = new TimeSpan(15, 30, 0);
+                        var currentTime = DateTime.Now.TimeOfDay;
+                        var getstockdata = await getstcoks();
                         var onlineUsers = StockNotificationHub.GetConnectedUsers();
 
 
@@ -53,87 +59,132 @@ namespace Repository.FyersWebSocketServices
                                 await _hubContext.Clients.User(item).SendAsync("ReceiveStockUpdate", getstockdata);
                             }
                         }
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            _logger.LogInformation("JobSchedulerService task was canceled during delay.");
+                            // Optional: break the loop explicitly if desired
+                            break;
+                        }
 
-                    await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
+                       
+                    }
+
                 }
-                
             }
+            catch (Exception ex)
+            {
+                 Errorhandl(ex, "StockNotificationService/ExecuteAsync");
+                throw;
+            }
+          
         }
         private List<StockData> GetLiveStockPrice(List<Stocks> symbol)
         {
-            if (symbol != null)
+            try
             {
-                List<StockData> stockData = _fyersWebSocketService.GetStockData();
-                return stockData;
+                if (symbol != null)
+                {
+                    List<StockData> stockData = _fyersWebSocketService.GetStockData();
+                    return stockData;
+                }
+                else
+                {
+                    return new List<StockData>();
+                }
             }
-            else
+            catch (Exception ex)
             {
+                 Errorhandl(ex, "StockNotificationService/GetLiveStockPrice");
                 return new List<StockData>();
             }
+           
 
         }
 
         private async Task<List<Stocknotifactiondata>> getstcoks()
         {
             List<Stocknotifactiondata> stocks = new List<Stocknotifactiondata>();
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var userId = StockNotificationHub.GetLoggedInUserId();
-                if (string.IsNullOrEmpty(userId))
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    Console.WriteLine("User ID not found in claims.");
-                    return stocks;
-                }
-                if (userId != null)
-                {
-                    var userRepository = scope.ServiceProvider.GetRequiredService<IRepository<User>>(); // Resolve scoped service
-                    var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>(); // Resolve scoped service
-                    var users = await userRepository.GetByIdAsync(userId);
-                    var assignedStocks = users.Stocks?.Where(x => x.StockNotification == true).ToList() ?? new List<Stocks>();
-                    List<string> userstrategy = users.UserStrategy!=null? users.UserStrategy.Where(x => x.StretagyEnableDisable==true).Select(x=>x.StretagyName??"").ToList():new List<string>();
-                    if (assignedStocks != null && assignedStocks.Any())
+                    var userId = StockNotificationHub.GetLoggedInUserId();
+                    if (string.IsNullOrEmpty(userId))
                     {
-                        users.UserStrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList():new List<UserStrategy>();
-                        var stockPrices = GetLiveStockPrice(assignedStocks);
-                        foreach (var item in assignedStocks)
+                        Console.WriteLine("User ID not found in claims.");
+                        return stocks;
+                    }
+                    if (userId != null)
+                    {
+                        var userRepository = scope.ServiceProvider.GetRequiredService<IRepository<User>>(); // Resolve scoped service
+                        var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>(); // Resolve scoped service
+                        var users = await userRepository.GetByIdAsync(userId);
+                        var assignedStocks = users.Stocks?.Where(x => x.StockNotification == true && x.IsActive==true).ToList() ?? new List<Stocks>();
+                        List<string> userstrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true).Select(x => x.StretagyName ?? "").ToList() : new List<string>();
+                        if (assignedStocks != null && assignedStocks.Any())
                         {
-                           // var signal = users?.UserStrategy!=null? await getfinalsignal(item?.Symbol??"", users.UserStrategy):string.Empty;
-                            //if (!string.IsNullOrEmpty(signal))
-                            //{
-                            //    await userRepo.UpdateUserStocks(users?.Id.ToString()??"", item?.Symbol ?? "", signal);
-                            //}
-                            stocks.Add(new Stocknotifactiondata()
+                            users.UserStrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList() : new List<UserStrategy>();
+                            var stockPrices = GetLiveStockPrice(assignedStocks);
+                            foreach (var item in assignedStocks)
                             {
-                                BuySellSignal = item.BuySellSignal,
-                                Change = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Change,
-                                Price = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Price,
-                                Priviscloseprice = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.prev_close_price,
-                                Symbol = item?.Symbol,
-                                userid = users?.Id.ToString(),
-                                timestamp = DateTime.Now,
-                                CompanyName=item?.CompanyName,
-                                userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>()
-                            });
+                                // var signal = users?.UserStrategy!=null? await getfinalsignal(item?.Symbol??"", users.UserStrategy):string.Empty;
+                                //if (!string.IsNullOrEmpty(signal))
+                                //{
+                                //    await userRepo.UpdateUserStocks(users?.Id.ToString()??"", item?.Symbol ?? "", signal);
+                                //}
+                                stocks.Add(new Stocknotifactiondata()
+                                {
+                                    BuySellSignal = item.BuySellSignal,
+                                    Change = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Change,
+                                    Price = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.Price,
+                                    Priviscloseprice = stockPrices.Where(x => x.Symbol == item?.Symbol)?.FirstOrDefault()?.prev_close_price,
+                                    Symbol = item?.Symbol,
+                                    userid = users?.Id.ToString(),
+                                    timestamp = DateTime.Now,
+                                    CompanyName = item?.CompanyName,
+                                    userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>()
+                                });
+
+                            }
 
                         }
-
+                        return stocks;
                     }
-                    return stocks;
+
                 }
-               
+                return stocks;
             }
-            return stocks;
+            catch (Exception ex)
+            {
+                Errorhandl(ex, "StockNotificationService/getstcoks");
+                return stocks;
+            }
+           
         }
 
         private async Task<AdminSettings> GetAdminsetting()
         {
             AdminSettings adminSettings = new AdminSettings();
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var Admindsetting=scope.ServiceProvider.GetRequiredService<IUserRepository>();
-                adminSettings = await Admindsetting.GetUserSettings();
+              
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var Admindsetting = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    adminSettings = await Admindsetting.GetUserSettings();
+                    return adminSettings;
+                }
+            }
+            catch (Exception ex)
+            {
+                Errorhandl(ex, "StockNotificationService/GetLiveStockPrice");
                 return adminSettings;
             }
+           
         }
 
         private async Task<string> getfinalsignal(string sym,List<UserStrategy> strategy)
@@ -154,5 +205,23 @@ namespace Repository.FyersWebSocketServices
             return result;
         }
 
+
+        public void  Errorhandl(Exception ex, string remarks)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var errorrepo = scope.ServiceProvider.GetRequiredService<IErrorHandlingRepository>();
+                     errorrepo.AddError(ex, remarks);
+                }
+
+            }
+            catch (Exception innerex)
+            {
+                _logger.LogError(innerex, "JobSchedulerService/Errorhandl");
+            }
+
+        }
     }
 }

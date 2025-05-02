@@ -26,20 +26,32 @@ namespace TrixyWebapp.Controllers
         private readonly IUserRepository _user;
         private readonly IWebHostEnvironment _env;
         private readonly FyersWebSocketService _fyersWebSocket;
+        private readonly IErrorHandlingRepository  _errorhandling;
         public AccountController(IRepository<User> userRepository, IUserRepository user, IWebHostEnvironment env,
-            FyersWebSocketService fyersWebSocket)
+            FyersWebSocketService fyersWebSocket, IErrorHandlingRepository errorhandling)
         {
             _userRepository = userRepository;
             _user = user;
             _env = env;
             _fyersWebSocket = fyersWebSocket;
+            _errorhandling = errorhandling;
         }
 
         public async Task<IActionResult> Index()
         {
-            var getuser = await _userRepository.GetAllAsync();
-
-            return View(getuser);
+            IEnumerable<User>getuser = new List<User>();
+            try
+            {
+                 getuser = await _userRepository.GetAllAsync();
+                return View(getuser);
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex,"Account/Index");
+                return View(getuser);
+            }
+           
+           
         }
 
         public IActionResult Login()
@@ -92,11 +104,13 @@ namespace TrixyWebapp.Controllers
                 else
                 {
                     ViewData["LoginError"] = "Invalid email or password. Please try again.";
+                   
                     return View(model);
                 }
             }
             catch (Exception ex)
             {
+                await _errorhandling.AddErrorHandling(ex, "Login");
                 Helper.LogFilegenerate(ex, "Login Action", _env);
                 return View(model);
             }
@@ -105,26 +119,44 @@ namespace TrixyWebapp.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            _fyersWebSocket.Disconnect();
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            HttpContext.Session.Clear();
-           
-            return RedirectToAction("Login", "Account");
+            try
+            {
+                _fyersWebSocket.Disconnect();
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+
+                return RedirectToAction("Login", "Account");
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "Account/LogOut");
+                return RedirectToAction("Login", "Account");
+            }
+          
         }
 
         
         [HttpGet]
         public async Task<IActionResult> ChangePassword(string Id)
         {
-            var user=await _userRepository.GetByIdAsync(Id);
-            if (user != null)
+            try
             {
-                return View(user);
+                var user = await _userRepository.GetByIdAsync(Id);
+                if (user != null)
+                {
+                    return View(user);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return RedirectToAction("Index","Home");
+                await _errorhandling.AddErrorHandling(ex, "Account/ChangePassword");
+                return RedirectToAction("Index", "Home");
             }
+        
         
         }
 
@@ -132,25 +164,34 @@ namespace TrixyWebapp.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePassword changePassword)
         {
-            var user = await _userRepository.GetByIdAsync(changePassword?.Id??"");
-            if (changePassword !=null && !string.IsNullOrEmpty(changePassword.Id))
+            try
             {
-               var result = await _user.ChangePassword(changePassword?.Id??"",changePassword?.Oldpassword??"",changePassword?.NewPassword??"");
-                if (result == 1)
+                var user = await _userRepository.GetByIdAsync(changePassword?.Id ?? "");
+                if (changePassword != null && !string.IsNullOrEmpty(changePassword.Id))
                 {
-                    return RedirectToAction("Index","Home");
+                    var result = await _user.ChangePassword(changePassword?.Id ?? "", changePassword?.Oldpassword ?? "", changePassword?.NewPassword ?? "");
+                    if (result == 1)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        ViewBag.errormessage = "Something went wrong. Please try again.";
+                        return View(user);
+
+                    }
                 }
                 else
                 {
                     ViewBag.errormessage = "Something went wrong. Please try again.";
                     return View(user);
-                    
                 }
+
             }
-            else
+            catch (Exception ex)
             {
-                ViewBag.errormessage = "Something went wrong. Please try again.";
-                return View(user);
+                await _errorhandling.AddErrorHandling(ex, "Account/ChangePassword");
+                return RedirectToAction("Index", "Home");
             }
           
         }
@@ -159,63 +200,81 @@ namespace TrixyWebapp.Controllers
         [HttpGet]
         public async Task<IActionResult> UserProfile(string Id)
         {
-            var user = await _userRepository.GetByIdAsync(Id);
-            if (user != null)
+            try
             {
-                return View(user);
+                var user = await _userRepository.GetByIdAsync(Id);
+                if (user != null)
+                {
+                    return View(user);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
-            else
+            catch (Exception ex)
             {
+                await _errorhandling.AddErrorHandling(ex, "Account/UserProfile");
                 return RedirectToAction("Index", "Home");
             }
+           
         }
         
         [HttpPost]
         public async Task<IActionResult> UserProfile(CreateUserViewModel model)
         {
-            var existuser = await _userRepository.GetByIdAsync(model?.Id ?? "");
-            if (ModelState.IsValid)
+            try
             {
-                string? fileName = null;
-                if (model?.ProfileImage != null)
+                var existuser = await _userRepository.GetByIdAsync(model?.Id ?? "");
+                if (ModelState.IsValid)
                 {
-                    string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Uploads");
-                    if (!Directory.Exists(uploadDir))
+                    string? fileName = null;
+                    if (model?.ProfileImage != null)
                     {
-                        Directory.CreateDirectory(uploadDir);
+                        string uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Uploads");
+                        if (!Directory.Exists(uploadDir))
+                        {
+                            Directory.CreateDirectory(uploadDir);
+                        }
+
+                        fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfileImage.FileName);
+                        string filePath = Path.Combine(uploadDir, fileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.ProfileImage.CopyToAsync(fileStream);
+                        }
+
+                        model.ProfileImageUrl = "/Uploads/" + fileName;
                     }
 
-                    fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfileImage.FileName);
-                    string filePath = Path.Combine(uploadDir, fileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    var user = new User
                     {
-                        await model.ProfileImage.CopyToAsync(fileStream);
+                        Id = string.IsNullOrEmpty(model?.Id) ? ObjectId.GenerateNewId() : ObjectId.Parse(model.Id),
+                        Firstname = model?.Firstname,
+                        Lastname = model?.Lastname,
+                        Email = model?.Email,
+                        ProfileImageUrl = !string.IsNullOrEmpty(model?.ProfileImageUrl) ? model?.ProfileImageUrl : existuser.ProfileImageUrl // Save path in DB
+                    };
+                    var result = await _user.UpdateUserProfile(user);
+                    if (result)
+                    {
+                        return RedirectToAction("Index", "Home");
                     }
-
-                    model.ProfileImageUrl = "/Uploads/" + fileName;
+                    else
+                    {
+                        return View(existuser);
+                    }
                 }
 
-                var user = new User
-                {
-                    Id = string.IsNullOrEmpty(model?.Id) ? ObjectId.GenerateNewId() : ObjectId.Parse(model.Id),
-                    Firstname = model?.Firstname,
-                    Lastname = model?.Lastname,
-                    Email = model?.Email,
-                    ProfileImageUrl =!string.IsNullOrEmpty(model?.ProfileImageUrl)? model?.ProfileImageUrl : existuser.ProfileImageUrl // Save path in DB
-                };
-                var result=  await _user.UpdateUserProfile(user);
-                if (result)
-                {
-                    return RedirectToAction("Index","Home");
-                }
-                else
-                {
-                    return View(existuser);
-                }
+                return View(existuser);
             }
-
-            return View(existuser);
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "Account/UserProfile");
+                return RedirectToAction("Index", "Home");
+            }
+            
         }
 
     }

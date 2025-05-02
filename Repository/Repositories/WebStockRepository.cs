@@ -19,122 +19,96 @@ namespace Repository.Repositories
         private readonly IRepository<Stock_master_data> _stcock;
         private readonly IMongoCollection<Historical_Data> _historicaldata;
         private readonly IMongoCollection<AdminSettings> _adminsetting;
+        private readonly IErrorHandlingRepository _errorHandlingRepository;
         public WebStockRepository(IRepository<Historical_Data> collection,
             IRepository<Stock_master_data> stcock, IMongoClient mongoClient,
-            IOptions<MongoDBSettings> settings)
+            IOptions<MongoDBSettings> settings, IErrorHandlingRepository errorHandlingRepository)
         {
             _collection = collection;
             _stcock = stcock;
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _historicaldata = database.GetCollection<Historical_Data>("Historical_Data");
             _adminsetting = database.GetCollection<AdminSettings>("AdminSettings");
+            _errorHandlingRepository = errorHandlingRepository;
         }
         public async Task<List<Historical_Data>> GetHistoricalData()
         {
-            List<Historical_Data> historical_Datas = new List<Historical_Data>();
-            historical_Datas = (List<Historical_Data>)await _collection.GetAllAsync();
-            return historical_Datas;
-        }
-        public async Task InsertStockAsync(Stock_master_data stock)
-        {
-            List<Stock_master_data> stock_Master_sq=new List<Stock_master_data> ();
-            var stock1 = new Stock_master_data
+            try
             {
-                StockSymbl = "NSE:SBIN-EQ",
-                CompanyName = "Apple Inc.",
-                Code = "NSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock1);
-            var stock2 = new Stock_master_data
+                List<Historical_Data> historical_Datas = new List<Historical_Data>();
+                historical_Datas = (List<Historical_Data>)await _collection.GetAllAsync();
+                return historical_Datas;
+            }
+            catch (Exception ex)
             {
-                StockSymbl = "SBIN-EQ",
-                CompanyName = "Reliance",
-                Code = "NSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock2);
-            var stock3 = new Stock_master_data
-            {
-                StockSymbl = "NSE:SBIN-EQ",
-                CompanyName = "ITC",
-                Code = "BSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock3);
-            var stock4 = new Stock_master_data
-            {
-                StockSymbl = "NSE:SBIN-EQ",
-                CompanyName = "TCS",
-                Code = "BSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock4);
-            var stock5 = new Stock_master_data
-            {
-                StockSymbl = "SBIN-EQ",
-                CompanyName = "IDFC First bank.",
-                Code = "BSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock5);
-            var stock6 = new Stock_master_data
-            {
-                StockSymbl = "SBIN-EQ",
-                CompanyName = "Bajaj Finance.",
-                Code = "BSE",
-                Status = true,
-                CreatedBy = "Admin",
-                Updatedby = "Admin"
-            };
-            stock_Master_sq.Add(stock6);
-            await _stcock.InsertManyAsync(stock_Master_sq);
-           
+
+                await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/GetHistoricalData");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+          
         }
 
         public async Task<List<Historical_Data>> GetStockDataBySymbolAsync(string symbol)
         {
-            var filter = Builders<Historical_Data>.Filter.And(
-                Builders<Historical_Data>.Filter.Eq(s => s.symbol, symbol)
-            );
+            try
+            {
+                var filter = Builders<Historical_Data>.Filter.And(
+               Builders<Historical_Data>.Filter.Eq(s => s.symbol, symbol)
+           );
 
-            return await _collection.FindAsync(filter);
+                return await _collection.FindAsync(filter);
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/GetStockDataBySymbolAsync");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+           
         }
 
         public async Task<int> DeleteHistoricaldata()
         {
-            
-            var frequency = await _adminsetting
-            .Find(_ => true)
-           .FirstOrDefaultAsync();
-            
-            DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;  
-            DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1); 
-            DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
-            var filter = Builders<Historical_Data>.Filter.And(
-     Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),
-     Builders<Historical_Data>.Filter.Lte(s => s.Timestamp, endOfDay)
- );
-            var result = await _historicaldata.DeleteManyAsync(filter);
+            try
+            {
+                var frequency = await _adminsetting
+           .Find(_ => true)
+          .FirstOrDefaultAsync();
 
-            return (int)result.DeletedCount;
+                DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;
+                DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1);
+                DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
+                var filter = Builders<Historical_Data>.Filter.And(
+         Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),
+         Builders<Historical_Data>.Filter.Lte(s => s.Timestamp, endOfDay)
+     );
+                var result = await _historicaldata.DeleteManyAsync(filter);
+
+                return (int)result.DeletedCount;
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/DeleteHistoricaldata");
+                throw new Exception("An error occurred while DeleteHistorical data. Please try again.");
+            }
+            
+           
         }
         public async Task InsertNewHistoricalData(List<Historical_Data> newData)
         {
-            if (newData !=null && newData.Any()) 
+            try
             {
-                await _historicaldata.InsertManyAsync(newData);
+                if (newData != null && newData.Any())
+                {
+                    await _historicaldata.InsertManyAsync(newData);
+                }
+
             }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/InsertNewHistoricalData");
+                throw new Exception("An error occurred while InsertNewHistoricalData data. Please try again.");
+            }
+           
         
         }
 

@@ -42,16 +42,16 @@ namespace Repository.FyersWebSocketServices
         public readonly List<string?> _stocklist=new List<string?>();
         private readonly IServiceProvider _serviceProvider;
         private readonly FyersStockSettings _settings;
-      
+       private readonly ILogger<FyersWebSocketService> _logger;
         public FyersWebSocketService(IHubContext<StockHub> hubContext,
             HttpClient httpClient, IServiceProvider serviceProvider,
-            IOptions<FyersStockSettings> settings)
+            IOptions<FyersStockSettings> settings, ILogger<FyersWebSocketService> logger)
         {
             _hubContext = hubContext;
             _httpClient = httpClient;
             _serviceProvider = serviceProvider;
             _settings = settings.Value;
-            
+            _logger = logger;
         }
         public void LogFilegenerate(Exception? ex, string path)
         {
@@ -117,6 +117,24 @@ namespace Repository.FyersWebSocketServices
                 writer.WriteLine(errorMessage);
             }
         }
+
+        public void Errorhandl(Exception ex, string remarks)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var errorrepo = scope.ServiceProvider.GetRequiredService<IErrorHandlingRepository>();
+                    errorrepo.AddError(ex, remarks);
+                }
+
+            }
+            catch (Exception innerex)
+            {
+                _logger.LogError(innerex, "JobSchedulerService/Errorhandl");
+            }
+
+        }
         public List<StockData> GetStockData()
         {
             lock (_lock)
@@ -142,103 +160,119 @@ namespace Repository.FyersWebSocketServices
         public async Task<List<Historical_Data>> FetchAndStoreHistoricalStockDataAsync(string sym,string rangform,string rangeto)
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
-           
-            string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-            _settings.AccessToken=await GetAccestokenFromadminsetings();
-            // Add Authorization Token
-            if (!await ValidateToken(_settings.AccessToken))
+            try
             {
-                Updatetokenindb();
-            }
-            string token = $"{_settings.ClientId}:{_settings.AccessToken}";
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution=30&date_format=1&range_from={rangform}&range_to={rangeto}";
 
-            using var response = await _httpClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseString = await response.Content.ReadAsStringAsync();
-                var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
-
-                if (jsonResponse != null && jsonResponse.candles!=null && jsonResponse.candles.Count>0 && jsonResponse.s== "ok")
+                using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+                _settings.AccessToken = await GetAccestokenFromadminsetings();
+                // Add Authorization Token
+                if (!await ValidateToken(_settings.AccessToken))
                 {
-                    foreach (var item in jsonResponse.candles)
+                    Updatetokenindb();
+                }
+                string token = $"{_settings.ClientId}:{_settings.AccessToken}";
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                using var response = await _httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
+
+                    if (jsonResponse != null && jsonResponse.candles != null && jsonResponse.candles.Count > 0 && jsonResponse.s == "ok")
                     {
-                        var stockHistory = new Historical_Data();
-                        long timestamp = Convert.ToInt64(item[0]);
-                        DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
-                        stockHistory.Timestamp = dateTime;
-                        stockHistory.Open = Convert.ToDecimal(item[1]);
-                        stockHistory.High = Convert.ToDecimal(item[2]);
-                        stockHistory.Low = Convert.ToDecimal(item[3]);
-                        stockHistory.Close = Convert.ToDecimal(item[4]);
-                        stockHistory.Volume = Convert.ToDecimal(item[5]);
-                        stockHistory.from_date = rangform;
-                        stockHistory.to_date = rangeto;
-                        stockHistory.symbol = sym;
-                        stockHistory.Createddate = DateTime.UtcNow;
-                        stockHistorylist.Add(stockHistory);
+                        foreach (var item in jsonResponse.candles)
+                        {
+                            var stockHistory = new Historical_Data();
+                            long timestamp = Convert.ToInt64(item[0]);
+                            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
+                            stockHistory.Timestamp = dateTime;
+                            stockHistory.Open = Convert.ToDecimal(item[1]);
+                            stockHistory.High = Convert.ToDecimal(item[2]);
+                            stockHistory.Low = Convert.ToDecimal(item[3]);
+                            stockHistory.Close = Convert.ToDecimal(item[4]);
+                            stockHistory.Volume = Convert.ToDecimal(item[5]);
+                            stockHistory.from_date = rangform;
+                            stockHistory.to_date = rangeto;
+                            stockHistory.symbol = sym;
+                            stockHistory.Createddate = DateTime.UtcNow;
+                            stockHistorylist.Add(stockHistory);
+                        }
                     }
                 }
+                else
+                {
+                    Console.WriteLine($"API Error: {response.StatusCode}");
+                }
+                return stockHistorylist;
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"API Error: {response.StatusCode}");
+                Errorhandl(ex, "FyersWebSocketService/FetchAndStoreHistoricalStockDataAsync");
+                return stockHistorylist;
             }
-            return stockHistorylist;
+          
         }
 
         public async Task<List<Historical_Data>> FetchAndHistoricalStockDataAsync(string sym, string rangform, string rangeto,int range)
         {
             List<Historical_Data> stockHistorylist = new List<Historical_Data>();
-
-            string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-            _settings.AccessToken = await GetAccestokenFromadminsetings();
-            // Add Authorization Token
-            if (!await ValidateToken(_settings.AccessToken))
+            try
             {
-                Updatetokenindb();
-            }
-            string token = $"{_settings.ClientId}:{_settings.AccessToken}";
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                string apiUrl = $"{_settings.BaseUrlForhistory}?symbol={sym}&resolution={range}&date_format=1&range_from={rangform}&range_to={rangeto}";
 
-            using var response = await _httpClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseString = await response.Content.ReadAsStringAsync();
-                var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
-
-                if (jsonResponse != null && jsonResponse.candles != null && jsonResponse.candles.Count > 0 && jsonResponse.s == "ok")
+                using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+                _settings.AccessToken = await GetAccestokenFromadminsetings();
+                // Add Authorization Token
+                if (!await ValidateToken(_settings.AccessToken))
                 {
-                    foreach (var item in jsonResponse.candles)
+                    Updatetokenindb();
+                }
+                string token = $"{_settings.ClientId}:{_settings.AccessToken}";
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                using var response = await _httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var jsonResponse = JsonSerializer.Deserialize<HistoryStockdataRoot>(responseString);
+
+                    if (jsonResponse != null && jsonResponse.candles != null && jsonResponse.candles.Count > 0 && jsonResponse.s == "ok")
                     {
-                        var stockHistory = new Historical_Data();
-                        long timestamp = Convert.ToInt64(item[0]);
-                        DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
-                        stockHistory.Timestamp = dateTime;
-                        stockHistory.Open = Convert.ToDecimal(item[1]);
-                        stockHistory.High = Convert.ToDecimal(item[2]);
-                        stockHistory.Low = Convert.ToDecimal(item[3]);
-                        stockHistory.Close = Convert.ToDecimal(item[4]);
-                        stockHistory.Volume = Convert.ToDecimal(item[5]);
-                        stockHistory.from_date = rangform;
-                        stockHistory.to_date = rangeto;
-                        stockHistory.symbol = sym;
-                        stockHistory.Createddate = DateTime.UtcNow;
-                        stockHistorylist.Add(stockHistory);
+                        foreach (var item in jsonResponse.candles)
+                        {
+                            var stockHistory = new Historical_Data();
+                            long timestamp = Convert.ToInt64(item[0]);
+                            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
+                            stockHistory.Timestamp = dateTime;
+                            stockHistory.Open = Convert.ToDecimal(item[1]);
+                            stockHistory.High = Convert.ToDecimal(item[2]);
+                            stockHistory.Low = Convert.ToDecimal(item[3]);
+                            stockHistory.Close = Convert.ToDecimal(item[4]);
+                            stockHistory.Volume = Convert.ToDecimal(item[5]);
+                            stockHistory.from_date = rangform;
+                            stockHistory.to_date = rangeto;
+                            stockHistory.symbol = sym;
+                            stockHistory.Createddate = DateTime.UtcNow;
+                            stockHistorylist.Add(stockHistory);
+                        }
                     }
                 }
+                else
+                {
+                    Console.WriteLine($"API Error: {response.StatusCode}");
+                }
+                return stockHistorylist;
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"API Error: {response.StatusCode}");
+                Errorhandl(ex, "FyersWebSocketService/FetchAndHistoricalStockDataAsync");
+                return stockHistorylist;
             }
-            return stockHistorylist;
+          
         }
 
         public async Task<TokenResponse> GetRefreshToken(string refreshtoken,string clinetpin)
@@ -268,6 +302,7 @@ namespace Repository.FyersWebSocketServices
             catch (Exception ex)
             {
                 LogFilegenerate(ex, "GetRefreshToken");
+                Errorhandl(ex, "FyersWebSocketService/GetRefreshToken");
             }
             return TokenResponse;
 
@@ -276,36 +311,54 @@ namespace Repository.FyersWebSocketServices
         public async Task<JObject> genrateRefreshtoken(string authcode)
         {
             Auth auth = new Auth();
-            var authresponse =await auth.generateAccesandrefreshToken(_settings.ClientId,_settings.secretKey,_settings.redirectURI,authcode,_settings.Apphasid);
-            return authresponse;
+            try
+            {
+                
+                var authresponse = await auth.generateAccesandrefreshToken(_settings.ClientId, _settings.secretKey, _settings.redirectURI, authcode, _settings.Apphasid);
+                return authresponse;
+            }
+            catch (Exception ex)
+            {
+                Errorhandl(ex, "FyersWebSocketService/genrateRefreshtoken");
+                return new JObject();
+            }
+           
         }
         public async void Updatetokenindb()
         {
-
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-                var adminsetting = await userrepo.GetUserSettings();
-                var authdata = adminsetting.UserAuthtoken;
-                var generatetoken = GetRefreshToken(_settings.refreshtoken, _settings.clinetpin);
-                var getrefreshtoken = await GetRefreshToken(authdata?.refresh_token ?? "", authdata?.Pin ?? "");
-                if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    var updatetoken = await userrepo.UpdateAdminAuthtoken(getrefreshtoken?.access_token ?? "");
-                    if (updatetoken != null)
+                    var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var adminsetting = await userrepo.GetUserSettings();
+                    var authdata = adminsetting.UserAuthtoken;
+                    var generatetoken = GetRefreshToken(_settings.refreshtoken, _settings.clinetpin);
+                    var getrefreshtoken = await GetRefreshToken(authdata?.refresh_token ?? "", authdata?.Pin ?? "");
+                    if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
                     {
-                        _settings!.AccessToken = updatetoken.access_token;
-                        _settings!.refreshtoken = updatetoken.refresh_token;
-                        _settings!.clinetpin = authdata.Pin;
+                        var updatetoken = await userrepo.UpdateAdminAuthtoken(getrefreshtoken?.access_token ?? "");
+                        if (updatetoken != null)
+                        {
+                            _settings!.AccessToken = updatetoken.access_token;
+                            _settings!.refreshtoken = updatetoken.refresh_token;
+                            _settings!.clinetpin = authdata.Pin;
 
-                        Console.WriteLine("Refresh token successfully");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Please try agin");
+                            Console.WriteLine("Refresh token successfully");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Please try agin");
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+
+                Errorhandl(ex, "FyersWebSocketService/Updatetokenindb");
+            }
+          
         }
 
         public async Task<string> GetAccestokenFromadminsetings()
@@ -340,7 +393,7 @@ namespace Repository.FyersWebSocketServices
                 Tuple<ProfileModel, JObject> responseTuple = await fyersModel.GetProfile();
                 
                
-                if (responseTuple.Item1!=null)
+                if (responseTuple !=null && responseTuple.Item1!=null)
                 {
                     result = true;
                 }
@@ -376,41 +429,50 @@ namespace Repository.FyersWebSocketServices
             catch (Exception ex)
             {
                 LogFilegenerate(ex, "ValidateToken");
+                Errorhandl(ex, "FyersWebSocketService/ValidateToken");
             }
             return result;
         }
 
         public void UpdateStockData(JToken scripsToken)
         {
-            lock (_lock)
+            try
             {
-                JArray scripsArray = scripsToken is JObject singleScrip
-                    ? new JArray { singleScrip }
-                    : (JArray)scripsToken;
-
-                var stockData = new StockData();
-
-                foreach (var scrip in scripsArray)
+                lock (_lock)
                 {
-                    string? symbol = scrip["symbol"]?.ToString();
-                    decimal price = scrip["ltp"]?.ToObject<decimal>() ?? 0;
-                    decimal precloseprice = scrip["prev_close_price"]?.ToObject<decimal>() ?? 0;
+                    JArray scripsArray = scripsToken is JObject singleScrip
+                        ? new JArray { singleScrip }
+                        : (JArray)scripsToken;
 
-                    if (!string.IsNullOrEmpty(symbol))
+                    var stockData = new StockData();
+
+                    foreach (var scrip in scripsArray)
                     {
-                        var existingStock = _stockDataList.FirstOrDefault(s => s.Symbol == symbol);
-                        if (existingStock != null)
+                        string? symbol = scrip["symbol"]?.ToString();
+                        decimal price = scrip["ltp"]?.ToObject<decimal>() ?? 0;
+                        decimal precloseprice = scrip["prev_close_price"]?.ToObject<decimal>() ?? 0;
+
+                        if (!string.IsNullOrEmpty(symbol))
                         {
-                            existingStock.Price = price; 
-                        }
-                        else
-                        {
-                            _stockDataList.Add(new StockData { Symbol = symbol, Price = price ,prev_close_price=precloseprice});
+                            var existingStock = _stockDataList.FirstOrDefault(s => s.Symbol == symbol);
+                            if (existingStock != null)
+                            {
+                                existingStock.Price = price;
+                            }
+                            else
+                            {
+                                _stockDataList.Add(new StockData { Symbol = symbol, Price = price, prev_close_price = precloseprice });
+                            }
                         }
                     }
                 }
+                _hubContext.Clients.All.SendAsync("ReceiveStockData", _stockDataList);
             }
-            _hubContext.Clients.All.SendAsync("ReceiveStockData", _stockDataList);
+            catch (Exception ex)
+            {
+                Errorhandl(ex, "FyersWebSocketService/UpdateStockData");
+            }
+            
         }
 
         public async Task Connect()
@@ -466,7 +528,8 @@ namespace Repository.FyersWebSocketServices
             }
             catch (Exception ex)
             {
-                LogFilegenerate(ex, "FyersWebSocketService");
+                LogFilegenerate(ex, "FyersWebSocketService/Connect");
+                Errorhandl(ex, "FyersWebSocketService/Connect");
             }
             
         }

@@ -4,20 +4,31 @@
     ViewData["Title"] = "Index";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
+<style>
 
+    .bootbox .modal-body .close {
+        margin: 0rem 0rem 0rem auto;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+        opacity: 0.5;
+        float: right;
+    }
+</style>
 <h1>Index</h1>
 <div class="content-wrapper">
     <div class="container-full">
         <section class="content">
             <div class="col-xl-12 col-12">
                 <div class="box">
+                   
                     <p>
                         <a href="/StockSymbol/CreateSymbol" class="btn btn-danger mt-10" style="float:right;    margin-right: 10px;">Create New</a>
                     </p>
                     <div class="box-body">
 
                         <div class="table-responsive customize-responsive-table">
-                            <table class="table mt-0 table-hover no-wrap" data-page-size="10">
+                            <table id="stocksym" class="table mt-0 table-hover no-wrap" data-page-size="10">
                                 <thead>
                                     <tr>
                                         <th>
@@ -56,16 +67,17 @@
                                                        class="waves-effect btn btn-info  btn-xs"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Update">
-                                                        <i data-feather="edit" aria-hidden="true"></i>
+                                                        <i class="ti-pencil-alt" aria-hidden="true"></i>
                                                     </a>
-                                                    @*    @Html.ActionLink("Edit", "CreateUser", new { id = item.Id.ToString() }) | *@
+                                                  
                                                     <a href="@Url.Action("DeleteSymbol","StockSymbol",new{id = item.Id.ToString()})"
-                                                       class="waves-effect btn btn-info  btn-xs"
+                                                       class="waves-effect btn btn-info  btn-xs btn-danger delete-stockSymbol" data-Id="@item.Id"
+                                                       data-url="@Url.Action("DeleteSymbol", "StockSymbol", new { id = item.Id.ToString() })"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Delete">
-                                                        <i data-feather="trash" aria-hidden="true"></i>
+                                                        <i class="ti-trash" aria-hidden="true"></i>
                                                     </a>
-                                                    @*     @Html.ActionLink("Delete", "DeleteUser", new { id = item.Id.ToString() }) *@
+                                                 
                                                 </td>
                                             </tr>
                                         }
@@ -84,3 +96,46 @@
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap JS (required for $.fn.modal used by Bootbox) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    $(document).on('click', '.delete-stockSymbol', function (e) {
+        e.preventDefault(); // Stop default anchor navigation
+        debugger
+        const url = $(this).data('url');
+
+        bootbox.confirm({
+            message: "Are you sure you want to remove this Stock Symbol?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                        $.post(url, function (data) {
+                        if (data) {
+                            toastr.success("Stock Symbol deleted successfully");
+                            window.location.reload(); // or toastr, etc.
+                        } else {
+                             toastr.success("Failed to delete.");
+
+                        }
+                    });
+                    // window.location.href = url;
+                }
+            }
+        });
+    });
+</script>

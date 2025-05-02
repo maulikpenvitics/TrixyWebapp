@@ -35,13 +35,15 @@ namespace Repository.Models
         public DateTime? UpdatedDate { get; set; }
         public string? UpdatedBy { get; set; }
         public string StatusText => Status != null ? (bool)Status ? "Active" : "Inactive" : "Inactive";
-        public List<UserStrategy>? UserStrategy { get; set; }
-        public List<Stocks>? Stocks { get; set; }
+        public List<UserStrategy> UserStrategy { get; set; }
+        public List<Stocks> Stocks { get; set; }
         public User()
         {
             CreatedDate = DateTime.UtcNow;  
             UpdatedDate = DateTime.UtcNow;
             Status=true;
+            Stocks = new List<Stocks>();
+            UserStrategy=new List<UserStrategy>();
         }
     }
 

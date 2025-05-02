@@ -11,7 +11,7 @@ namespace Repository.IRepositories
     public interface IWebStockRepository
     {
         Task<List<Historical_Data>> GetHistoricalData();
-        Task InsertStockAsync(Stock_master_data stock);
+   
         Task<List<Historical_Data>> GetStockDataBySymbolAsync(string symbol);
         Task<int> DeleteHistoricaldata();
         Task InsertNewHistoricalData(List<Historical_Data> newData);

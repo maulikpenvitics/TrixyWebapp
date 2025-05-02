@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Repository.DbModels;
@@ -17,13 +18,14 @@ namespace Repository.Repositories
     {
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<T> _collection;
-
-        public MongoRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings)
+        private readonly IErrorHandlingRepository _errorHandlingRepository;
+    
+        public MongoRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings, IErrorHandlingRepository errorHandlingRepository)
         {
             _database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _collection = _database.GetCollection<T>(typeof(T).Name);
+            _errorHandlingRepository = errorHandlingRepository;
         }
-
         public async Task<T> AuthenticateUserAsync(string email, string password)
         {
             try
@@ -36,67 +38,138 @@ namespace Repository.Repositories
             }
             catch (Exception ex)
             {
-
-                throw ex;
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/AuthenticateUserAsync");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
             }
          
         }
 
         public async Task<T> getUserByEmail(string email)
         {
-            return await _collection.Find(Builders<T>.Filter.And(
-                  Builders<T>.Filter.Eq("Email", email),
-                  Builders<T>.Filter.Eq("Status", true)
-              )).FirstOrDefaultAsync();
+            try
+            {
+                return await _collection.Find(Builders<T>.Filter.And(
+              Builders<T>.Filter.Eq("Email", email),
+              Builders<T>.Filter.Eq("Status", true)
+                  )).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/getUserByEmail");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+        
         }
-        public async Task<IEnumerable<T>> GetAllAsync() =>
-        await _collection.Find(_ => true).ToListAsync();
+        public async Task<IEnumerable<T>> GetAllAsync() {
+            try
+            {
+                return await _collection.Find(_ => true).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/GetAllAsync");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+         
+        }
+        
 
         public async Task<T> GetByIdAsync(string id)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            try
             {
-                throw new ArgumentException("Invalid ObjectId format", nameof(id));
+                if (!ObjectId.TryParse(id, out ObjectId objectId))
+                {
+                    throw new ArgumentException("Invalid ObjectId format", nameof(id));
+                }
+                return await _collection.Find(Builders<T>.Filter.Eq("_id", objectId)).FirstOrDefaultAsync();
             }
-            return await _collection.Find(Builders<T>.Filter.Eq("_id", objectId)).FirstOrDefaultAsync();
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/GetByIdAsync");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+         
         }
-          
 
-        public async Task<T> GetByIdAsyncForMaster(string userId) =>
-            await _collection.Find(Builders<T>.Filter.Eq("userId", userId)).FirstOrDefaultAsync();
 
-        public async Task CreateAsync(T entity) =>
-            await _collection.InsertOneAsync(entity);
+        public async Task<T> GetByIdAsyncForMaster(string userId)
+        {
+            try
+            {
+                return await _collection.Find(Builders<T>.Filter.Eq("userId", userId)).FirstOrDefaultAsync();
+
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/GetByIdAsyncForMaster");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+        }
+
+        public async Task CreateAsync(T entity)
+        {
+            try
+            {
+                await _collection.InsertOneAsync(entity);
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/CreateAsync");
+                throw new Exception("An error occurred while create data. Please try again.");
+            }
+           
+        }
 
         public async Task UpdateAsync(string id, T entity)
         {
-            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            try
             {
-                throw new ArgumentException("Invalid ObjectId format", nameof(id));
+                if (!ObjectId.TryParse(id, out ObjectId objectId))
+                {
+                    throw new ArgumentException("Invalid ObjectId format", nameof(id));
+                }
+                await _collection.ReplaceOneAsync(Builders<T>.Filter.Eq("_id", objectId), entity);
             }
-             await _collection.ReplaceOneAsync(Builders<T>.Filter.Eq("_id", objectId), entity);
-        }
+            catch (Exception ex)
+            {
+
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/UpdateAsync");
+                throw new Exception("An error occurred while Update data. Please try again.");
+            }
            
+        }
 
-        //public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
-        //{
-        //    var filter = Builders<T>.Filter.And(
-        //                 Builders<T>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
-        //                 Builders<T>.Filter.ElemMatch<BsonDocument>("UserStrategy", Builders<BsonDocument>.Filter.Eq("StrategyName", strategyName)) );
-        //    var update = Builders<T>.Update.Set("UserStrategy.$.StrategyEnableDisable", isChecked); // Update the StrategyEnableDisable field
 
-        //    await _collection.UpdateOneAsync(filter, update);
-        //}
 
-        public async Task DeleteAsync(string id) =>
-            await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id));
-
+        public async Task DeleteAsync(string id)
+        {
+            try
+            {
+                await _collection.DeleteOneAsync(Builders<T>.Filter.Eq("_id", id));
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/DeleteAsync");
+                throw new Exception("An error occurred while Delete data. Please try again.");
+            }
+           
+        }
         public async  Task InsertManyAsync(List<T> entities)
         {
-            if (entities != null)
+            try
             {
-                await _collection.InsertManyAsync(entities);
+                if (entities != null)
+                {
+                    await _collection.InsertManyAsync(entities);
+                }
             }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/InsertManyAsync");
+                throw new Exception("An error occurred while InsertMany data. Please try again.");
+            }
+           
         }
 
         public async Task<int> InsertAsync(T entity)
@@ -109,14 +182,24 @@ namespace Repository.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"MongoDB Insert Error: {ex.Message}");
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/DeleteAsync");
+                
                 return 0;
             }
         }
 
         public async Task<List<T>> FindAsync(FilterDefinition<T> filter)
         {
-            return await _collection.Find(filter).ToListAsync();
+            try
+            {
+                return await _collection.Find(filter).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "MongoRepository/FindAsync");
+                throw new Exception("An error occurred while Find data. Please try again.");
+            }
+           
         }
 
     }

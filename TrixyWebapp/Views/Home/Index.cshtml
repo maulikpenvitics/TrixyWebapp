@@ -24,6 +24,16 @@
         font-weight: bold;
         color: black;
     }
+
+    .bootbox .modal-body .close {
+        margin: 0rem 0rem 0rem auto;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+        opacity: 0.5;
+        float:right;
+    }
+      
 </style>
 <div class="content-wrapper">
     <div class="container-full">
@@ -144,10 +154,12 @@
                                                             }
 
                                                         }
-                                                        <a href="@Url.Action("Removestockfromuser","Home",new {sym=item.Symbol})" class="waves-effect waves-circle btn btn-circle btn-info  btn-xs"
+                                                        <a href="@Url.Action("Removestockfromuser","Home",new {sym=item.Symbol})" class="waves-effect waves-circle btn btn-circle btn-info btn-danger  btn-xs delete-stock"
+                                                           data-symbol="@item.Symbol"
+                                                           data-url="@Url.Action("Removestockfromuser", "Home", new { sym = item.Symbol })"
                                                            data-toggle="tooltip"
                                                            title="Remove Stock">
-                                                            <i data-feather="trash" aria-hidden="true"></i>
+                                                            <i class="ti-trash" aria-hidden="true"></i>
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -210,6 +222,13 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="~/assets/js/apexcharts.js"></script>
+<!-- Bootstrap JS (required for $.fn.modal used by Bootbox) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
     $(document).ready(function () {
@@ -313,7 +332,7 @@
 
       }
     function Chartdatabind(sym){
-                      debugger
+                    
                           $.ajax({
                                   url: '/Home/FetchData',
                                   type:'GET',
@@ -321,7 +340,7 @@
                                   dataType:'json',
                               success:function(response){
                                   if(response.length>0){
-                                      debugger
+                                     
                                       renderChart(response);
                                   }
 
@@ -378,27 +397,38 @@
           });
 </script>
 
-@* <script>
-    $(document).on("click", ".remove-stock", function (e) {
+<script>
+    $(document).on('click', '.delete-stock', function (e) {
+        e.preventDefault(); // Stop default anchor navigation
         debugger
-    e.preventDefault();
-    const symbol = $(this).data("symbol");
-  
-    $.ajax({
-        type: "POST",
-        url: "/Home/Removestockfromuser",
-        data: { sym: symbol },
-        success: function (response) {
-            if (response) {
-                window.location.href = "/Home/Index";
-            } else {
-                alert("Failed to remove stock.");
-            }
-        },
-        error: function () {
-            alert("Error occurred.");
-        }
-    });
-});
+        const url = $(this).data('url');
 
-</script> *@
+        bootbox.confirm({
+            message: "Are you sure you want to remove this stock?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                        $.post(url, function (data) {
+                        if (data) {
+                            toastr.success("Stock deleted successfully");
+                            window.location.reload(); // or toastr, etc.
+                        } else {
+                             toastr.success("Failed to delete.");
+                            
+                        }
+                    });
+                    // window.location.href = url;
+                }
+            }
+        });
+    });
+</script>

@@ -18,135 +18,229 @@ namespace Repository.Repositories
     {
         private readonly IMongoCollection<User> _users;
         private readonly IMongoCollection<AdminSettings> _userSettingsCollection;
-        public UserRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings) : base(mongoClient, settings)
+        private readonly IErrorHandlingRepository _errorHandlingRepository;
+        public UserRepository(IMongoClient mongoClient, IOptions<MongoDBSettings> settings, IErrorHandlingRepository errorHandlingRepository) : base(mongoClient, settings, errorHandlingRepository)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _users = database.GetCollection<User>("User");
             _userSettingsCollection = database.GetCollection<AdminSettings>("AdminSettings");
+            _errorHandlingRepository = errorHandlingRepository;
         }
 
         public async Task<User> GetByEmail(string Email)
         {
-            return await _users.Find(Builders<User>.Filter.And(
+            try
+            {
+                return await _users.Find(Builders<User>.Filter.And(
                 Builders<User>.Filter.Eq("Email", Email),
                 Builders<User>.Filter.Eq("Status", true)
             )).FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/GetByEmail");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
+            }
+            
         }
         public async Task<int> ChangePassword(string Id,string oldpass,string newpass)
         {
-            var user= await GetByIdAsync(Id);
-            if (user !=null && user.Password==oldpass)
+            try
             {
-                var update = Builders<User>.Update
-            .Set(u => u.Password, newpass)
-            .Set(u => u.UpdatedDate, DateTime.UtcNow);
-                var objid = ObjectId.TryParse(Id, out ObjectId objectId);
+                var user = await GetByIdAsync(Id);
+                if (user != null && user.Password == oldpass)
+                {
+                    var update = Builders<User>.Update
+                .Set(u => u.Password, newpass)
+                .Set(u => u.UpdatedDate, DateTime.UtcNow);
+                    var objid = ObjectId.TryParse(Id, out ObjectId objectId);
                     var result = await _users.UpdateOneAsync(
                     Builders<User>.Filter.Eq("_id", objectId), update);
 
-                return result.ModifiedCount > 0 ? 1 : 0;
-                
+                    return result.ModifiedCount > 0 ? 1 : 0;
+
+                }
+                else
+                {
+                    return 0;
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                return 0;
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/ChangePassword");
+                throw new Exception("An error occurred while retrieving data. Please try again.");
             }
-           
+          
         }
 
         public async Task<bool> UpdateUserProfile(User model)
-      {
-        if (model == null)
-            return false; 
-        var filter = Builders<User>.Filter.Eq("_id", model.Id); 
+        {
+            try
+            {
+                if (model == null)
+                    return false;
+                var filter = Builders<User>.Filter.Eq("_id", model.Id);
 
-        var update = Builders<User>.Update
-            .Set(u => u.Firstname, model.Firstname)
-            .Set(u => u.Lastname, model.Lastname)
-            .Set(u => u.Email, model.Email)
-            .Set(u => u.ProfileImageUrl, model.ProfileImageUrl)
-            .Set(u => u.UpdatedDate, DateTime.UtcNow); 
+                var update = Builders<User>.Update
+                    .Set(u => u.Firstname, model.Firstname)
+                    .Set(u => u.Lastname, model.Lastname)
+                    .Set(u => u.Email, model.Email)
+                    .Set(u => u.ProfileImageUrl, model.ProfileImageUrl)
+                    .Set(u => u.UpdatedDate, DateTime.UtcNow);
 
-        var result = await _users.UpdateOneAsync(filter, update);
+                var result = await _users.UpdateOneAsync(filter, update);
 
-        return result.ModifiedCount > 0; 
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateUserProfile");
+                throw new Exception("An error occurred while UpdateUserProfile data. Please try again.");
+            }
+     
      }
 
         public async Task UpdateAsyncStrategy(string userId, string strategyName, bool isChecked)
         {
-            var filter = Builders<User>.Filter.And(
-                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
-                         Builders<User>.Filter.ElemMatch(u=>u.UserStrategy,s=>s.StretagyName==strategyName));
-            var update = Builders<User>.Update.Set("UserStrategy.$.StretagyEnableDisable", isChecked); // Update the StrategyEnableDisable field
+            try
+            {
+                var filter = Builders<User>.Filter.And(
+                      Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)), // Match the user by ID
+                      Builders<User>.Filter.ElemMatch(u => u.UserStrategy, s => s.StretagyName == strategyName));
+                var update = Builders<User>.Update.Set("UserStrategy.$.StretagyEnableDisable", isChecked); // Update the StrategyEnableDisable field
 
-            await _users.UpdateOneAsync(filter, update);
+                await _users.UpdateOneAsync(filter, update);
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateAsyncStrategy");
+                throw new Exception("An error occurred while UpdateAsyncStrategy data. Please try again.");
+            }
+         
         }
 
         public async Task UpdateAsyncUserStocks(string userId, string sym, bool isChecked,string BuySellSignal)
         {
-            var filter = Builders<User>.Filter.And(
+            try
+            {
+                var filter = Builders<User>.Filter.And(
                          Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
                          Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
-            var update = Builders<User>.Update.Set("Stocks.$.StockNotification", isChecked)
-                .Set("Stocks.$.BuySellSignal", BuySellSignal); 
-            
-            await _users.UpdateOneAsync(filter, update);
+                var update = Builders<User>.Update.Set("Stocks.$.StockNotification", isChecked)
+                    .Set("Stocks.$.BuySellSignal", BuySellSignal);
+
+                await _users.UpdateOneAsync(filter, update);
+
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateAsyncUserStocks");
+                throw new Exception("An error occurred while UpdateAsyncUserStocks data. Please try again.");
+            }
+           
         }
         public async Task UpdateUserStocks(string userId, string sym, string BuySellSignal)
         {
-            var filter = Builders<User>.Filter.And(
-                         Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
-                         Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
-            var update = Builders<User>.Update.Set("Stocks.$.BuySellSignal", BuySellSignal)
-                .Set("Stocks.$.BuySellSignal", BuySellSignal);
+            try
+            {
+                var filter = Builders<User>.Filter.And(
+                       Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+                       Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
+                var update = Builders<User>.Update.Set("Stocks.$.BuySellSignal", BuySellSignal)
+                    .Set("Stocks.$.BuySellSignal", BuySellSignal);
 
-            await _users.UpdateOneAsync(filter, update);
+                await _users.UpdateOneAsync(filter, update);
+            }
+            catch (Exception ex)
+            {
+
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateUserStocks");
+                throw new Exception("An error occurred while UpdateUserStocks data. Please try again.");
+            }
+          
         }
         public async Task<bool> AddUserStocks(User user)
         {
-            var filter = Builders<User>.Filter.And(
-                         Builders<User>.Filter.Eq("_id", user.Id)
-                     );
-            var update = Builders<User>.Update.Set("Stocks", user.Stocks);
+            try
+            {
+                var filter = Builders<User>.Filter.And(
+                     Builders<User>.Filter.Eq("_id", user.Id)
+                 );
+                var update = Builders<User>.Update.Set("Stocks", user.Stocks);
 
-           var result=await _users.UpdateOneAsync(filter, update);
-            return result.ModifiedCount > 0;
+                var result = await _users.UpdateOneAsync(filter, update);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/AddUserStocks");
+                throw new Exception("An error occurred while AddUserStocks data. Please try again.");
+            }
+        
         }
 
         public async Task<IEnumerable<User>> GetallUser()
         {
-            return await GetAllAsync();
+            try
+            {
+                return await GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/GetallUser");
+                throw new Exception("An error occurred while GetallUser data. Please try again.");
+               
+            }
+          
         }
         public async Task<bool> updatemanyuserstock(string sym,bool? isactive)
         {
-           
-            var filter = Builders<User>.Filter.Eq("Stocks.Symbol", sym);
-           
-            var update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
-
-        
-            var arrayFilter = new ArrayFilterDefinition<BsonDocument>[]
+            try
             {
+                var filter = Builders<User>.Filter.Eq("Stocks.Symbol", sym);
+
+                var update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
+
+
+                var arrayFilter = new ArrayFilterDefinition<BsonDocument>[]
+                {
         new BsonDocumentArrayFilterDefinition<BsonDocument>(
             new BsonDocument("elem.Symbol", sym))
-            };
+                };
 
-            // Apply the update with array filters
-            var updateOptions = new UpdateOptions { ArrayFilters = arrayFilter };
+                // Apply the update with array filters
+                var updateOptions = new UpdateOptions { ArrayFilters = arrayFilter };
 
-            // Perform the update operation on multiple documents
-            var result = await _users.UpdateManyAsync(filter, update, updateOptions);
+                // Perform the update operation on multiple documents
+                var result = await _users.UpdateManyAsync(filter, update, updateOptions);
 
-            // Return true if any documents were modified
-            return result.ModifiedCount > 0;
+                // Return true if any documents were modified
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/updatemanyuserstock");
+                throw new Exception("An error occurred while updatemanyuserstock data. Please try again.");
+            }
+           
         }
         public User GetById(string Id)
         {
-            if (!ObjectId.TryParse(Id, out ObjectId objectId))
+            try
             {
-                throw new ArgumentException("Invalid ObjectId format", nameof(Id));
+                if (!ObjectId.TryParse(Id, out ObjectId objectId))
+                {
+                    throw new ArgumentException("Invalid ObjectId format", nameof(Id));
+                }
+                return _users.Find(Builders<User>.Filter.Eq("_id", objectId)).FirstOrDefault();
             }
-            return _users.Find(Builders<User>.Filter.Eq("_id", objectId)).FirstOrDefault();
+            catch (Exception ex)
+            {
+                 _errorHandlingRepository.AddError(ex, "UserRepository/GetById");
+                throw new Exception("An error occurred while GetById data. Please try again.");
+            }
+          
         }
 
         public async Task<bool> removeuserstock(string sym)
@@ -168,6 +262,8 @@ namespace Repository.Repositories
             }
             catch (Exception ex)
             {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/removeuserstock");
+                //throw new Exception("An error occurred while removeuserstock data. Please try again.");
                 return false;
             }
         }
@@ -175,63 +271,120 @@ namespace Repository.Repositories
         #region Adminswttings
         public async Task InsertUserseting(AdminSettings model)
         {
-            await _userSettingsCollection.InsertOneAsync(model);
+            try
+            {
+                await _userSettingsCollection.InsertOneAsync(model);
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/InsertUserseting");
+                throw new Exception("An error occurred while InsertUserseting data. Please try again.");
+            }
+
         }
         public async Task<AdminSettings> GetUserSettings()
         {
-            var settings = await _userSettingsCollection
-            .Find(_ => true) 
-           .FirstOrDefaultAsync();
+            try
+            {
+                var settings = await _userSettingsCollection
+          .Find(_ => true)
+         .FirstOrDefaultAsync();
 
-            return settings ?? new AdminSettings(); //
+                return settings ?? new AdminSettings(); //
+            }
+            catch (Exception ex)
+            {
+
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/GetUserSettings");
+                throw new Exception("An error occurred while GetUserSettings data. Please try again.");
+            }
+          
         }
         public async Task UpdateUserSettings(string userId, AdminSettings settings)
         {
-            await _userSettingsCollection.ReplaceOneAsync(s => s.UserId == userId, settings);
+            try
+            {
+                await _userSettingsCollection.ReplaceOneAsync(s => s.UserId == userId, settings);
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateUserSettings");
+                throw new Exception("An error occurred while UpdateUserSettings data. Please try again.");
+            }
+           
         }
         public async Task DeleteUserSettings(string userId)
         {
-            await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
+            try
+            {
+                await _userSettingsCollection.DeleteOneAsync(s => s.UserId == userId);
+
+            }
+            catch (Exception ex)
+            {
+
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/DeleteUserSettings");
+                throw new Exception("An error occurred while DeleteUserSettings data. Please try again.");
+            }
+            
         }
 
         public  async Task<UserAuthtoken> UpdateAdminAuthtoken(string accesstoken)
         {
-            if (!string.IsNullOrEmpty(accesstoken))
+            try
             {
-                var filter = Builders<AdminSettings>.Filter.Empty;
-               
-                var update = Builders<AdminSettings>.Update.Set(x => x.UserAuthtoken.access_token, accesstoken);
-
-                var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
-                if(updatedata.ModifiedCount > 0)
+                if (!string.IsNullOrEmpty(accesstoken))
                 {
-                    var admin= await GetUserSettings();
-                    return admin.UserAuthtoken;
+                    var filter = Builders<AdminSettings>.Filter.Empty;
+
+                    var update = Builders<AdminSettings>.Update.Set(x => x.UserAuthtoken.access_token, accesstoken);
+
+                    var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
+                    if (updatedata.ModifiedCount > 0)
+                    {
+                        var admin = await GetUserSettings();
+                        return admin.UserAuthtoken;
+                    }
                 }
+                return new UserAuthtoken();
             }
-            return new UserAuthtoken();
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateAdminAuthtoken");
+                throw new Exception("An error occurred while UpdateAdminAuthtoken data. Please try again.");
+            }
+           
 
         }
 
         public async Task<UserAuthtoken> UpdateAdminbothAuthtoken(string accesstoken,string refreshtoken)
         {
-            if (!string.IsNullOrEmpty(accesstoken))
+            try
             {
-                var filter = Builders<AdminSettings>.Filter.Empty;
-
-                var update = Builders<AdminSettings>.Update
-                    .Set(x => x.UserAuthtoken.access_token, accesstoken)
-                    .Set(x => x.UserAuthtoken.refresh_token, refreshtoken);
-
-                var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
-                if (updatedata.ModifiedCount > 0)
+                if (!string.IsNullOrEmpty(accesstoken))
                 {
-                    var admin = await GetUserSettings();
-                    return admin.UserAuthtoken;
-                }
-            }
-            return new UserAuthtoken();
+                    var filter = Builders<AdminSettings>.Filter.Empty;
 
+                    var update = Builders<AdminSettings>.Update
+                        .Set(x => x.UserAuthtoken.access_token, accesstoken)
+                        .Set(x => x.UserAuthtoken.refresh_token, refreshtoken);
+
+                    var updatedata = await _userSettingsCollection.UpdateOneAsync(filter, update);
+                    if (updatedata.ModifiedCount > 0)
+                    {
+                        var admin = await GetUserSettings();
+                        return admin.UserAuthtoken;
+                    }
+                }
+                return new UserAuthtoken();
+
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/UpdateAdminbothAuthtoken");
+                throw new Exception("An error occurred while UpdateAdminbothAuthtoken data. Please try again.");
+            }
+            
         }
        
         #endregion

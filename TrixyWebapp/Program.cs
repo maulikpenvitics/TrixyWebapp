@@ -13,12 +13,12 @@ using Repository.IRepositories;
 using Repository.Repositories;
 using System.Net;
 
-var builder = WebApplication.CreateBuilder(args);
 
+
+var builder = WebApplication.CreateBuilder(args);
 
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
 
 
 builder.Services.Configure<MongoDBSettings>(
@@ -48,6 +48,9 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddHostedService<JobSchedulerService>();
 builder.Services.AddHostedService<StockNotificationService>();
+
+
+
 // Configure Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -74,6 +77,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWebStockRepository, WebStockRepository>();
 builder.Services.AddScoped<IStockSymbolRepository, StockSymbolRepository>();
 builder.Services.AddScoped<IAdminSettingRepository, AdminSettingRepository>();
+builder.Services.AddScoped<IErrorHandlingRepository, ErrorHandlingRepository>();
 
 
 
@@ -100,11 +104,13 @@ builder.Services.Configure<FyersStockMarketSettings>(builder.Configuration.GetSe
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
+
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope()) // ✅ Create a scope
 {
     var webSocketService = scope.ServiceProvider.GetRequiredService<FyersWebSocketService>();
-    webSocketService.Connect();
+    await webSocketService.Connect();
 }
 
 // Configure the HTTP request pipeline.

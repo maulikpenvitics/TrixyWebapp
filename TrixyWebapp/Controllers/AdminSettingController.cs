@@ -15,11 +15,14 @@ namespace TrixyWebapp.Controllers
     {
         private readonly IRepository<AdminSettings> _adminSettingsRepository;
         private readonly IAdminSettingRepository _adminSettings;
-
-        public AdminSettingController(IRepository<AdminSettings> adminSettingsRepository, IAdminSettingRepository adminSettings)
+        private readonly IErrorHandlingRepository _errorhandling;
+        public AdminSettingController(IRepository<AdminSettings> adminSettingsRepository,
+            IAdminSettingRepository adminSettings,
+            IErrorHandlingRepository errorhandling)
         {
             _adminSettingsRepository = adminSettingsRepository;
             _adminSettings = adminSettings;
+            _errorhandling = errorhandling;
         }
 
         public IActionResult Index()
@@ -29,12 +32,21 @@ namespace TrixyWebapp.Controllers
         }
 
         [HttpGet]
-        public  IActionResult AdminSetting()
+        public async Task<IActionResult> AdminSetting()
         {
-            var symbollist =  _adminSettingsRepository.GetAllAsync().Result.FirstOrDefault();
-            //var adminseting = _user.GetUserSettings("67bef9c5bc1d49323084998f");
+            try
+            {
+                var symbollist = _adminSettingsRepository.GetAllAsync().Result.FirstOrDefault();
+                //var adminseting = _user.GetUserSettings("67bef9c5bc1d49323084998f");
 
-            return View(symbollist);
+                return View(symbollist);
+            }
+            catch (Exception ex)
+            {
+                await _errorhandling.AddErrorHandling(ex, "AdminSetting");
+                return View(new AdminSettings());
+            }
+         
         }
 
         [HttpPost]
@@ -47,9 +59,9 @@ namespace TrixyWebapp.Controllers
                 await _adminSettingsRepository.UpdateAsync(model?.Id ?? "".ToString(), model??new AdminSettings());
                 ViewBag.SuccessMessage = "Admin settings saved successfully!";
             }
-            catch
+            catch(Exception ex)
             {
-               
+                await _errorhandling.AddErrorHandling(ex, "AdminSetting");
                 ViewBag.ErrorMessage = "Invalid JSON format!";
                 var symbollist = _adminSettingsRepository.GetAllAsync().Result.FirstOrDefault();
                 return View(symbollist);
