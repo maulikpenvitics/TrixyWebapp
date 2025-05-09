@@ -35,6 +35,14 @@
     }
       
 </style>
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        toastr.success("@TempData["SuccessMessage"].ToString()");
+    </script>
+
+}
+
 <div class="content-wrapper">
     <div class="container-full">
         <!-- Main content -->
@@ -168,7 +176,7 @@
                                         else
                                         {
                                             <tr>
-                                                <td colspan="5">No dataa found</td>
+                                                <td colspan="5">No data found</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -227,11 +235,10 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
 <script>
     $(document).ready(function () {
+   
+
         updateStockPrices();
         $('[data-toggle="tooltip"]').tooltip({
             html:true

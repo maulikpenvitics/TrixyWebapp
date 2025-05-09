@@ -1,4 +1,4 @@
-@media only screen and (min-width: 280px) and (max-width:480px), only screen and (min-width: 767px) and (max-width:980px) {
+﻿@media only screen and (min-width: 280px) and (max-width:480px), only screen and (min-width: 767px) and (max-width:980px) {
   .customize-responsive-table thead {
     display: none;
   }
@@ -8,6 +8,8 @@
   }
   .customize-responsive-table tbody tr td {
     position: relative;
+    white-space: initial;
+    word-break: break-word;
     padding-left: 45% !important;
   }
   .customize-responsive-table tbody tr td:before {
@@ -29,8 +31,63 @@
   .customize-responsive-table tbody tr td:nth-of-type(4):before {
     content: "Rec.";
   }
+  .customize-responsive-table tbody tr td:nth-of-type(5):before {
+    content: "Action";
+  }
   .customize-responsive-table tbody tr td:last-child {
     border-color: #212529;
+  }
+}
+@media only screen and (min-width: 280px) and (max-width:480px), only screen and (min-width: 767px) and (max-width:980px) {
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(1):before {
+    content: "First Name";
+  }
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(2):before {
+    content: "Last Name";
+  }
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(3):before {
+    content: "Email";
+  }
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(4):before {
+    content: "Role";
+  }
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(5):before {
+    content: "Status";
+  }
+  .customize-responsive-table.users-table tbody tr td:nth-of-type(6):before {
+    content: "Action";
+  }
+}
+@media only screen and (min-width: 280px) and (max-width:480px) {
+  .customize-responsive-table.users-table .col-sm-12 {
+    text-align: center;
+  }
+  .customize-responsive-table.users-table .dataTables_filter {
+    float: none;
+    margin-top: 10px;
+  }
+}
+@media only screen and (min-width: 280px) and (max-width:480px), only screen and (min-width: 767px) and (max-width:980px) {
+  .customize-responsive-table.stocksym-tables tbody tr td:nth-of-type(1):before {
+    content: "Symbol";
+  }
+  .customize-responsive-table.stocksym-tables tbody tr td:nth-of-type(2):before {
+    content: "Company Name";
+  }
+  .customize-responsive-table.stocksym-tables tbody tr td:nth-of-type(3):before {
+    content: "Status";
+  }
+  .customize-responsive-table.stocksym-tables tbody tr td:nth-of-type(4):before {
+    content: "Action";
+  }
+}
+@media only screen and (min-width: 280px) and (max-width:480px) {
+  .customize-responsive-table.stocksym-tables .col-sm-12 {
+    text-align: center;
+  }
+  .customize-responsive-table.stocksym-tables .dataTables_filter {
+    float: none;
+    margin-top: 10px;
   }
 }
 
@@ -54,4 +111,17 @@
     right: 15px;
     position: absolute;
   }
-}/*# sourceMappingURL=custom.css.map */
+}
+
+@media (max-width: 767px) {
+  header.main-header {
+    display: flex;
+    align-items: self-start;
+  }
+  header.main-header div.logo-box {
+    width: 16.29rem !important;
+  }
+  header .navbar {
+    justify-content: end;
+  }
+}

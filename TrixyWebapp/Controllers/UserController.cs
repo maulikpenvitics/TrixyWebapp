@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using Repository.IRepositories;
 using Repository.Models;
 using System.Text;
+using System.Text.Json;
 using TrixyWebapp.Filters;
 
 
@@ -66,6 +67,7 @@ namespace TrixyWebapp.Controllers
 
                 if (isUpdate && existuser != null)
                 {
+                   
                     var sentimentStrategy = existuser?.UserStrategy?.FirstOrDefault(x => x.StretagyName == "Sentiment_Analysis");
                     if (sentimentStrategy != null)
                     {
@@ -81,7 +83,17 @@ namespace TrixyWebapp.Controllers
                     user.Status = true;
                     user.Stocks = existuser?.Stocks??new List<Stocks>();
                     await _userRepository.UpdateAsync(user.Id.ToString(), user);
+                    var currentuserid = HttpContext?.Session.GetString("UserId");
+                    if (currentuserid == existuser.Id.ToString())
+                    {
+                        existuser = await _user.GetByEmail(user?.Email ?? "");
+                        HttpContext!.Session.SetString("UserId", existuser.Id.ToString());
+                        HttpContext.Session.SetString("UserRole", existuser?.Role ?? "");
+                        HttpContext.Session.SetString("UserName", existuser?.Firstname + " " + existuser?.Lastname);
+                        HttpContext.Session.SetString("imageurl", user?.ProfileImageUrl ?? "");
+                        HttpContext.Session.SetString("User", JsonSerializer.Serialize(existuser));
 
+                    }
                     TempData["message"] = "User updated successfully";
                     return RedirectToAction("Index");
                 }

@@ -199,7 +199,15 @@ namespace Repository.Repositories
             try
             {
                 var filter = Builders<User>.Filter.Eq("Stocks.Symbol", sym);
-
+                //UpdateDefinition<User> update;
+                //if (!string.IsNullOrEmpty(companyname))
+                //{
+                //    update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive).Set("Stocks.$[elem].CompanyName", companyname);
+                //}
+                //else
+                //{
+                //    update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
+                //}
                 var update = Builders<User>.Update.Set("Stocks.$[elem].IsActive", isactive);
 
 
@@ -243,27 +251,31 @@ namespace Repository.Repositories
           
         }
 
-        public async Task<bool> removeuserstock(string sym)
+        public async Task<bool> removeuserstock(string sym,string userid)
         {
             try
             {
+                var objectId = new ObjectId(userid);
                 var filter = Builders<User>.Filter.And(
-                         Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym));
-                var update = Builders<User>.Update.Set("Stocks.$.IsActive", false);
-                  
-                var result = await _users.UpdateOneAsync(filter, update);
+                        Builders<User>.Filter.Eq("_id", objectId),
+                        Builders<User>.Filter.ElemMatch(u=>u.Stocks,s=>s.Symbol==sym)
+                    );
+                var update = Builders<User>.Update.Set("Stocks.$[stock].IsActive", false);
+                var updateOptions = new UpdateOptions
+                {
+                    ArrayFilters = new List<ArrayFilterDefinition>
+            {
+                new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                    new BsonDocument("stock.Symbol", sym))
+            }
+                };
+                var result = await _users.UpdateOneAsync(filter, update, updateOptions);
+              
                 return result.ModifiedCount > 0;
-
-                //var filter = Builders<User>.Filter.ElemMatch(u => u.Stocks, s => s.Symbol == sym);
-                //var update = Builders<User>.Update.PullFilter(u => u.Stocks, s => s.Symbol == sym);
-
-                //var result = await _users.UpdateOneAsync(filter, update);
-                //return result.ModifiedCount > 0;
             }
             catch (Exception ex)
             {
                 await _errorHandlingRepository.AddErrorHandling(ex, "UserRepository/removeuserstock");
-                //throw new Exception("An error occurred while removeuserstock data. Please try again.");
                 return false;
             }
         }

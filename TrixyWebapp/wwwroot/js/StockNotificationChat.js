@@ -11,18 +11,19 @@ $(document).ready(function () {
     }
 });
 const connection = new signalR.HubConnectionBuilder()
-	.withUrl("/stockNotificationHub")
+    .withUrl("/stockNotificationHub")
+    .withAutomaticReconnect()
     .build();
  
 connection.on("ReceiveStockUpdate", (stocknotifactiondatas) => {
-   
+   debugger
     console.log("Received Data:", stocknotifactiondatas); // Debugging
     if (!Array.isArray(stocknotifactiondatas) || stocknotifactiondatas.length === 0) {
         console.warn("No data received or incorrect format");
         return;
     }
     let userNotifications = stocknotifactiondatas.filter(item => item.userid === currentUserId);
-    notifiction = [...userNotifications, ...notifiction].slice(0, 50);
+    notifiction = [...userNotifications, ...notifiction];
    
     localStorage.setItem(`stockNotifications_${currentUserId}`, JSON.stringify(notifiction));
     
@@ -36,6 +37,31 @@ connection.start()
     .then(() => console.log("Connected to Hub with Connection ID:", connection.connectionId))
 	.catch(err => console.error(err));
 
+
+connection.onreconnecting(error => {
+    console.warn(`SignalR reconnecting due to: ${error}`);
+});
+
+connection.onreconnected(connectionId => {
+    console.log(`SignalR reconnected. New connection ID: ${connectionId}`);
+});
+
+connection.onclose(error => {
+    console.error(`SignalR closed. Reason: ${error}`);
+    // Optional: custom logic if it fails after retries
+});
+
+//// Start connection
+//function startConnection() {
+//    connection.start()
+//        .then(() => console.log("Connected to Hub with Connection ID:", connection.connectionId))
+//        .catch(err => {
+//            console.error("SignalR connection failed. Retrying...", err);
+//            setTimeout(() => startConnection(), 5000); // Retry after 5 sec
+//        });
+//}
+
+//startConnection();
 function requestOnlineUsers() {
 	connection.invoke("GetOnlineUsers");
 }

@@ -48,7 +48,7 @@ namespace Repository.Hubs
                     if (connections.Count == 0)
                     {
                         _userConnections.TryRemove(userId, out _);
-                        _activeUsers.TryRemove(userId, out _);
+                       _activeUsers.TryRemove(userId, out _);
                     }
                 }
             }

@@ -27,7 +27,7 @@
                     </p>
                     <div class="box-body">
 
-                        <div class="table-responsive customize-responsive-table">
+                        <div class="table-responsive customize-responsive-table stocksym-tables">
                             <table id="stocksym" class="table mt-0 table-hover no-wrap" data-page-size="10">
                                 <thead>
                                     <tr>
@@ -64,14 +64,14 @@
                                                 </td>
                                                 <td>
                                                     <a href="@Url.Action("CreateSymbol","StockSymbol",new{id = item.Id.ToString()})"
-                                                       class="waves-effect btn btn-info  btn-xs"
+                                                       class="waves-effect waves-circle btn-circle btn btn-info  btn-xs"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Update">
                                                         <i class="ti-pencil-alt" aria-hidden="true"></i>
                                                     </a>
                                                   
                                                     <a href="@Url.Action("DeleteSymbol","StockSymbol",new{id = item.Id.ToString()})"
-                                                       class="waves-effect btn btn-info  btn-xs btn-danger delete-stockSymbol" data-Id="@item.Id"
+                                                       class="waves-effect waves-circle btn-circle btn btn-info  btn-xs btn-danger delete-stockSymbol" data-Id="@item.Id"
                                                        data-url="@Url.Action("DeleteSymbol", "StockSymbol", new { id = item.Id.ToString() })"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Delete">

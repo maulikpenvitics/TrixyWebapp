@@ -9,28 +9,30 @@ $large_desktop_width: "only screen and (min-width: 1600px) and (max-width:2500px
 
     @media #{$mobile_width, $tablet_width} {
 
-        thead{
+        thead {
             display: none;
         }
 
-        tbody{
+        tbody {
 
-            tr{
-                display: flex;                
+            tr {
+                display: flex;
                 flex-direction: column;
 
                 td {
-                    position: relative;                    
+                    position: relative;
+                    white-space: initial;
+                    word-break: break-word;
                     padding-left: 45% !important;
 
                     &:before {
                         left: 5px;
                         font-weight: bold;
-                        position: absolute;                        
+                        position: absolute;
                         padding-right: 10px;
-                        white-space: nowrap;            
+                        white-space: nowrap;
                     }
-            
+
                     &:nth-of-type(1):before {
                         content: "Company";
                     }
@@ -47,16 +49,112 @@ $large_desktop_width: "only screen and (min-width: 1600px) and (max-width:2500px
                         content: "Rec.";
                     }
 
-                    &:last-child{
+                    &:nth-of-type(5):before {
+                        content: "Action";
+                    }
+
+                    &:last-child {
                         border-color: #212529;
                     }
-                } 
+                }
+            }
+        }
+    }
+
+    &.users-table {
+
+        @media #{$mobile_width, $tablet_width} {
+
+            tbody {
+
+                tr {
+
+                    td {
+
+                        &:nth-of-type(1):before {
+                            content: "First Name";
+                        }
+
+                        &:nth-of-type(2):before {
+                            content: "Last Name";
+                        }
+
+                        &:nth-of-type(3):before {
+                            content: "Email";
+                        }
+
+                        &:nth-of-type(4):before {
+                            content: "Role";
+                        }
+
+                        &:nth-of-type(5):before {
+                            content: "Status";
+                        }
+
+                        &:nth-of-type(6):before {
+                            content: "Action";
+                        }
+                    }
+                }
+            }
+        }
+
+        @media #{$mobile_width} {
+
+            .col-sm-12 {
+                text-align: center;
             }
 
-        }          
+            .dataTables_filter {
+                float: none;
+                margin-top: 10px;
+            }
+        }
+    }
 
-    }     
 
+    &.stocksym-tables {
+
+        @media #{$mobile_width, $tablet_width} {
+
+            tbody {
+
+                tr {
+
+                    td {
+
+                        &:nth-of-type(1):before {
+                            content: "Symbol";
+                        }
+
+                        &:nth-of-type(2):before {
+                            content: "Company Name";
+                        }
+
+                        &:nth-of-type(3):before {
+                            content: "Status";
+                        }
+
+                        &:nth-of-type(4):before {
+                            content: "Action";
+                        }
+                    }
+                }
+            }
+        }
+
+        @media #{$mobile_width} {
+
+            .col-sm-12 {
+                text-align: center;
+            }
+
+            .dataTables_filter {
+                float: none;
+                margin-top: 10px;
+            }
+        }
+    }
 }
 
 
@@ -88,5 +186,24 @@ $large_desktop_width: "only screen and (min-width: 1600px) and (max-width:2500px
         }
 
     }    
+
+}
+
+@media (max-width: 767px) {
+
+    header {
+        &.main-header {
+            display: flex;
+            align-items: self-start;
+
+            div.logo-box {
+                width: 16.29rem !important;
+            }
+        }
+
+        .navbar{
+            justify-content: end;
+        }
+    }
 
 }

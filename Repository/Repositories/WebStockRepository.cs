@@ -70,10 +70,31 @@ namespace Repository.Repositories
         {
             try
             {
-                var frequency = await _adminsetting
-           .Find(_ => true)
-          .FirstOrDefaultAsync();
+                DateTime cutoffDate = DateTime.UtcNow.AddDays(-90);
 
+                // Define a filter to delete documents older than 90 days
+                var filter = Builders<Historical_Data>.Filter.Lt(s => s.Timestamp, cutoffDate);
+
+                // Delete the matching documents
+                var result = await _historicaldata.DeleteManyAsync(filter);
+                var dayliydeletedata = everydayDeleteHistoricaldata();
+                return (int)result.DeletedCount;
+
+                
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/DeleteHistoricaldata");
+                throw new Exception("An error occurred while DeleteHistorical data. Please try again.");
+            }
+            
+           
+        }
+
+        public async Task<int> everydayDeleteHistoricaldata()
+        {
+            try
+            {
                 DateTime startOfDay = DateTime.UtcNow.AddDays(-1).Date;
                 DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1);
                 DateTime HoursAgo = DateTime.UtcNow.AddDays(-1).Date;
@@ -81,6 +102,8 @@ namespace Repository.Repositories
          Builders<Historical_Data>.Filter.Gte(s => s.Timestamp, startOfDay),
          Builders<Historical_Data>.Filter.Lte(s => s.Timestamp, endOfDay)
      );
+
+
                 var result = await _historicaldata.DeleteManyAsync(filter);
 
                 return (int)result.DeletedCount;
@@ -90,8 +113,8 @@ namespace Repository.Repositories
                 await _errorHandlingRepository.AddErrorHandling(ex, "WebStockRepository/DeleteHistoricaldata");
                 throw new Exception("An error occurred while DeleteHistorical data. Please try again.");
             }
-            
-           
+
+
         }
         public async Task InsertNewHistoricalData(List<Historical_Data> newData)
         {

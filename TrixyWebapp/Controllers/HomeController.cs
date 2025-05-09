@@ -86,7 +86,7 @@ namespace TrixyWebapp.Controllers
                 var userId = HttpContext.Session.GetString("UserId");
                 //string userId = Encoding.UTF8.GetString(userIdBytes);
                 var user = userId != null ? _user.GetById(userId) : new User();
-                user.Stocks = user?.Stocks?.Where(x => x.IsActive == true).ToList();
+                user.Stocks = user?.Stocks?.Where(x => x.IsActive == true).ToList()??new List<Stocks>();
                 List<string?> stocklst = user?.Stocks?.Select(x => x.Symbol).ToList()??new List<string?>();
                 List<StockData> stockData = _fyersWebSocket.GetStockData();
                 stockData = stockData.Where(x => stocklst.Contains(x.Symbol)).ToList();
@@ -371,7 +371,12 @@ namespace TrixyWebapp.Controllers
         {
             try
             {
-                var result = await _user.removeuserstock(sym);
+                var userId = HttpContext.Session.GetString("UserId");
+                if (userId!=null)
+                {
+                    var result = await _user.removeuserstock(sym, userId);
+                }
+                
                 return RedirectToAction("Index","Home");
 
             }

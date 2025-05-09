@@ -15,7 +15,7 @@ namespace Repository.IRepositories
         Task UpdateUserStocks(string userId, string sym, string BuySellSignal);
         User GetById(string Id);
         Task<bool> updatemanyuserstock(string sym, bool? isactive);
-        Task<bool> removeuserstock(string sym);
+        Task<bool> removeuserstock(string sym,string userid);
         #endregion
         #region User settings method
         Task InsertUserseting(AdminSettings model);

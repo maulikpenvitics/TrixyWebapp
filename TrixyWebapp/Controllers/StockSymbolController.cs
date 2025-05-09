@@ -74,12 +74,28 @@ namespace TrixyWebapp.Controllers
             }
            
         }
-
+        [HttpGet]
+        public async Task<bool> Validsymbol(string sym)
+        {
+            var isvalid= await _fyersWebSocket.IsSymbolValidAsync(sym);
+            if (isvalid)
+            {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> CreateSymbol(StockSymbol stockSymbol)
         {
             try
             {
+                if (!await Validsymbol(stockSymbol.Symbol))
+                {
+                    ViewBag.Errormessage = "Invalid symbol please try agin";
+                    return View();
+                }
                 // Handle file upload
                 if (stockSymbol.IconFile != null && stockSymbol.IconFile.Length > 0)
                 {
@@ -140,7 +156,7 @@ namespace TrixyWebapp.Controllers
                     }
                     else
                     {
-                        ViewBag.Errormessage = "This user already exists.";
+                        ViewBag.Errormessage = "This symbol already exists.";
                         return View();
                     }
                 }
@@ -231,10 +247,15 @@ namespace TrixyWebapp.Controllers
                                 else
                                 {
                                     var existsym = user.Stocks.Where(x => x.Symbol == stockSymbol.Symbol).FirstOrDefault();
-                                    if (existsym != null)
+                                    if (existsym != null && existsym.IsActive==false)
                                     {
                                         existsym.IsActive = true;
                                         existsym.StockNotification = false;
+                                    }
+                                    else
+                                    {
+                                        TempData["SuccessMessage"] = "Stock allready exist";
+                                        return RedirectToAction("Index", "Home");
                                     }
                                 }
                             }
@@ -244,7 +265,7 @@ namespace TrixyWebapp.Controllers
                                await _fyersWebSocket.Connect();
                                 var symhistorydata = await _fyersWebSocket.FetchAndHistoricalStockDataAsync(stockSymbol?.Symbol ?? "", DateTime.UtcNow.AddDays(-90).ToString("yyyy-MM-dd"), DateTime.UtcNow.ToString("yyyy-MM-dd"), 30);
                                 await _webStockRepository.InsertNewHistoricalData(symhistorydata);
-                                ViewBag.succesmessage = "Added stock succesfully";
+                                TempData["SuccessMessage"] = "Added stock succesfully";
                                 return RedirectToAction("Index", "Home");
                             }
                         }

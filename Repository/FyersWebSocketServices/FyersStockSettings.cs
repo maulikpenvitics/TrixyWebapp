@@ -20,5 +20,6 @@ namespace Repository.FyersWebSocketServices
         public string? ValidateApi { get; set; }
         public string? refreshtoken { get; set; }
         public string? clinetpin { get; set; }
+        public string? symbolquotes { get; set; }
     }
 }

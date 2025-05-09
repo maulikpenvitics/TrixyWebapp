@@ -22425,7 +22425,7 @@ Height property
     padding: 0 1rem 0 1.5rem; } }
 @media (max-width: 767px) {
   .main-header > div {
-    width: 100% !important;
+    /*width: 100% !important;*/
     float: none;
     margin-left: 0 !important; }
     .main-header > div .logo {

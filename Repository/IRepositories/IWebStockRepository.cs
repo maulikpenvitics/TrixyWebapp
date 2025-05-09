@@ -15,5 +15,6 @@ namespace Repository.IRepositories
         Task<List<Historical_Data>> GetStockDataBySymbolAsync(string symbol);
         Task<int> DeleteHistoricaldata();
         Task InsertNewHistoricalData(List<Historical_Data> newData);
+        Task<int> everydayDeleteHistoricaldata();
     }
 }

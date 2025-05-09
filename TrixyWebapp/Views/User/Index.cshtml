@@ -24,7 +24,7 @@
                     </p>
                     <div class="box-body">
                         
-                        <div class="table-responsive customize-responsive-table">
+                        <div class="table-responsive customize-responsive-table users-table">
                             <table id="user" class="table mt-0 table-hover no-wrap" data-page-size="10">
                                 <thead>
                                     <tr>
@@ -54,7 +54,7 @@
                                 <tbody>
                                     @if (Model != null && Model.Any())
                                     {
-                                        foreach (var item in Model)
+                                        foreach (var item in Model.Where(x=>x.Status==true).ToList())
                                         {
                                             <tr>
                                                 <td>
@@ -78,7 +78,7 @@
                                                 </td>
                                                 <td>
                                                     <a href="@Url.Action("CreateUser","User",new{id = item.Id.ToString()})"
-                                                       class="waves-effect btn btn-info  btn-xs"
+                                                       class="waves-effect waves-circle btn-circle btn btn-info  btn-xs"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Update">
                                                         <i class="ti-pencil-alt" aria-hidden="true"></i>
@@ -86,7 +86,7 @@
                                                     <a href="@Url.Action("DeleteUser","User",new{id = item.Id.ToString()})"
                                                        data-Id="@item.Id.ToString()"
                                                        data-url="@Url.Action("DeleteUser", "User", new { id = item.Id.ToString()})"
-                                                       class="waves-effect btn btn-info  btn-xs btn-danger delete-user"
+                                                       class="waves-effect waves-circle btn-circle btn btn-info  btn-xs btn-danger delete-user"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-original-title="Delete">
                                                         <i class="ti-trash" aria-hidden="true"></i>
@@ -119,6 +119,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
+
+  
+
     $(document).on('click', '.delete-user', function (e) {
         e.preventDefault(); // Stop default anchor navigation
         debugger

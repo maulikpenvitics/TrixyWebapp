@@ -333,7 +333,6 @@ namespace Repository.FyersWebSocketServices
                     var userrepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
                     var adminsetting = await userrepo.GetUserSettings();
                     var authdata = adminsetting.UserAuthtoken;
-                    var generatetoken = GetRefreshToken(_settings.refreshtoken, _settings.clinetpin);
                     var getrefreshtoken = await GetRefreshToken(authdata?.refresh_token ?? "", authdata?.Pin ?? "");
                     if (!string.IsNullOrEmpty(getrefreshtoken?.access_token))
                     {
@@ -391,7 +390,7 @@ namespace Repository.FyersWebSocketServices
                 fyersModel.ClientId = _settings.ClientId;
                 fyersModel.AccessToken = token;
                 Tuple<ProfileModel, JObject> responseTuple = await fyersModel.GetProfile();
-                
+               
                
                 if (responseTuple !=null && responseTuple.Item1!=null)
                 {
@@ -401,30 +400,7 @@ namespace Repository.FyersWebSocketServices
                 {
                     result = false;
                 }
-                //string authtoken = $"{_settings.ClientId}:{token}";
-                //using var request = new HttpRequestMessage(HttpMethod.Get, _settings.ValidateApi);
-            
-
-                //request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authtoken);
-                // // request.Headers.Add("Authorization", $"{encodedAuthToken}");
-
-                //var response = await _httpClient.SendAsync(request);
-                //var content = await response.Content.ReadAsStringAsync();
-                //string tokenresult = string.Empty;
-                //if (response.IsSuccessStatusCode)
-                //{
-                //    tokenresult = await response.Content.ReadAsStringAsync();
-                //    result = true;
-                //    Console.WriteLine("Token is valid. Profile Data: " + tokenresult);
-                //}
-                //else
-                //{
-                //    tokenresult = await response.Content.ReadAsStringAsync();
-                //    result = false;
-                //    Console.WriteLine("Invalid or expired token. Status: " + response.StatusCode);
-                //}
-
-
+              
             }
             catch (Exception ex)
             {
@@ -474,13 +450,54 @@ namespace Repository.FyersWebSocketServices
             }
             
         }
+        public async Task<bool> IsSymbolValidAsync(string symbol)
+        {
+            bool isvalid = false;
+            string token = $"{_settings.ClientId}:{_settings.AccessToken}";
+            
+           var queryString = $"?symbols={Uri.EscapeDataString(symbol)}";
 
+            var requestUrl = _settings.symbolquotes + queryString;
+           
+           
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            
+            request.Headers.TryAddWithoutValidation("Authorization", token);
+
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            if (response.IsSuccessStatusCode)
+            {
+                //Console.WriteLine("Success:");
+                var response1 = JsonSerializer.Deserialize<QuoteResponse>(responseContent, options);
+                if (response1?.d.Count > 0)
+                {
+                    var v = response1.d.Select(x => x.v).Where(x=>x.errmsg!=null && x.code!=null && x.s=="error").FirstOrDefault();
+                    if (v==null)
+                    {
+                        isvalid= true;
+                    }
+                    else
+                    {
+                        isvalid= false;
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Error: {response.StatusCode}");
+                isvalid= false;
+            }
+            return isvalid;
+        }
         public async Task Connect()
         {
             try
             {
-                
-
                 List<string?> symlist = new List<string?>();
                 using (var scope = _serviceProvider.CreateScope())
                 {
@@ -545,7 +562,7 @@ namespace Repository.FyersWebSocketServices
     {
         private readonly FyersWebSocketService _service;
         private  FyersSocket? client ;
-      
+       
         public Methods(FyersWebSocketService service)
         {
             _service = service;
@@ -558,7 +575,7 @@ namespace Repository.FyersWebSocketServices
                 client = new FyersSocket();
                 //client.ReconnectAttemptsCount = 1;
                 client.webSocketDelegate = this;
-
+                
                  client.Connect();
                 client.ConnectHSM(ChannelModes.FULL);
 
@@ -572,6 +589,7 @@ namespace Repository.FyersWebSocketServices
             }
           
         }
+
         public void OnClose(string status)
         {
             Console.WriteLine("Connection closed: " + status);

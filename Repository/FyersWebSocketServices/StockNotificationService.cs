@@ -48,17 +48,24 @@ namespace Repository.FyersWebSocketServices
                         var marketStart = new TimeSpan(9, 15, 0);
                         var marketEnd = new TimeSpan(15, 30, 0);
                         var currentTime = DateTime.Now.TimeOfDay;
-                        var getstockdata = await getstcoks();
+                        
                         var onlineUsers = StockNotificationHub.GetConnectedUsers();
-
-
+                         List<Stocknotifactiondata> getstockdata1 = new List<Stocknotifactiondata>();
                         foreach (var item in onlineUsers)
                         {
+                            var getstockdata = await getstcoks(item);
+                            getstockdata1.AddRange(getstockdata);
                             if (getstockdata != null && getstockdata.Any())
                             {
                                 await _hubContext.Clients.User(item).SendAsync("ReceiveStockUpdate", getstockdata);
                             }
                         }
+                        //if (onlineUsers != null)
+                        //{
+                        //    await _hubContext.Clients.Group(onlineUsers.ToString()).SendAsync("ReceiveStockUpdate", getstockdata1);
+                        //}
+
+
                         try
                         {
                             await Task.Delay(TimeSpan.FromMinutes(time), stoppingToken);
@@ -66,6 +73,8 @@ namespace Repository.FyersWebSocketServices
                         catch (TaskCanceledException)
                         {
                             _logger.LogInformation("JobSchedulerService task was canceled during delay.");
+
+                            Console.WriteLine("JobSchedulerService task was canceled during delay.");
                             // Optional: break the loop explicitly if desired
                             break;
                         }
@@ -105,14 +114,14 @@ namespace Repository.FyersWebSocketServices
 
         }
 
-        private async Task<List<Stocknotifactiondata>> getstcoks()
+        private async Task<List<Stocknotifactiondata>> getstcoks(string userId)
         {
             List<Stocknotifactiondata> stocks = new List<Stocknotifactiondata>();
             try
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var userId = StockNotificationHub.GetLoggedInUserId();
+                  //  var userId = StockNotificationHub.GetLoggedInUserId();
                     if (string.IsNullOrEmpty(userId))
                     {
                         Console.WriteLine("User ID not found in claims.");
@@ -125,7 +134,7 @@ namespace Repository.FyersWebSocketServices
                         var users = await userRepository.GetByIdAsync(userId);
                         var assignedStocks = users.Stocks?.Where(x => x.StockNotification == true && x.IsActive==true).ToList() ?? new List<Stocks>();
                         List<string> userstrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true).Select(x => x.StretagyName ?? "").ToList() : new List<string>();
-                        if (assignedStocks != null && assignedStocks.Any())
+                        if (assignedStocks != null && assignedStocks.Any() && userstrategy.Count>0)
                         {
                             users.UserStrategy = users.UserStrategy != null ? users.UserStrategy.Where(x => x.StretagyEnableDisable == true && x.IsActive == true).ToList() : new List<UserStrategy>();
                             var stockPrices = GetLiveStockPrice(assignedStocks);

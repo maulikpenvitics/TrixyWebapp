@@ -28,13 +28,13 @@
                                         <form asp-action="CreateUser" method="post" id="createuserform">
                                             <div class="form-group">
                                                 <label class="control-label">Frist Name</label>
-                                                <input name="firstname" value="@Model?.Firstname" class="form-control" required />
+                                                <input name="firstname" value="@Model?.Firstname" class="form-control"  maxlength="50" required />
                                                 <input name="Id" type="hidden" value="@Model?.Id" class="form-control" />
 
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Last Name</label>
-                                                <input name="Lastname" class="form-control" value="@Model?.Lastname" required />
+                                                <input name="Lastname" class="form-control" value="@Model?.Lastname" maxlength="50" required />
 
                                             </div>
                                             <div class="form-group">
@@ -55,7 +55,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label">Role</label>
-                                                <select name="Role" class="form-control">
+                                                <select name="Role" class="form-control" required>
                                                     <option value="">Select Role</option>
                                                     <option value="Admin" @(Model?.Role == "Admin" ? "selected" : "")>Admin</option>
                                                     <option value="User" @(Model?.Role == "User" ? "selected" : "")>User</option>

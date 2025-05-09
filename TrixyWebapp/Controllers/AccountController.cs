@@ -254,9 +254,11 @@ namespace TrixyWebapp.Controllers
                         Firstname = model?.Firstname,
                         Lastname = model?.Lastname,
                         Email = model?.Email,
-                        ProfileImageUrl = !string.IsNullOrEmpty(model?.ProfileImageUrl) ? model?.ProfileImageUrl : existuser.ProfileImageUrl // Save path in DB
+                        ProfileImageUrl = model?.ProfileImageUrl??null// Save path in DB
                     };
                     var result = await _user.UpdateUserProfile(user);
+                    HttpContext.Session.SetString("imageurl", user?.ProfileImageUrl ?? "");
+                    HttpContext.Session.SetString("UserName", user?.Firstname + " " + user?.Lastname);
                     if (result)
                     {
                         return RedirectToAction("Index", "Home");
