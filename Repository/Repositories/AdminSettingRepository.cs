@@ -36,5 +36,28 @@ namespace Repository.Repositories
             }
            
         }
+        public async Task<bool> UpdateUserAuthcode(string authcode)
+        {
+            try
+            {
+                var existingSetting = await _adminSettings.Find(_ => true).FirstOrDefaultAsync();
+
+                if (existingSetting == null)
+                    return false; // No document to update
+
+                var filter = Builders<AdminSettings>.Filter.Eq(x => x.Id, existingSetting.Id);
+                var update = Builders<AdminSettings>.Update.Set(x => x.UserAuthtoken.code, authcode);
+                    
+                var result = await _adminSettings.UpdateOneAsync(filter, update);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                await _errorHandlingRepository.AddErrorHandling(ex, "AdminSettingRepository/GetJobFrequencyAsync");
+                return false;
+
+            }
+
+        }
     }
 }

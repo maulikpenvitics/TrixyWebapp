@@ -27,6 +27,10 @@
                                     @ViewBag.ErrorMessage
                                 </label>
                             }
+                            <label class="control-label" style="color:green; display:none" id="succesmessage">
+                                
+                            </label>
+                           
                             <form asp-action="AdminSetting" method="post" id="AdminSettingsForm">
                                 <div class="form-group">
                                     <label class="control-label">Edit Full Model as JSON</label>
@@ -39,6 +43,24 @@
                                 </div>
                             </form>
 
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-12 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <a href="javascript:void(0);" class="btn btn-primary mb-5" id="getAuthCodeBtn">Generate Auth Code</a>
+                            <form method="post" id="genrateAuth" style="display:none" class="form-group mb-5">
+                                <label class="control-label" style="color:red; display:none" id="errormessage">
+                                </label>
+                                <div class="form_group mb-3">
+                                    <label class="form-control mb-3" >Azuth Code</label>
+                                    <input class="form-control" placeholder="Enter Your Auth code" id="authcode" name="authcode" required/>
+                                </div>
+                                <div class="form_group text-right mt-3">
+                                    <button class="btn btn-success" type="submit">Save</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -58,5 +80,49 @@
                 return false;
             }
         });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#getAuthCodeBtn').on('click', function (e) {
+            e.preventDefault(); 
+            debugger
+            $.ajax({
+                url: '/AdminSetting/GenerateAuthCode',
+                type: 'GET',
+                success: function (response) {
+                     window.open(response.url, '_blank');
+                     
+                     $('#genrateAuth').slideDown();
+                },
+                error: function () {
+                    alert("Something went wrong.");
+                }
+            });
+        });
+    });
+    $('#genrateAuth').on('submit', function (e) {
+        e.preventDefault(); 
+          $.ajax({
+                url: '/AdminSetting/UpdateUserAuthcode',
+                type: 'POST',
+                data:$(this).serialize(),
+                success: function (response) {
+                     if(response.message){
+                         setTimeout(() => toastr.success(response.message), 1500);
+                          $("#succesmessage").text(response.message).show();
+                            window.location.reload();
+                    }
+                    if(response.error){
+
+                        $("#errormessage").text(response.error).show();
+                        setTimeout(() =>  toastr.error(response.error), 1500);
+                         
+                    }
+                },
+                error: function () {
+                    alert("Something went wrong.");
+                }
+            });
     });
 </script>

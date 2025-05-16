@@ -21,5 +21,6 @@ namespace Repository.FyersWebSocketServices
         public string? refreshtoken { get; set; }
         public string? clinetpin { get; set; }
         public string? symbolquotes { get; set; }
+        public string? genrateauthcodeurl { get; set; }
     }
 }

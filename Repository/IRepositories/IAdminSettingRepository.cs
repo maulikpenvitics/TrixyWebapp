@@ -9,5 +9,6 @@ namespace Repository.IRepositories
     public interface IAdminSettingRepository
     {
         Task<string> GetJobFrequencyAsync();
+        Task<bool> UpdateUserAuthcode(string authcode);
     }
 }

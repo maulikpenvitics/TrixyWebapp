@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Repository.FyersWebSocketServices;
+using Repository.FyersWebSocketServices.Jobs;
 using Repository.IRepositories;
 using Repository.Models;
 using Repository.Repositories;
@@ -16,13 +18,16 @@ namespace TrixyWebapp.Controllers
         private readonly IRepository<AdminSettings> _adminSettingsRepository;
         private readonly IAdminSettingRepository _adminSettings;
         private readonly IErrorHandlingRepository _errorhandling;
+        private readonly FyersWebSocketService _fyersWebSocketService;
         public AdminSettingController(IRepository<AdminSettings> adminSettingsRepository,
             IAdminSettingRepository adminSettings,
-            IErrorHandlingRepository errorhandling)
+            IErrorHandlingRepository errorhandling,
+               FyersWebSocketService  fyersWebSocketService )
         {
             _adminSettingsRepository = adminSettingsRepository;
             _adminSettings = adminSettings;
             _errorhandling = errorhandling;
+            _fyersWebSocketService=fyersWebSocketService;
         }
 
         public IActionResult Index()
@@ -68,6 +73,30 @@ namespace TrixyWebapp.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUserAuthcode(string authcode)
+        {
+            var result = await _fyersWebSocketService.GenerateandupdateToken(authcode);
+
+            if (result)
+            {
+                var updateadminauthcode = await _adminSettings.UpdateUserAuthcode(authcode);
+                await _fyersWebSocketService.Connect();
+                return Json(new { message = "Auth code update successfully." });
+            }
+            else
+            {
+                return Json(new { error = "Please pass valid token" });
+            }
+
+        }
+        [HttpGet]
+        public IActionResult GenerateAuthCode()
+        {
+            string authUrl = _fyersWebSocketService.generateAuthCode();
+            return Json(new { url = authUrl });
         }
     }
 }

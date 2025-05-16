@@ -111,7 +111,6 @@
                             <i data-feather="maximize"></i>
                         </a>
                     </li>
-
                     <!-- Control Sidebar Toggle Button -->
                     <li class="btn-group nav-item">
                         <a href="#" data-toggle="control-sidebar" title="Setting"
@@ -194,7 +193,7 @@
                         </li>
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            @if (User.IsInRole("Admin"))
+                            @if (userRole=="Admin")
                             {
                                 <li class="treeview @(currentController == "User" && currentAction == "Index" ? "active" : "")" onclick="location.href=this.querySelector('a').href;">
                                     <a href="/User/Index">
@@ -212,6 +211,7 @@
                                         <i data-feather="settings"></i><span>Admin settings</span>
                                     </a>
                                 </li>
+                               
                             }
 
                         }
@@ -274,7 +274,7 @@
 
         </div>
     </aside>
-
+   
     <!-- /.control-sidebar -->
     <!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
     <div class="control-sidebar-bg"></div>
@@ -376,6 +376,7 @@
     </script>
 
 
+ 
 
 
     @await RenderSectionAsync("Scripts", required: false)

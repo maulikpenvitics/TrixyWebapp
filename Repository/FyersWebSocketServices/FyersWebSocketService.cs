@@ -556,7 +556,52 @@ namespace Repository.FyersWebSocketServices
             _stocklist.Clear();
            
         }
+        public string generateAuthCode()
+        {
+            return $"{_settings.genrateauthcodeurl}?client_id={_settings.ClientId}&redirect_uri={_settings.redirectURI}&response_type=code&state=sample_state";
+            //FyersClass fyersModel = FyersClass.Instance;
+            //fyersModel.GetGenerateCode(_settings.ClientId,_settings.secretKey, _settings.redirectURI);
+        }
+        public async Task<bool> GenerateandupdateToken(string authcode)
+        {
+            bool result = false;
+            try
+            {
+                
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var UserRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var adminsetting = await UserRepo.GetUserSettings();
+                    var authdata = adminsetting.UserAuthtoken;
 
+                    if (authdata != null)
+                    {
+                        var getrefreshtoken = await genrateRefreshtoken(authcode);
+                        var data = JsonSerializer.Deserialize<Accesstoken>(getrefreshtoken.ToString());
+                        if (data.RESPONSE_MESSAGE == "SUCCESS")
+                        {
+
+                            var updatetoken = await UserRepo.UpdateAdminbothAuthtoken(data.TOKEN, data.refresh_token);
+                            _settings!.refreshtoken = updatetoken.refresh_token;
+                            _settings!.clinetpin = updatetoken.Pin;
+                            _settings!.AccessToken = updatetoken.access_token;
+                            result= true;
+                        }
+                        else
+                        {
+                            result = false;
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                LogFilegenerate(ex, "FyersWebSocketService/Refreshtokengenerate");
+                Errorhandl(ex, "FyersWebSocketService/Refreshtokengenerate");
+            }
+            return result;
+        }
     }
     public class Methods : FyersSocketDelegate
     {
@@ -731,12 +776,7 @@ namespace Repository.FyersWebSocketServices
     }
     public class Auth
     {
-        public void generateAuthCode(string clientID, string secretKey, string redirectURI)
-        {
-            FyersClass fyersModel = FyersClass.Instance;
-            fyersModel.GetGenerateCode(clientID, secretKey, redirectURI);
-        }
-
+      
         public async Task<JObject> generateAccesandrefreshToken(string clientID, string secretKey, string redirectURI, string auth_code,string aphasid)
         {
             FyersClass fyersModel = FyersClass.Instance;
