@@ -1,0 +1,70 @@
+[{
+  "_id": {
+    "$oid": "67c81d3f1127262962a68207"
+  },
+  "UserId": "67d000689b41c91fe2d8775f",
+  "NotificationStatus": true,
+  "Threshold": 1,
+  "Frequency": 1,
+  "MovingAverage": {
+    "SMA_Periods": 10,
+    "LMA_Periods": 50
+  },
+  "RSIThresholds": {
+    "Overbought": 70,
+    "Oversold": 30,
+    "RsiPeriod": 14
+  },
+  "MACD_Settings": {
+    "ShortEmaPeriod": 12,
+    "LongEmaPeriod": 26,
+    "SignalPeriod": 9
+  },
+  "MeanReversion": {
+    "Period": 30,
+    "Threshold": 0.1
+  },
+  "StrategyWeighted": [
+    {
+      "Strategy": "Moving_Average",
+      "Weight": 10.8,
+      "IsActive": true
+    },
+    {
+      "Strategy": "RSI",
+      "Weight": 30,
+      "IsActive": true
+    },
+    {
+      "Strategy": "Bollinger_Bands",
+      "Weight": 14.3,
+      "IsActive": true
+    },
+    {
+      "Strategy": "Mean_Reversion",
+      "Weight": 14.3,
+      "IsActive": true
+    },
+    {
+      "Strategy": "VWAP",
+      "Weight": 15.3,
+      "IsActive": true
+    },
+    {
+      "Strategy": "MACD",
+      "Weight": 15.3,
+      "IsActive": true
+    },
+    {
+      "Strategy": "Sentiment_Analysis",
+      "Weight": 0,
+      "IsActive": false
+    }
+  ],
+  "UserAuthtoken": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCb0xaZDNKd1pJbGVTbDBJRGoxU3Q2U0JyakY2WlJPTVduUUJ5QUx0c2ZIbEItQzcyQkdwSFF3dVJIVkY3eWZXWlVzWE1rSWxwX3lmTkdUSUI0VDhZMGdKa3dDaTQwYkM0eWtCSExzeDFuc1dFX3lFST0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ3ODczODAwLCJpYXQiOjE3NDc4MTgzNTksImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NzgxODM1OSwic3ViIjoiYWNjZXNzX3Rva2VuIn0.L507NwmOUJ6jk0iSef6EWNaZfptFJTJnkZcwbR8VoKQ",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZDoxIiwiZDoyIiwieDowIiwieDoxIiwieDoyIl0sImF0X2hhc2giOiJnQUFBQUFCb0xXbW9ER3c0a3FRQjBtMmRKU3FGVXRqdXJKQnI1ME9ESHE1UzJfTFZOVk80QWdiTkpmSWdHdzNGbDVDNFFhU2w3b3U4anJHRnNRVU81ME0yUk5rLVBYTnpuS2dkcmk2X2Y1c3ZfVUV6Zy1SSEhIWT0iLCJkaXNwbGF5X25hbWUiOiIiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImZ5X2lkIjoiWVYxNjU2OSIsImFwcFR5cGUiOjEwMCwiZXhwIjoxNzQ5MDgzNDAwLCJpYXQiOjE3NDc4MDY2MzIsImlzcyI6ImFwaS5meWVycy5pbiIsIm5iZiI6MTc0NzgwNjYzMiwic3ViIjoicmVmcmVzaF90b2tlbiJ9.HmNhUP_tz6udUui5yCZ8drmUZOegc5SayDduDv5mScE",
+    "code": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJOR1gwMTZKVkU5IiwidXVpZCI6IjJkOWM0YjFlYjliNDQ4MjM5NjBjNWNiZGJiM2JjMDM1IiwiaXBBZGRyIjoiIiwibm9uY2UiOiIiLCJzY29wZSI6IiIsImRpc3BsYXlfbmFtZSI6IllWMTY1NjkiLCJvbXMiOiJLMSIsImhzbV9rZXkiOiIyMWIyNzc2MDEyNDk1ZmYwMzdlMDY5MTc3ZTQ2ODRkMmZjNTI2ZDNkODZhYjEzYjA3OGExNTc2MyIsImlzRGRwaUVuYWJsZWQiOiJOIiwiaXNNdGZFbmFibGVkIjoiTiIsImF1ZCI6IltcImQ6MVwiLFwiZDoyXCIsXCJ4OjBcIixcIng6MVwiLFwieDoyXCJdIiwiZXhwIjoxNzQ3ODM2NjIzLCJpYXQiOjE3NDc4MDY2MjMsImlzcyI6ImFwaS5sb2dpbi5meWVycy5pbiIsIm5iZiI6MTc0NzgwNjYyMywic3ViIjoiYXV0aF9jb2RlIn0.F-F4zs3GQorKcIj0kmanCHLGLQAqmp1-5V3bDTLGAVI",
+    "Pin": "1999"
+  }
+}]
