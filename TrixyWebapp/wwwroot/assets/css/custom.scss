@@ -197,13 +197,20 @@ $large_desktop_width: "only screen and (min-width: 1600px) and (max-width:2500px
             align-items: self-start;
 
             div.logo-box {
-                width: 16.29rem !important;
+                width: 12rem !important;
             }
         }
 
         .navbar{
             justify-content: end;
         }
+    }
+
+    .main-header .navbar-custom-menu .navbar-nav > li:last-child > a {
+        padding: 0 !important;
+        width: 45px !important;
+        height: 45px !important;
+        margin: 3px 5px !important;
     }
 
 }

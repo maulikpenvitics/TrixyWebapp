@@ -241,37 +241,60 @@ namespace Repository.FyersWebSocketServices
         /// </returns>
         public static string CalculateVWAP(List<Historical_Data> stockData)
         {
-            string Signal = "HOLD";
+            string Signal = string.Empty;
             
             var stockPrices = stockData.Select(x => new BuySellRecomdeation
             {
                 Close = (double)x.Close,
                 Date = x.Timestamp,
                 Volume = (double)x.Volume,
-            }).DistinctBy(item => item.Date).ToList();
-            var result = stockPrices.OrderByDescending(x => x.Date).FirstOrDefault();
-            if (result != null)
+            }).DistinctBy(item => item.Date).OrderBy(b => b.Date).ToList();
+            double cumulativePV = 0.0;
+            double cumulativeVolume = 0.0;
+
+            foreach (var bar in stockPrices)
             {
-                double cumulativePV = result.Close * result.Volume;  // Cumulative Price * Volume
-                double cumulativeVolume = result.Volume;// Cumulative Volume
-                if (cumulativeVolume != 0)
-                {
-                    result.VWAP = cumulativePV / cumulativeVolume;
-                }
-                if (result.Close < result.VWAP)
-                {
-                    Signal = "BUY";
-                }
-                else if (result.Close > result.VWAP)
-                {
-                    Signal = "SELL";
-                }
-                else
-                {
-                    Signal = "N/A";
-                }
+                cumulativePV += bar.Close * bar.Volume;
+                cumulativeVolume += bar.Volume;
             }
-            return Signal;
+
+            // 3) Compute VWAP over the entire set
+            double vwap = (cumulativeVolume == 0) ? 0 : (cumulativePV / cumulativeVolume);
+            var latestBar = stockPrices.Last();
+            string signal;
+            if (latestBar.Close < vwap)
+                signal = "BUY";
+            else if (latestBar.Close > vwap)
+                signal = "SELL";
+            else
+                signal = "N/A";  // exactly equal
+
+            return signal;
+
+
+            //var result = stockPrices.OrderByDescending(x => x.Date).FirstOrDefault();
+            //if (result != null)
+            //{
+            //    double cumulativePV = result.Close * result.Volume;  // Cumulative Price * Volume
+            //    double cumulativeVolume = result.Volume;// Cumulative Volume
+            //    if (cumulativeVolume != 0)
+            //    {
+            //        result.VWAP = cumulativePV / cumulativeVolume;
+            //    }
+            //    if (result.Close < result.VWAP)
+            //    {
+            //        Signal = "BUY";
+            //    }
+            //    else if (result.Close > result.VWAP)
+            //    {
+            //        Signal = "SELL";
+            //    }
+            //    else
+            //    {
+            //        Signal = "N/A";
+            //    }
+            //}
+            //return Signal;
         }
         /// <summary>
         /// Calculates the Exponential Moving Average (EMA) for a given list of prices over a specified period.

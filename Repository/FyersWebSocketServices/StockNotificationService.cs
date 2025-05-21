@@ -155,7 +155,8 @@ namespace Repository.FyersWebSocketServices
                                     userid = users?.Id.ToString(),
                                     timestamp = DateTime.Now,
                                     CompanyName = item?.CompanyName,
-                                    userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>()
+                                    userStrategy = userstrategy.Count() != 0 ? userstrategy : new List<string>(),
+                                    StockNotification =Convert.ToBoolean(item?.StockNotification),
                                 });
 
                             }

@@ -119,9 +119,15 @@
     align-items: self-start;
   }
   header.main-header div.logo-box {
-    width: 16.29rem !important;
+    width: 12rem !important;
   }
   header .navbar {
     justify-content: end;
+  }
+  .main-header .navbar-custom-menu .navbar-nav > li:last-child > a {
+    padding: 0 !important;
+    width: 45px !important;
+    height: 45px !important;
+    margin: 3px 5px !important;
   }
 }
