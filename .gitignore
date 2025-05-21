@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /TrixyWebapp/wwwroot/Uploads/356c7a27-227b-431c-a8f7-981cc5004e72.jpg
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat

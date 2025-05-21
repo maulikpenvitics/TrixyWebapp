@@ -37,6 +37,7 @@ namespace Repository.FyersWebSocketServices
         public string? CompanyName { get; set; }
         public DateTime? timestamp { get; set; }
         public List<string>? userStrategy {  get; set; }
+        public bool StockNotification {  get; set; }
         
     }
     
